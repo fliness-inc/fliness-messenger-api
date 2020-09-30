@@ -2,7 +2,11 @@
   "compilerOptions": {
     "module": "commonjs",
     "declaration": true,
+    "moduleResolution": "node",
     "removeComments": true,
+    "esModuleInterop": true,
+    "types": ["node", "jest"],
+    "typeRoots": ["node_modules/@types"],
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
@@ -10,6 +14,11 @@
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
-    "incremental": true
+    "incremental": true,
+    "paths": {
+      "@/*": ["*"],
+      "@src/*": ["src/*"],
+      "@database/*": ["src/database/*"],
+    }
   }
 }
