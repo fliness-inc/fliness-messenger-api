@@ -1,16 +1,16 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { config as setupDotEnv } from 'dotenv'; 
+import { config as setupDotEnv } from 'dotenv';
+import cookieParser from 'cookie-parser';
 
 setupDotEnv();
 
-const {
-  PORT = 8080
-} = process.env;
+const { PORT = 8080 } = process.env;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.use(cookieParser());
 
   const options = new DocumentBuilder()
     .setTitle('Fliness Messenger API')
