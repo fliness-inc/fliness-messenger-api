@@ -279,4 +279,56 @@ describe('[E2E] [AuthController] ...', () => {
             expect(resRefresh.status).toStrictEqual(401);
         });
     });
+
+    describe('[Logout] ...', () => {
+        it('should logout user', async () => {
+            const payload = { 
+                email: Faker.internet.email(),
+                password: Faker.random.word()
+            };
+    
+            const users = getRepository(User);
+            const user = await users.save(users.create({ 
+                name: Faker.internet.userName(), 
+                ...payload
+            }));
+
+            const resLogin = await request(app.getHttpServer())
+                .post('/auth/login')
+                .send(payload);
+
+            const resLogout = await request(app.getHttpServer())
+                .get('/auth/logout')
+                .set('Cookie', `jwt-token=${resLogin.body.refreshToken}`)
+                .send(payload);
+
+            expect(resLogout.status).toEqual(200);
+
+            const resRefresh= await request(app.getHttpServer())
+                .get('/auth/refresh')
+                .set('Cookie', `jwt-token=${resLogin.body.refreshToken}`)
+                .send();
+
+            expect(resRefresh.status).toEqual(401);
+        });
+
+        it('should return 401 status when try to logging out the unauthorized user', async () => {
+            const payload = { 
+                email: Faker.internet.email(),
+                password: Faker.random.word()
+            };
+    
+            const users = getRepository(User);
+            const user = await users.save(users.create({ 
+                name: Faker.internet.userName(), 
+                ...payload
+            }));
+
+            const resLogout = await request(app.getHttpServer())
+                .get('/auth/logout')
+                .send(payload);
+
+            expect(resLogout.status).toEqual(401);
+        });
+    });
 });
