@@ -5,13 +5,13 @@ import IFactory from './factory';
 import ISeeder from './seeder';
 
 export class UserFactory implements IFactory<User> {
-    public create({ name, email, password }: Partial<User> = {}) {
-        const user = new User();
-        user.email = email || Faker.internet.email();
-        user.name = name || `${Faker.name.lastName()} ${Faker.name.firstName()}`;
-        user.password = password || Faker.random.word();
-        return user;
-    }
+  public create({ name, email, password }: Partial<User> = {}) {
+    const user = new User();
+    user.email = email || Faker.internet.email();
+    user.name = name || `${Faker.name.lastName()} ${Faker.name.firstName()}`;
+    user.password = password || Faker.random.word();
+    return user;
+  }
 }
 
 export class UserSeeder implements ISeeder<User> {
