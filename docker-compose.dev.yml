@@ -1,0 +1,33 @@
+version: '3'
+
+services: 
+    db:
+        image: 'postgres'
+        ports:
+            - ${TYPEORM_PORT}:${TYPEORM_PORT}
+        env_file: .env.dev
+        environment: 
+            POSTGRES_USER: ${TYPEORM_USERNAME}
+            POSTGRES_PASSWORD: ${TYPEORM_PASSWORD} 
+            POSTGRES_DB: ${TYPEORM_DATABASE}
+            restart: always
+        container_name: fliness_messenger_database_dev
+    api:
+        build: 
+            context: .
+            dockerfile: Dockerfile.dev
+        ports:
+            - ${PORT}:${PORT}
+        env_file: .env.dev
+        environment: 
+            TYPEORM_HOST: 'db'
+        depends_on:
+            - db
+        volumes: 
+            - .:/usr/src/fliness-messenger-api
+            - node_modules:/usr/src/fliness-messenger-api/node_modules
+        restart: always
+        container_name: fliness_messenger_api_dev
+
+volumes: 
+    node_modules:
