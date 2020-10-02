@@ -5,6 +5,7 @@ import Invitation from '@database/entities/invitation';
 import InvitationType from '@database/entities/invitation-type';
 import InvitationStatus from '@database/entities/invitation-status';
 import { InvalidPropertyError } from '@src/errors';
+import FriendsService from '../friends/friends.service';
 
 export enum Status {
     ACCEPTED = 'ACCEPTED',
@@ -28,7 +29,10 @@ export class InvitationsService {
 
     private readonly maxAge: number = 1000 * 60 * 60 * 24 * 7; // 7 days
 
-    public constructor(private readonly usersService: UsersService) {}
+    public constructor(
+        private readonly usersService: UsersService,
+        private readonly friendsService: FriendsService
+    ) {}
 
     public async create(senderId: string, recipientId: string, type: Type): Promise<Invitation> {
         const [sender, recipient] = await this.usersService.findByIds([ senderId, recipientId ]);
@@ -41,6 +45,13 @@ export class InvitationsService {
 
         if (sender.id === recipient.id)
             throw new InvalidPropertyError(`The sender and recipient the same user`);
+
+        if (type === Type.INVITE_TO_FRIENDS) {
+            const friend = await this.friendsService.findOne({ where: { userId: senderId, friendId: recipientId } });
+
+            if (friend)
+                throw new InvalidPropertyError('The sender already has the recipient like a friend')
+        }
 
         const invitationsType = await getRepository(InvitationType).findOne({ name: type });
         const status = await getRepository(InvitationStatus).findOne({ name: Status.WAITING });

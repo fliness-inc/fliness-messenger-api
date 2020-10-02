@@ -12,6 +12,7 @@ import UsersService from '@modules/users/users.service';
 import { Tokens } from '@modules/tokens/tokens.service';
 import Invitation from '@database/entities/invitation';
 import { Type, Status } from '@modules/invitations/invitations.service'
+import FriendsService from '@/src/modules/friends/friends.service';
 
 setupDotEnv();
 
@@ -168,6 +169,22 @@ describe('[E2E] [FriendsController] ...', () => {
                 .send({ userId: uuid.v4() });
 
             expect(resSend.status).toEqual(401);
+        });
+
+        it('should return 401 status when the user trying to send the invitation to the user that already is friend', async () => {
+            const [sender, recipient] = users; 
+            
+            await app.get<FriendsService>(FriendsService).create({
+                userId: sender.user.id,
+                friendId: recipient.user.id,
+            });
+            
+            const res = await request(app.getHttpServer())
+                .post('/me/friends/invitation')
+                .set('Authorization', `Bearer ${sender.tokens.accessToken}`)
+                .send({ userId: recipient.user.id });
+
+            expect(res.status).toEqual(400);
         });
     });
 });
