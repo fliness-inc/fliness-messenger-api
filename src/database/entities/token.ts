@@ -15,7 +15,7 @@ export class Token extends IEntity {
     public userAgent: string;
 
     @Column({ name: 'expires_at', default: () => 'NOW()' })
-    public expiresAt: Date
+    public expiresAt: Date;
 
     @OneToOne(type => User, u => u.id)
     public user: User;

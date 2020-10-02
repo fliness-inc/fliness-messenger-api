@@ -1,15 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import request from 'supertest';
-import { AppModule } from '@src/app.module';
-import { User } from '@database/entities/user';
-import { getRepository } from 'typeorm';
-import Faker from 'faker';
 import { config as setupDotEnv } from 'dotenv';
-import { JwtService } from '@nestjs/jwt'
-import * as uuid from 'uuid';
+import { JwtService } from '@nestjs/jwt';
 import cookieParser from 'cookie-parser';
-import { Token } from '@/src/database/entities/token';
+import { getRepository } from 'typeorm';
+import { User } from '@database/entities/user';
+import { AppModule } from '@modules/app/app.module';
+import request from 'supertest';
+import * as uuid from 'uuid';
+import Faker from 'faker';
 
 setupDotEnv();
 

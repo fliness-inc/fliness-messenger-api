@@ -15,6 +15,14 @@ export class UsersService {
         return getRepository(User).findOne(options);
     }
 
+    public async findByIds(ids: string[], options?: FindManyOptions<User>): Promise<(User | undefined)[]> {
+        //const indexes = ids.filter((v, i) => ids.indexOf(v) === i);
+
+        const users = await getRepository(User).findByIds(ids, options);
+
+        return ids.map(id => users.find(u => u.id === id));
+    }
+
     public async create(entity: DeepPartial<User>): Promise<User> {
         const users = getRepository(User);
         return users.save(users.create(entity));

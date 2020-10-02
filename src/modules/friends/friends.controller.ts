@@ -1,34 +1,20 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { FriendsService } from './friends.service';
-import { User } from '@database/entities/user';
+import { Friend } from '@database/entities/friend';
+import { ApiBody } from '@nestjs/swagger';
+import { AuthGuard } from '@modules/auth/auth.guard';
+import { Request } from 'express';
 
-import { ApiBody, ApiProperty } from '@nestjs/swagger';
-
-export class UserData {
-  @ApiProperty({ type: String })
-  public readonly name: string;
-
-  @ApiProperty({ type: String })
-  public readonly email: string;
-
-  @ApiProperty({ type: String })
-  public readonly password: string;
-}
-
-@ApiTags('friends')
-@Controller('friends')
+@UseGuards(AuthGuard)
+@Controller()
 export class FriendsController {
-  public constructor(private readonly friends: FriendsService) {}
+    public constructor(private readonly friendsService: FriendsService) {}
 
-  @Get()
-  public async findAll(): Promise<User[]> {
-    return this.friends.find();
-  }
-
-  @Post()
-  @ApiBody({ type: UserData })
-  public async create(@Body() body: UserData): Promise<User> {
-    return this.friends.create(body);
-  }
+    @ApiTags('me')
+    @Get('/me/friends')
+    public async findAll(@Req() req: Request): Promise<Friend[]> {
+        const { id }: any = req.user;
+        return this.friendsService.find({ where: { userId: id } });
+    }
 }
