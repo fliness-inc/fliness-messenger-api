@@ -23,3 +23,15 @@ export class InvalidPropertyError extends HttpException  {
         super(message, HttpStatus.BAD_REQUEST);
     }
 }
+
+export class NotFoundError extends HttpException  {
+    public constructor(public readonly message: string = '') {
+        super(message, HttpStatus.NOT_FOUND);
+    }
+}
+
+export class OperationInvalidError extends HttpException  {
+    public constructor(public readonly message: string = '') {
+        super(message, HttpStatus.CONFLICT);
+    }
+}

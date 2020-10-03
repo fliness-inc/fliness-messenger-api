@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { getRepository } from 'typeorm';
+import { getRepository, FindManyOptions, FindOneOptions, FindConditions } from 'typeorm';
 import UsersService from '@modules/users/users.service';
 import Invitation from '@database/entities/invitation';
 import InvitationType from '@database/entities/invitation-type';
 import InvitationStatus from '@database/entities/invitation-status';
-import { InvalidPropertyError } from '@src/errors';
-import FriendsService from '../friends/friends.service';
+import { InvalidPropertyError, NotFoundError, OperationInvalidError } from '@src/errors';
+import FriendsService from '@modules/friends/friends.service';
 
 export enum Status {
     ACCEPTED = 'ACCEPTED',
@@ -20,8 +20,18 @@ export enum Type {
 }
 
 export class FindInvitationsOptions {
-    public senderId?: string;
-    public recipientId?: string;
+    public readonly id?: string;
+    public readonly senderId?: string;
+    public readonly recipientId?: string;
+}
+
+export class InvitationResponse {
+    public readonly id: string;
+    public readonly senderId: string;
+    public readonly recipientId: string;
+    public readonly status: string;
+    public readonly type: string;
+    public readonly expiresAt: Date;
 }
 
 @Injectable()
@@ -60,32 +70,87 @@ export class InvitationsService {
         return invitations.save(invitations.create({
             senderId,
             recipientId,
-            statusId: status.id,
-            typeId: invitationsType.id,
+            status: status,
+            type: invitationsType,
             expiresAt: new Date(Date.now() + this.maxAge)
         }));
     }
 
-    public async find({ senderId, recipientId }: FindInvitationsOptions = {}): Promise<Invitation[]> {
+    private prepareQuery(options?: FindConditions<Invitation>): FindManyOptions<Invitation> {
+        return {
+            select: [
+                'id', 
+                'senderId', 
+                'recipientId', 
+                'typeId',
+                'statusId',
+                'expiresAt',
+                'type',
+                'status'
+            ],
+            join: {
+                alias: 't',
+                leftJoinAndSelect: {
+                    type: 't.type',
+                    status: 't.status'
+                }
+            },
+            relations: ['type', 'status'],
+            where: options
+        };
+    }
 
-        const query = getRepository(Invitation).createQueryBuilder('t')
-            .select('t.id', 'id')
-            .addSelect('t.sender_id', 'senderId')
-            .addSelect('t.recipient_id', 'recipientId')
-            .addSelect('t.expires_at', 'expiresAt')
-            .addSelect('types.name', 'type')
-            .addSelect('statuses.name', 'status')
-            .leftJoin('t.type', 'types')
-            .leftJoin('t.status', 'statuses');
+    public async find(options?: FindConditions<Invitation>): Promise<Invitation[]> {
+        return getRepository(Invitation).find(this.prepareQuery(options));
+    }
 
-        if (senderId)
-            query.andWhere('t.sender_id = :senderId', { senderId: senderId });
+    public async findOne(options?: FindConditions<Invitation>): Promise<Invitation | undefined> {
+        return getRepository(Invitation).findOne(this.prepareQuery(options));
+    }
 
-        if (recipientId)
-            query.andWhere('t.recipient_id = :recipientId', { recipientId });
+    public prepareEntity(entity: Invitation): InvitationResponse {
+        const { id, senderId, recipientId, type, status, expiresAt } = entity;
 
-        return query.getRawMany();
-    } 
+        return { 
+            id,
+            senderId,
+            recipientId,
+            type: type.name,
+            status: status.name,
+            expiresAt,
+        };
+    }
+
+    public prepareEntities(entites: Invitation[]): InvitationResponse[] {
+        return entites.map(entity => this.prepareEntity(entity));
+    }
+
+    private async setStatus(id: string, status: Status): Promise<Invitation> {
+        const invitation = await this.findOne({ id });
+
+        if (!invitation)
+            throw new NotFoundError(`The invitation was not found with the id: ${id}`);
+        else if (invitation.status.name !== Status.WAITING)
+            throw new OperationInvalidError('The invitation is not valid already');
+
+        const newStatus = await getRepository(InvitationStatus).findOne({ name: status });
+
+        const invitations = getRepository(Invitation);
+
+        return invitations.save(invitations.create({
+            ...invitation,
+            status: newStatus,
+            expiresAt: new Date()
+        }));
+    }
+
+    public async accept(id: string): Promise<Invitation> {
+        return this.setStatus(id, Status.ACCEPTED);
+    }
+
+    public async reject(id: string): Promise<Invitation> {
+        return this.setStatus(id, Status.REJECTED);
+    }
 
 }
 
