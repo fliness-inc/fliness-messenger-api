@@ -49,7 +49,7 @@ export class InvitationsService {
             const friend = await this.friendsService.findOne({ where: { userId: senderId, friendId: recipientId } });
 
             if (friend)
-                throw new InvalidPropertyError('The sender already has the recipient like a friend')
+                throw new OperationInvalidError('The sender already has the recipient like a friend')
         }
 
         const invitationsType = await getRepository(InvitationType).findOne({ name: type });

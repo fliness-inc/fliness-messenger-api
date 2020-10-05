@@ -14,6 +14,8 @@ import Invitation from '@database/entities/invitation';
 import InvitationsService from '@modules/invitations/invitations.service'
 import FriendsService from '@modules/friends/friends.service';
 import { Type, Status } from '@modules/invitations/invitations.dto';
+import { InvitationStatusSeeder, InvitationStatusFactory } from '@database/seeds/invitation-status.seeder';
+import { InvitationTypeSeeder, InvitationTypeFactory } from '@database/seeds/invitation-type.seeder';
 
 setupDotEnv();
 
@@ -34,14 +36,17 @@ describe('[E2E] [InvitationsController] ...', () => {
 
         connection = getConnection();
 
-        await connection.query(`
-            TRUNCATE 
-                users, 
-                tokens,
-                friends,
-                invitations
-            CASCADE`
-        );
+        await connection.synchronize(true);
+
+        const invitationStatusSeeder = new InvitationStatusSeeder(new InvitationStatusFactory());
+        await invitationStatusSeeder.run(1, { name: Status.ACCEPTED });
+        await invitationStatusSeeder.run(1, { name: Status.REJECTED });
+        await invitationStatusSeeder.run(1, { name: Status.WAITING });
+
+        const invitationTypeSeeder = new InvitationTypeSeeder(new InvitationTypeFactory());
+        await invitationTypeSeeder.run(1, { name: Type.INVITE_TO_CHANNEL });
+        await invitationTypeSeeder.run(1, { name: Type.INVITE_TO_FRIENDS });
+        await invitationTypeSeeder.run(1, { name: Type.INVITE_TO_GROUP });
     });
 
     afterEach(async () => {
@@ -54,12 +59,6 @@ describe('[E2E] [InvitationsController] ...', () => {
     });
 
     afterAll(async () => {
-        await connection.query(`
-            TRUNCATE 
-                users, 
-                tokens,
-            CASCADE`
-        );
         await app.close();
         await connection.close();
     }); 
@@ -157,7 +156,7 @@ describe('[E2E] [InvitationsController] ...', () => {
                 expect(resSend.status).toEqual(401);
             });
 
-            it('should return 401 status when the user trying to send the invitation to the user that already is friend', async () => {
+            it('should return 409 status when the user trying to send the invitation to the user that already is friend', async () => {
                 const [sender, recipient] = users; 
                 
                 await app.get<FriendsService>(FriendsService).create({
@@ -170,7 +169,7 @@ describe('[E2E] [InvitationsController] ...', () => {
                     .set('Authorization', `Bearer ${sender.tokens.accessToken}`)
                     .send({ userId: recipient.user.id });
     
-                expect(res.status).toEqual(400);
+                expect(res.status).toEqual(409);
             });
         });
 
@@ -252,11 +251,11 @@ describe('[E2E] [InvitationsController] ...', () => {
                 const invitationId = resSend.body.id;
 
                 const res = await request(app.getHttpServer())
-                    .get(`/me/friends/invitations/${invitationId}/accept`)
+                    .post(`/me/friends/invitations/${invitationId}/accept`)
                     .set('Authorization', `Bearer ${recipient.tokens.accessToken}`)
                     .send();
 
-                expect(res.status).toEqual(200);
+                expect(res.status).toEqual(201);
 
                 const invitation = await app.get<InvitationsService>(InvitationsService).findOne({ id: invitationId })
                 
@@ -269,7 +268,7 @@ describe('[E2E] [InvitationsController] ...', () => {
                 const [sender, recipient] = users;
 
                 const res = await request(app.getHttpServer())
-                    .get(`/me/friends/invitations/${uuid.v4()}/accept`)
+                    .post(`/me/friends/invitations/${uuid.v4()}/accept`)
                     .set('Authorization', `Bearer ${sender.tokens.accessToken}`)
                     .send();
 
@@ -287,7 +286,7 @@ describe('[E2E] [InvitationsController] ...', () => {
                 const invitationId = resSend.body.id;
 
                 const res = await request(app.getHttpServer())
-                    .get(`/me/friends/invitations/${invitationId}/accept`)
+                    .post(`/me/friends/invitations/${invitationId}/accept`)
                     .send();
                 
                 expect(res.status).toEqual(401);
@@ -306,11 +305,11 @@ describe('[E2E] [InvitationsController] ...', () => {
                 const invitationId = resSend.body.id;
 
                 const res = await request(app.getHttpServer())
-                    .get(`/me/friends/invitations/${invitationId}/reject`)
+                    .post(`/me/friends/invitations/${invitationId}/reject`)
                     .set('Authorization', `Bearer ${recipient.tokens.accessToken}`)
                     .send();
 
-                expect(res.status).toEqual(200);
+                expect(res.status).toEqual(201);
 
                 const invitation = await app.get<InvitationsService>(InvitationsService).findOne({ id: invitationId })
                 
@@ -323,7 +322,7 @@ describe('[E2E] [InvitationsController] ...', () => {
                 const [sender, recipient] = users;
 
                 const res = await request(app.getHttpServer())
-                    .get(`/me/friends/invitations/${uuid.v4()}/reject`)
+                    .post(`/me/friends/invitations/${uuid.v4()}/reject`)
                     .set('Authorization', `Bearer ${sender.tokens.accessToken}`)
                     .send();
 
@@ -341,7 +340,7 @@ describe('[E2E] [InvitationsController] ...', () => {
                 const invitationId = resSend.body.id;
 
                 const res = await request(app.getHttpServer())
-                    .get(`/me/friends/invitations/${invitationId}/reject`)
+                    .post(`/me/friends/invitations/${invitationId}/reject`)
                     .send();
                 
                 expect(res.status).toEqual(401);

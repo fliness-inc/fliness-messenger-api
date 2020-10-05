@@ -1,12 +1,12 @@
 import { Body, Controller, Post, Res, Req, Get, UnauthorizedException} from '@nestjs/common';
-import { ApiTags, ApiProperty, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiProperty, ApiBody, ApiUnauthorizedResponse, ApiHeader, ApiCookieAuth } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { TokensService } from '@modules/tokens/tokens.service';
 import { AuthLoginDTO, AuthRegisterDTO } from './auth.dto';
 
-@ApiTags('auth')
-@Controller('auth')
+@ApiTags('/auth')
+@Controller('/auth')
 export class AuthController {
 
     public constructor(
@@ -15,6 +15,7 @@ export class AuthController {
     ) {}
 
     @ApiBody({ type: () => AuthLoginDTO })
+    @ApiUnauthorizedResponse({ description: 'The user is unauthorized.' })
     @Post('/login')
     public async login(
         @Req() req: Request,
@@ -56,6 +57,8 @@ export class AuthController {
         res.status(201).json(tokens);
     }
 
+    @ApiUnauthorizedResponse({ description: 'The user is unauthorized.' })
+    @ApiHeader({ name: 'Authorization', description: 'The header tag contains the access token.' })
     @Get('/refresh')
     public async refresh(
         @Req() req: Request,
@@ -74,6 +77,8 @@ export class AuthController {
         res.status(200).json(tokens);
     }
 
+    @ApiUnauthorizedResponse({ description: 'The user is unauthorized.' })
+    @ApiHeader({ name: 'Authorization', description: 'The header tag contains the access token.' })
     @Get('/logout')
     public async logout(
         @Req() req: Request,

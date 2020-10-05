@@ -4,7 +4,7 @@ import Chat from '@database/entities/chat';
 import ChatType from '@database/entities/chat-type';
 import { Type } from '@modules/chat/chat.dto';
 import UsersService from '@modules/users/users.service';
-import { InvalidPropertyError, OperationInvalidError } from '@src/errors';
+import { InvalidPropertyError, NotFoundError, OperationInvalidError } from '@src/errors';
 import { MembersService } from '@modules/members/members.service';
 import { Privilege as MemberPrivilege} from '@modules/members/members.dto';
 
@@ -97,7 +97,7 @@ export class ChatService {
         const chat = await this.findOne({ where: { id: chatId } });
         
         if (!chat)
-            throw new InvalidPropertyError(`The chat was not find with the id: ${chatId}`);
+            throw new NotFoundError(`The chat was not find with the id: ${chatId}`);
 
         const chats = getRepository(Chat);
 

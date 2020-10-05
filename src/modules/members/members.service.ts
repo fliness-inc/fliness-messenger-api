@@ -2,7 +2,7 @@ import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import UserService from '@modules/users/users.service';
 import ChatService from '@modules/chat/chat.service';
 import Member from '@database/entities/member';
-import { InvalidPropertyError, OperationInvalidError } from '@src/errors';
+import { InvalidPropertyError, NotFoundError, OperationInvalidError } from '@src/errors';
 import MemberPrivilege from '@database/entities/member-privilege';
 import { MemberRespomse, Privilege } from '@modules/members/members.dto';
 import { FindConditions, FindManyOptions, getRepository } from 'typeorm';
@@ -26,7 +26,7 @@ export class MembersService {
         const chat = await this.chatService.findOne({ where: { id: chatId, isDeleted: false } });
 
         if (!chat)
-            throw new InvalidPropertyError(`The chat was not found with the id: ${chatId}`);
+            throw new NotFoundError(`The chat was not found with the id: ${chatId}`);
 
         const countMember = await getRepository(Member).count({
             where: {
@@ -62,7 +62,7 @@ export class MembersService {
         const chat = await this.chatService.findOne({ where: { id: chatId, isDeleted: false } });
 
         if (!chat)
-            throw new InvalidPropertyError(`The chat was not found with the id: ${chatId}`);
+            throw new NotFoundError(`The chat was not found with the id: ${chatId}`);
 
         const members = getRepository(Member);
         const member = await members.findOne({ where: { userId, chatId, isDeleted: false } });

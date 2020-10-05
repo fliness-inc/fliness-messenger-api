@@ -8,12 +8,11 @@ export enum Type {
 
 export class ChatCreateDTO {
     @ApiPropertyOptional({ type: () => String, description: `
-        Optional property of your chat title. 
-        If you are creating a group/channel, this property is required`
+        The title of your chat. If you are creating a group/channel, this property is required.`
     })
     public readonly title?: string;
 
-    @ApiPropertyOptional({ type: () => String, description: 'Optional property of your chat description.' })
+    @ApiPropertyOptional({ type: () => String, description: 'The description of your chat.' })
     public readonly description?: string;
 
     @ApiProperty({ enum: Type, description: 'The type of your chat.' })
