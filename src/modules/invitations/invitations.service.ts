@@ -6,18 +6,7 @@ import InvitationType from '@database/entities/invitation-type';
 import InvitationStatus from '@database/entities/invitation-status';
 import { InvalidPropertyError, NotFoundError, OperationInvalidError } from '@src/errors';
 import FriendsService from '@modules/friends/friends.service';
-
-export enum Status {
-    ACCEPTED = 'ACCEPTED',
-    REJECTED = 'REJECTED',
-    WAITING = 'WAITING'
-}
-
-export enum Type {
-    INVITE_TO_FRIENDS = 'INVITE_TO_FRIENDS',
-    INVITE_TO_GROUP = 'INVITE_TO_GROUP',
-    INVITE_TO_CHANNEL = 'INVITE_TO_CHANNEL'
-}
+import { Type, Status } from '@modules/invitations/invitations.dto';
 
 export class FindInvitationsOptions {
     public readonly id?: string;
@@ -95,7 +84,6 @@ export class InvitationsService {
                     status: 't.status'
                 }
             },
-            relations: ['type', 'status'],
             where: options
         };
     }

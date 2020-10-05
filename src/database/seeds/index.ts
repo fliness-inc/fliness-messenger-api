@@ -3,7 +3,7 @@ import { config as setupDotEnv } from 'dotenv';
 import { UserSeeder, UserFactory } from './users.seeder';
 import { InvitationStatusSeeder, InvitationStatusFactory } from './invitation-status.seeder';
 import { InvitationTypeSeeder, InvitationTypeFactory } from './invitation-type.seeder';
-import { Type, Status } from '@modules/invitations/invitations.service';
+import { Type, Status } from '@modules/invitations/invitations.dto';
 
 setupDotEnv();
 

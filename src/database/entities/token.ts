@@ -1,6 +1,6 @@
 import {Entity, Column, OneToOne } from 'typeorm';
-import { IEntity } from '@database/entities/entity';
-import { User } from '@database/entities/user';
+import IEntity from '@database/entities/entity';
+import User from '@database/entities/user';
 
 @Entity({name: 'tokens'})
 export class Token extends IEntity {

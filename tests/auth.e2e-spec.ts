@@ -25,13 +25,11 @@ describe('[E2E] [AuthController] ...', () => {
         app = moduleFixture.createNestApplication();
         app.use(cookieParser());
         await app.init();
-        await getRepository(User).query('TRUNCATE users CASCADE');
-        await getRepository(User).query('TRUNCATE tokens CASCADE');
+        await getRepository(User).query('TRUNCATE users, tokens CASCADE');
     });
 
     afterEach(async () => {
-        await getRepository(User).query('TRUNCATE users CASCADE');
-        await getRepository(User).query('TRUNCATE tokens CASCADE');
+        await getRepository(User).query('TRUNCATE users, tokens CASCADE');
     });
 
     afterAll(async () => {

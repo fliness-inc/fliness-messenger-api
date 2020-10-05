@@ -1,8 +1,8 @@
 import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
-import { IEntity } from './entity';
-import { User } from './user';
-import { InvitationType } from './invitation-type';
-import { InvitationStatus } from './invitation-status';
+import IEntity from './entity';
+import User from './user';
+import InvitationType from './invitation-type';
+import InvitationStatus from './invitation-status';
 
 @Entity({ name: 'invitations' })
 export class Invitation extends IEntity {

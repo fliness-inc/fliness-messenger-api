@@ -11,8 +11,9 @@ import AppModule from '@modules/app/app.module';
 import UsersService from '@modules/users/users.service';
 import { Tokens } from '@modules/tokens/tokens.service';
 import Invitation from '@database/entities/invitation';
-import InvitationsService, { Type, Status } from '@modules/invitations/invitations.service'
+import InvitationsService from '@modules/invitations/invitations.service'
 import FriendsService from '@modules/friends/friends.service';
+import { Type, Status } from '@modules/invitations/invitations.dto';
 
 setupDotEnv();
 
@@ -94,14 +95,14 @@ describe('[E2E] [InvitationsController] ...', () => {
                 const [sender, recipient] = users; 
     
                 const resSend = await request(app.getHttpServer())
-                    .post(`/me/friends/invitation`)
+                    .post(`/me/friends/invitations`)
                     .set('Authorization', `Bearer ${sender.tokens.accessToken}`)
                     .send({ userId: recipient.user.id });
     
                 expect(resSend.status).toEqual(201);
     
                 const resGet = await request(app.getHttpServer())
-                    .get(`/me/friends/invitation`)
+                    .get(`/me/friends/invitations`)
                     .set('Authorization', `Bearer ${sender.tokens.accessToken}`)
                     .send();
     
@@ -116,7 +117,7 @@ describe('[E2E] [InvitationsController] ...', () => {
                 expect(resGet.body[0]).toHaveProperty('expiresAt');
     
                 const resGetNew = await request(app.getHttpServer())
-                    .get('/me/friends/invitation/new')
+                    .get('/me/friends/invitations/new')
                     .set('Authorization', `Bearer ${recipient.tokens.accessToken}`)
                     .send();
     
@@ -130,7 +131,7 @@ describe('[E2E] [InvitationsController] ...', () => {
                 const [sender, recipient] = users; 
     
                 const resSend = await request(app.getHttpServer())
-                    .post(`/me/friends/invitation`)
+                    .post(`/me/friends/invitations`)
                     .set('Authorization', `Bearer ${sender.tokens.accessToken}`)
                     .send({ userId: sender.user.id });
     
@@ -141,7 +142,7 @@ describe('[E2E] [InvitationsController] ...', () => {
                 const [sender, recipient] = users; 
     
                 const resSend = await request(app.getHttpServer())
-                    .post(`/me/friends/invitation`)
+                    .post(`/me/friends/invitations`)
                     .set('Authorization', `Bearer ${sender.tokens.accessToken}`)
                     .send({ userId: uuid.v4() });
     
@@ -150,7 +151,7 @@ describe('[E2E] [InvitationsController] ...', () => {
 
             it('should return 401 status when the unauthorized user trying to send the invitation', async () => {
                 const resSend = await request(app.getHttpServer())
-                    .post(`/me/friends/invitation`)
+                    .post(`/me/friends/invitations`)
                     .send({ userId: uuid.v4() });
     
                 expect(resSend.status).toEqual(401);
@@ -165,7 +166,7 @@ describe('[E2E] [InvitationsController] ...', () => {
                 });
                 
                 const res = await request(app.getHttpServer())
-                    .post('/me/friends/invitation')
+                    .post('/me/friends/invitations')
                     .set('Authorization', `Bearer ${sender.tokens.accessToken}`)
                     .send({ userId: recipient.user.id });
     
@@ -186,7 +187,7 @@ describe('[E2E] [InvitationsController] ...', () => {
                     await app.get<InvitationsService>(InvitationsService).create(recipient.user.id, sender.user.id, Type.INVITE_TO_FRIENDS);
             
                 const resSender = await request(app.getHttpServer())
-                    .get(`/me/friends/invitation`)
+                    .get(`/me/friends/invitations`)
                     .set('Authorization', `Bearer ${sender.tokens.accessToken}`)
                     .send();
     
@@ -195,7 +196,7 @@ describe('[E2E] [InvitationsController] ...', () => {
                 expect(resSender.body).toHaveLength(senderNumberInvitations);
                     
                 const resNewSender = await request(app.getHttpServer())
-                    .get(`/me/friends/invitation/new`)
+                    .get(`/me/friends/invitations/new`)
                     .set('Authorization', `Bearer ${sender.tokens.accessToken}`)
                     .send();
     
@@ -204,7 +205,7 @@ describe('[E2E] [InvitationsController] ...', () => {
                 expect(resNewSender.body).toHaveLength(recipientNumberInvitations);
 
                 const resRecipientSender = await request(app.getHttpServer())
-                    .get(`/me/friends/invitation`)
+                    .get(`/me/friends/invitations`)
                     .set('Authorization', `Bearer ${recipient.tokens.accessToken}`)
                     .send();
     
@@ -213,7 +214,7 @@ describe('[E2E] [InvitationsController] ...', () => {
                 expect(resRecipientSender.body).toHaveLength(recipientNumberInvitations);
                     
                 const resNewRecipient = await request(app.getHttpServer())
-                    .get(`/me/friends/invitation/new`)
+                    .get(`/me/friends/invitations/new`)
                     .set('Authorization', `Bearer ${recipient.tokens.accessToken}`)
                     .send();
     
@@ -224,7 +225,7 @@ describe('[E2E] [InvitationsController] ...', () => {
 
             it('should return 401 status when the unauthorized user trying to get the invitation', async () => {
                 const resSend = await request(app.getHttpServer())
-                    .get(`/me/friends/invitation`)
+                    .get(`/me/friends/invitations`)
                     .send({ userId: uuid.v4() });
     
                 expect(resSend.status).toEqual(401);
@@ -232,7 +233,7 @@ describe('[E2E] [InvitationsController] ...', () => {
 
             it('should return 401 status when the unauthorized user trying to get new invitation', async () => {
                 const resSend = await request(app.getHttpServer())
-                    .get(`/me/friends/invitation/new`)
+                    .get(`/me/friends/invitations/new`)
                     .send({ userId: uuid.v4() });
     
                 expect(resSend.status).toEqual(401);
@@ -244,14 +245,14 @@ describe('[E2E] [InvitationsController] ...', () => {
                 const [sender, recipient] = users;
 
                 const resSend = await request(app.getHttpServer())
-                    .post(`/me/friends/invitation`)
+                    .post(`/me/friends/invitations`)
                     .set('Authorization', `Bearer ${sender.tokens.accessToken}`)
                     .send({ userId: recipient.user.id });
 
                 const invitationId = resSend.body.id;
 
                 const res = await request(app.getHttpServer())
-                    .get(`/me/friends/invitation/${invitationId}/accept`)
+                    .get(`/me/friends/invitations/${invitationId}/accept`)
                     .set('Authorization', `Bearer ${recipient.tokens.accessToken}`)
                     .send();
 
@@ -268,7 +269,7 @@ describe('[E2E] [InvitationsController] ...', () => {
                 const [sender, recipient] = users;
 
                 const res = await request(app.getHttpServer())
-                    .get(`/me/friends/invitation/${uuid.v4()}/accept`)
+                    .get(`/me/friends/invitations/${uuid.v4()}/accept`)
                     .set('Authorization', `Bearer ${sender.tokens.accessToken}`)
                     .send();
 
@@ -279,14 +280,14 @@ describe('[E2E] [InvitationsController] ...', () => {
                 const [sender, recipient] = users;
 
                 const resSend = await request(app.getHttpServer())
-                    .post(`/me/friends/invitation`)
+                    .post(`/me/friends/invitations`)
                     .set('Authorization', `Bearer ${sender.tokens.accessToken}`)
                     .send({ userId: recipient.user.id });
 
                 const invitationId = resSend.body.id;
 
                 const res = await request(app.getHttpServer())
-                    .get(`/me/friends/invitation/${invitationId}/accept`)
+                    .get(`/me/friends/invitations/${invitationId}/accept`)
                     .send();
                 
                 expect(res.status).toEqual(401);
@@ -298,14 +299,14 @@ describe('[E2E] [InvitationsController] ...', () => {
                 const [sender, recipient] = users;
 
                 const resSend = await request(app.getHttpServer())
-                    .post(`/me/friends/invitation`)
+                    .post(`/me/friends/invitations`)
                     .set('Authorization', `Bearer ${sender.tokens.accessToken}`)
                     .send({ userId: recipient.user.id });
 
                 const invitationId = resSend.body.id;
 
                 const res = await request(app.getHttpServer())
-                    .get(`/me/friends/invitation/${invitationId}/reject`)
+                    .get(`/me/friends/invitations/${invitationId}/reject`)
                     .set('Authorization', `Bearer ${recipient.tokens.accessToken}`)
                     .send();
 
@@ -322,7 +323,7 @@ describe('[E2E] [InvitationsController] ...', () => {
                 const [sender, recipient] = users;
 
                 const res = await request(app.getHttpServer())
-                    .get(`/me/friends/invitation/${uuid.v4()}/reject`)
+                    .get(`/me/friends/invitations/${uuid.v4()}/reject`)
                     .set('Authorization', `Bearer ${sender.tokens.accessToken}`)
                     .send();
 
@@ -333,14 +334,14 @@ describe('[E2E] [InvitationsController] ...', () => {
                 const [sender, recipient] = users;
 
                 const resSend = await request(app.getHttpServer())
-                    .post(`/me/friends/invitation`)
+                    .post(`/me/friends/invitations`)
                     .set('Authorization', `Bearer ${sender.tokens.accessToken}`)
                     .send({ userId: recipient.user.id });
 
                 const invitationId = resSend.body.id;
 
                 const res = await request(app.getHttpServer())
-                    .get(`/me/friends/invitation/${invitationId}/reject`)
+                    .get(`/me/friends/invitations/${invitationId}/reject`)
                     .send();
                 
                 expect(res.status).toEqual(401);

@@ -1,7 +1,7 @@
 import { Controller, Post, Get, Req, Res, Body, UseGuards, Param } from '@nestjs/common';
-import { FriendInvitationDTO } from './invitations.dto';
+import { FriendInvitationDTO, Type } from '@modules/invitations/invitations.dto';
 import Invitation from '@database/entities/invitation';
-import { InvitationsService, Type, InvitationResponse } from '@modules/invitations/invitations.service';
+import { InvitationsService, InvitationResponse } from '@modules/invitations/invitations.service';
 import { ApiTags, ApiBody, ApiCreatedResponse, ApiBadRequestResponse, ApiOkResponse, ApiNotFoundResponse, ApiParam } from '@nestjs/swagger';
 import AuthGuard from '@modules/auth/auth.guard';
 import { Request, Response } from 'express';
@@ -14,7 +14,7 @@ export class InvitationsController {
 
     @ApiTags('me')
     @ApiOkResponse()
-    @Get('/me/friends/invitation')
+    @Get('/me/friends/invitations')
     public async getMyInvitations(@Req() req: Request): Promise<InvitationResponse[]> {
         const { id }: any = req.user;
         return this.invitationsService.prepareEntities(
@@ -24,7 +24,7 @@ export class InvitationsController {
 
     @ApiTags('me')
     @ApiOkResponse()
-    @Get('/me/friends/invitation/new')
+    @Get('/me/friends/invitations/new')
     public async getNewInvitationsFroMe(@Req() req: Request): Promise<InvitationResponse[]> {
         const { id }: any = req.user;
         return this.invitationsService.prepareEntities(
@@ -36,7 +36,7 @@ export class InvitationsController {
     @ApiBody({ type: FriendInvitationDTO })
     @ApiCreatedResponse()
     @ApiBadRequestResponse()
-    @Post('/me/friends/invitation')
+    @Post('/me/friends/invitations')
     public async sendInvitation(
         @Req() req: Request,
         @Body() payload: FriendInvitationDTO
@@ -51,7 +51,7 @@ export class InvitationsController {
     @ApiOkResponse()
     @ApiNotFoundResponse()
     @ApiParam({ name: 'id', description: 'The unique ID of the invitation' })
-    @Get('/me/friends/invitation/:id/accept')
+    @Get('/me/friends/invitations/:id/accept')
     public async acceptInvitation(@Param('id') id: string): Promise<InvitationResponse> {
         return this.invitationsService.prepareEntity(
             await this.invitationsService.accept(id)
@@ -63,7 +63,7 @@ export class InvitationsController {
     @ApiOkResponse()
     @ApiNotFoundResponse()
     @ApiParam({ name: 'id', description: 'The unique ID of the invitation' })
-    @Get('/me/friends/invitation/:id/reject')
+    @Get('/me/friends/invitations/:id/reject')
     public async rejectInvitation(@Param('id') id: string): Promise<InvitationResponse> {
         return this.invitationsService.prepareEntity(
             await this.invitationsService.reject(id)

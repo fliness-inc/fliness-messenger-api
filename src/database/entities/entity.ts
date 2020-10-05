@@ -6,17 +6,17 @@ import {
 } from 'typeorm';
 
 export abstract class IEntity {
-  @PrimaryGeneratedColumn('uuid')
-  public readonly id!: string;
+    @PrimaryGeneratedColumn('uuid')
+    public id: string;
 
-  @CreateDateColumn({ name: 'created_at' })
-  public readonly createdAt!: Date;
+    @CreateDateColumn({ name: 'created_at' })
+    public createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
-  public readonly updatedAt!: Date;
+    @UpdateDateColumn({ name: 'updated_at' })
+    public updatedAt: Date;
 
-  @Column({ name: 'is_deleted', default: false })
-  public readonly isDeleted!: boolean;
+    @Column({ name: 'is_deleted', default: false })
+    public isDeleted: boolean;
 }
 
 export default IEntity;

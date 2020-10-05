@@ -1,5 +1,5 @@
 import { Column, Entity } from 'typeorm';
-import { IEntity } from './entity';
+import IEntity from './entity';
 
 @Entity({ name: 'invitation_statuses' })
 export class InvitationStatus extends IEntity {
