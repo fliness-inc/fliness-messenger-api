@@ -4,7 +4,8 @@ import FriendsModule from '@modules/friends/friends.module';
 import AuthModule from '@modules/auth/auth.module';
 import UsersModule from '@modules/users/users.module';
 import InvitationsModule from '@modules/invitations/invitations.module';
-import ChatModule from '@modules/chat/chat.module';
+import ChatModule from '@modules/chats/chats.module';
+import MessagesModule from '@modules/messages/messages.module';
 
 @Module({
   imports: [
@@ -13,7 +14,8 @@ import ChatModule from '@modules/chat/chat.module';
     AuthModule, 
     FriendsModule,
     InvitationsModule,
-    ChatModule
+    ChatModule,
+    MessagesModule
   ]
 })
 export class AppModule {}

@@ -1,11 +1,12 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import UserService from '@modules/users/users.service';
-import ChatService from '@modules/chat/chat.service';
+import ChatService from '@modules/chats/chats.service';
 import Member from '@database/entities/member';
 import { InvalidPropertyError, NotFoundError, OperationInvalidError } from '@src/errors';
-import MemberPrivilege from '@database/entities/member-privilege';
-import { MemberRespomse, Privilege } from '@modules/members/members.dto';
-import { FindConditions, FindManyOptions, getRepository } from 'typeorm';
+import MemberRole from '@database/entities/member-role';
+import { MemberResponse, MemberRoleNameEnum } from '@modules/members/members.dto';
+import { FindManyOptions, FindOneOptions, getRepository } from 'typeorm';
+import { FindManyOptionsFunc, FindOneOptionsFunc } from '@src/utils';
 
 @Injectable()
 export class MembersService {
@@ -17,7 +18,7 @@ export class MembersService {
     ) {}
 
 
-    public async create(userId: string, chatId: string, privilege: Privilege): Promise<Member> {
+    public async create(userId: string, chatId: string, roleName: MemberRoleNameEnum): Promise<Member> {
         const user = await this.userService.findOne({ where: { id: userId, isDeleted: false } });
 
         if (!user)
@@ -38,16 +39,16 @@ export class MembersService {
         if (chat.memberLimit && countMember >= chat.memberLimit) 
             throw new OperationInvalidError(`The chat already has maximum number of members`);
 
-        const memberPrivilege = await getRepository(MemberPrivilege).findOne({ where: { name: privilege, isDeleted: false } });
+        const memberRole = await getRepository(MemberRole).findOne({ where: { name: roleName, isDeleted: false } });
 
-        if (!memberPrivilege)
-            throw new InvalidPropertyError(`The member privilege was not found: ${privilege}`);
+        if (!memberRole)
+            throw new InvalidPropertyError(`The member role was not found: ${roleName}`);
 
         const members = getRepository(Member);
         const newMember = members.create({
             userId: user.id,
             chatId: chat.id,
-            privilegeId: memberPrivilege.id
+            roleId: memberRole.id
         });
 
         return members.save(newMember);
@@ -76,47 +77,55 @@ export class MembersService {
         }))
     }
 
-    public prepareEntity(entity: Member): MemberRespomse {
-        const { id, userId, chatId, privilege, createdAt } = entity;
+    public prepareEntity(entity: Member): MemberResponse {
+        const { id, userId, chatId, role, createdAt } = entity;
 
         return { 
             id,
             userId,
             chatId,
-            privilege: privilege.name,
+            role: role.name,
             createdAt,
         };
     }
 
-    public prepareEntities(entites: Member[]): MemberRespomse[] {
+    public prepareEntities(entites: Member[]): MemberResponse[] {
         return entites.map(entity => this.prepareEntity(entity));
     }
 
-    private prepareQuery(options?: FindConditions<Member>): FindManyOptions<Member> {
+    private prepareQuery(alias: string, options: FindManyOptions<Member> = {}): FindManyOptions<Member> {
+        const { join = { leftJoinAndSelect: {} }, select = [] } = options;
         return {
+            ...options,
             select: [
+                ...select,
                 'id', 
                 'userId', 
                 'chatId', 
-                'privilege',
+                'role',
                 'createdAt',
             ],
             join: {
-                alias: 't',
+                ...join,
+                alias,
                 leftJoinAndSelect: {
-                    type: 't.privilege',
-                }
-            },
-            where: options
+                    ...(join && join.leftJoinAndSelect ? join.leftJoinAndSelect : {}),
+                    type: `${alias}.role`,
+                },
+            }
         };
     }
 
-    public async find(options?: FindConditions<Member>): Promise<Member[]> {
-        return getRepository(Member).find(this.prepareQuery(options));
+    public async find(options?: FindManyOptions<Member> | FindManyOptionsFunc<Member>): Promise<Member[]> {
+        const alias = 'members';
+        const op = typeof options === 'function' ? options(alias) : options;
+        return getRepository(Member).find(this.prepareQuery(alias, op));
     }
 
-    public async findOne(options?: FindConditions<Member>): Promise<Member | undefined> {
-        return getRepository(Member).findOne(this.prepareQuery(options));
+    public async findOne(options?: FindOneOptions<Member> | FindOneOptionsFunc<Member>): Promise<Member | undefined> {
+        const alias = 'members';
+        const op = typeof options === 'function' ? options(alias) : options;
+        return getRepository(Member).findOne(this.prepareQuery(alias, op));
     }
 }
 

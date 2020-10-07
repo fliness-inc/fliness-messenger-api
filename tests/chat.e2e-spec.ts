@@ -8,13 +8,12 @@ import { AppModule } from '@modules/app/app.module';
 import request from 'supertest';
 import * as uuid from 'uuid';
 import Faker from 'faker';
-import { Type as ChatType } from '@modules/chat/chat.dto';
-import { Privilege as MemberPrivilege } from '@/src/modules/members/members.dto';
+import { ChatTypeEnum } from '@modules/chats/chats.dto';
+import { MemberRoleNameEnum } from '@modules/members/members.dto';
 import UsersService from '@modules/users/users.service';
 import { Tokens } from '@modules/tokens/tokens.service';
 import { ChatTypeSeeder, ChatTypeFactory } from '@database/seeds/chat-type.seeder';
-import { MemberPriviliegeSeeder, MemberPriviliegeFactory } from '@database/seeds/member-privilege';
-import MembersService from '@modules/members/members.service';
+import { MemberRoleSeeder, MemberRoleFactory } from '@database/seeds/member-role';
 import Member from '@database/entities/member';
 import Chat from '@database/entities/chat';
 
@@ -40,14 +39,14 @@ describe('[E2E] [ChatController] ...', () => {
         await connection.synchronize(true);
 
         const chatTypeSeeder = new ChatTypeSeeder(new ChatTypeFactory());
-        await chatTypeSeeder.run(1, { name: ChatType.DIALOG });
-        await chatTypeSeeder.run(1, { name: ChatType.GROUP });
-        await chatTypeSeeder.run(1, { name: ChatType.CHANNEL });
+        await chatTypeSeeder.run(1, { name: ChatTypeEnum.DIALOG });
+        await chatTypeSeeder.run(1, { name: ChatTypeEnum.GROUP });
+        await chatTypeSeeder.run(1, { name: ChatTypeEnum.CHANNEL });
 
-        const memberPriviliegeSeeder = new MemberPriviliegeSeeder(new MemberPriviliegeFactory());
-        await memberPriviliegeSeeder.run(1, { name: MemberPrivilege.CREATOR });
-        await memberPriviliegeSeeder.run(1, { name: MemberPrivilege.ADMIN });
-        await memberPriviliegeSeeder.run(1, { name: MemberPrivilege.MEMBER });
+        const memberPriviliegeSeeder = new MemberRoleSeeder(new MemberRoleFactory());
+        await memberPriviliegeSeeder.run(1, { name: MemberRoleNameEnum.CREATOR, weight: 1 });
+        await memberPriviliegeSeeder.run(1, { name: MemberRoleNameEnum.ADMIN, weight: 0.5 });
+        await memberPriviliegeSeeder.run(1, { name: MemberRoleNameEnum.MEMBER, weight: 0.1 });
     });
 
     afterEach(async () => {
@@ -93,7 +92,7 @@ describe('[E2E] [ChatController] ...', () => {
                     .post('/me/chats')
                     .set('Authorization', `Bearer ${creator.tokens.accessToken}`)
                     .send({
-                        type: ChatType.DIALOG,
+                        type: ChatTypeEnum.DIALOG,
                         userIds: [companion.user.id]
                     });
 
@@ -105,7 +104,7 @@ describe('[E2E] [ChatController] ...', () => {
                 expect(res.body).toHaveProperty('description', null);
                 expect(res.body).toHaveProperty('createdAt');
                 expect(new Date(res.body.createdAt).getTime()).not.toBeNaN();
-                expect(res.body).toHaveProperty('type', ChatType.DIALOG);
+                expect(res.body).toHaveProperty('type', ChatTypeEnum.DIALOG);
                 expect(await getRepository(Member).count()).toEqual(2);
                 expect(await getRepository(Chat).count()).toEqual(1);
             });
@@ -116,7 +115,7 @@ describe('[E2E] [ChatController] ...', () => {
                     .post('/me/chats')
                     .set('Authorization', `Bearer ${creator.tokens.accessToken}`)
                     .send({
-                        type: ChatType.DIALOG,
+                        type: ChatTypeEnum.DIALOG,
                         userIds: [creator.user.id, companion.user.id]
                     });
     
@@ -160,7 +159,7 @@ describe('[E2E] [ChatController] ...', () => {
                     .post('/me/chats')
                     .set('Authorization', `Bearer ${creator.tokens.accessToken}`)
                     .send({
-                        type: ChatType.DIALOG,
+                        type: ChatTypeEnum.DIALOG,
                         userIds: []
                     });
     
@@ -175,7 +174,7 @@ describe('[E2E] [ChatController] ...', () => {
                     .post('/me/chats')
                     .set('Authorization', `Bearer ${creator.tokens.accessToken}`)
                     .send({
-                        type: ChatType.DIALOG,
+                        type: ChatTypeEnum.DIALOG,
                         userIds: null
                     });
     
@@ -190,7 +189,7 @@ describe('[E2E] [ChatController] ...', () => {
                     .post('/me/chats')
                     .set('Authorization', `Bearer ${creator.tokens.accessToken}`)
                     .send({
-                        type: ChatType.DIALOG,
+                        type: ChatTypeEnum.DIALOG,
                         userIds: [companion.user.id, otherUser.user.id]
                     });
     
@@ -204,7 +203,7 @@ describe('[E2E] [ChatController] ...', () => {
                 const res = await request(app.getHttpServer())
                     .post('/me/chats')
                     .send({
-                        type: ChatType.DIALOG,
+                        type: ChatTypeEnum.DIALOG,
                         userIds: [companion.user.id]
                     });
     
@@ -221,7 +220,7 @@ describe('[E2E] [ChatController] ...', () => {
                     .post('/me/chats')
                     .set('Authorization', `Bearer ${creator.tokens.accessToken}`)
                     .send({
-                        type: ChatType.DIALOG,
+                        type: ChatTypeEnum.DIALOG,
                         userIds: [companion.user.id]
                     });
 
@@ -241,7 +240,7 @@ describe('[E2E] [ChatController] ...', () => {
                     .post('/me/chats')
                     .set('Authorization', `Bearer ${creator.tokens.accessToken}`)
                     .send({
-                        type: ChatType.DIALOG,
+                        type: ChatTypeEnum.DIALOG,
                         userIds: [companion.user.id]
                     });
 

@@ -1,17 +1,17 @@
 import { Controller, Get, Post, Req, UseGuards, Body, Delete, Param } from '@nestjs/common';
-import { ChatService, ChatResponse } from '@modules/chat/chat.service';
+import { ChatsService, ChatResponse } from '@modules/chats/chats.service';
 import AuthGuard from '@modules/auth/auth.guard';
 import { Request } from 'express';
-import { Type, ChatCreateDTO } from '@modules/chat/chat.dto';
+import { ChatTypeEnum, ChatCreateDTO } from '@modules/chats/chats.dto';
 import { ApiBadGatewayResponse, ApiBody, ApiConflictResponse, ApiCreatedResponse, ApiTags, ApiOkResponse, ApiForbiddenResponse, ApiBadRequestResponse, ApiNotFoundResponse, ApiUnauthorizedResponse, ApiHeader } from '@nestjs/swagger';
-import { ChatGruard, NeedPrivileges } from '@modules/chat/chat.guard';
-import { Privilege as MemberPrivilege } from '@modules/members/members.dto';
+import { ChatGruard, ChatRoles } from '@modules/chats/chats.guard';
+import { MemberRoleNameEnum } from '@modules/members/members.dto';
 
 @UseGuards(AuthGuard)
 @Controller()
-export class ChatController {
+export class ChatsController {
 
-    public constructor(private readonly chatService: ChatService) {}
+    public constructor(private readonly chatService: ChatsService) {}
 
     @ApiTags('/me/chats')
     @ApiBody({ type: () => ChatCreateDTO })
@@ -41,11 +41,11 @@ export class ChatController {
     @ApiUnauthorizedResponse({ description: 'The user is unauthorized.' })
     @ApiHeader({ name: 'Authorization', description: 'The header tag contains the access token.' })
     @UseGuards(ChatGruard)
-    @NeedPrivileges(MemberPrivilege.CREATOR)
+    @ChatRoles(MemberRoleNameEnum.CREATOR)
     @Delete('/me/chats/:chatId')
     public async removeChat(@Param('chatId') chatId: string): Promise<void> { 
         await this.chatService.remove(chatId);
     }
 }
 
-export default ChatController;
+export default ChatsController;

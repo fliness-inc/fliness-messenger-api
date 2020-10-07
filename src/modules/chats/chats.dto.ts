@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-export enum Type {
+export enum ChatTypeEnum {
     DIALOG = 'DIALOG',
     GROUP = 'GROUP',
     CHANNEL = 'CHANNEL'
@@ -15,8 +15,8 @@ export class ChatCreateDTO {
     @ApiPropertyOptional({ type: () => String, description: 'The description of your chat.' })
     public readonly description?: string;
 
-    @ApiProperty({ enum: Type, description: 'The type of your chat.' })
-    public readonly type: Type;
+    @ApiProperty({ enum: ChatTypeEnum, description: 'The type of your chat.' })
+    public readonly type: ChatTypeEnum;
 
     @ApiPropertyOptional({ type: () => [String], description: `
         IDs of users who will be automatically added to the chat. 

@@ -1,8 +1,8 @@
 import { Column, Entity, OneToOne, JoinColumn, ManyToOne } from 'typeorm';
-import IEntity from './entity';
-import User from './user';
-import Chat from './chat';
-import MemberPrivilege from './member-privilege';
+import IEntity from '@database/entities/entity';
+import User from '@database/entities/user';
+import Chat from '@database/entities/chat';
+import MemberRole from '@database/entities/member-role';
 
 @Entity({ name: 'members' })
 export class Member extends IEntity {
@@ -21,12 +21,12 @@ export class Member extends IEntity {
     @JoinColumn({ name: 'user_id' })
     public user: User;
 
-    @Column({ name: 'privilege_id', type: 'uuid' })
-    public privilegeId: string;
+    @Column({ name: 'role_id', type: 'uuid' })
+    public roleId: string;
 
-    @ManyToOne(type => MemberPrivilege)
-    @JoinColumn({ name: 'privilege_id' })
-    public privilege: MemberPrivilege;
+    @ManyToOne(type => MemberRole)
+    @JoinColumn({ name: 'role_id' })
+    public role: MemberRole;
 }
 
 export default Member;

@@ -1,7 +1,7 @@
 import { Module, forwardRef } from '@nestjs/common';
 import MembersService from '@modules/members/members.service';
 import UsersModule from '@modules/users/users.module';
-import ChatModule from '@modules/chat/chat.module';
+import ChatModule from '@modules/chats/chats.module';
 import MembersController from '@modules/members/members.controller';
 
 @Module({
