@@ -6,6 +6,7 @@ import UsersModule from '@modules/users/users.module';
 import InvitationsModule from '@modules/invitations/invitations.module';
 import ChatModule from '@modules/chats/chats.module';
 import MessagesModule from '@modules/messages/messages.module';
+import AppGatewayModule from '@modules/gateway/gateway.module';
 
 @Module({
   imports: [
@@ -15,7 +16,8 @@ import MessagesModule from '@modules/messages/messages.module';
     FriendsModule,
     InvitationsModule,
     ChatModule,
-    MessagesModule
+    MessagesModule,
+    AppGatewayModule
   ]
 })
 export class AppModule {}
