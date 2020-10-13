@@ -7,7 +7,7 @@ import Faker from 'faker';
 import * as uuid from 'uuid';
 import cookieParser from 'cookie-parser';
 import User from '@database/entities/user';
-import AppModule from '@modules/app/app.module';
+import AppModule from '@src/app.module';
 import UsersService from '@modules/users/users.service';
 import { Tokens } from '@modules/tokens/tokens.service';
 import Invitation from '@database/entities/invitation';

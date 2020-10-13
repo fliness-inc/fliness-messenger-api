@@ -15,6 +15,7 @@ module.exports = {
         "^@/(.*)$": "<rootDir>/$1",
         "^@src/(.*)$": "<rootDir>/src/$1",
         "^@database/(.*)$": "<rootDir>/src/database/$1",
-        "^@modules/(.*)$": "<rootDir>/src/modules/$1"
+        "^@modules/(.*)$": "<rootDir>/src/modules/$1",
+        "^@schema/(.*)$": "<rootDir>/src/schema/$1"
     }
 };

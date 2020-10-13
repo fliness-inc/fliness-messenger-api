@@ -5,7 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import cookieParser from 'cookie-parser';
 import { getRepository } from 'typeorm';
 import { User } from '@database/entities/user';
-import { AppModule } from '@modules/app/app.module';
+import { AppModule } from '@src/app.module';
 import request from 'supertest';
 import * as uuid from 'uuid';
 import Faker from 'faker';
