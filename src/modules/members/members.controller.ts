@@ -1,4 +1,4 @@
-import { Delete, Get, Controller, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
+/* import { Delete, Get, Controller, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
 import AuthGuard from '@modules/auth/auth.guard';
 import { Request } from 'express';
 import MemberService from '@modules/members/members.service';
@@ -43,4 +43,4 @@ export class MembersController {
     }
 }
 
-export default MembersController;
+export default MembersController; */

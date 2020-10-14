@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+/* import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiHeader, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { FriendsService } from './friends.service';
 import { Friend } from '@database/entities/friend';
@@ -21,3 +21,4 @@ export class FriendsController {
         return this.friendsService.find({ where: { userId: id } });
     }
 }
+ */

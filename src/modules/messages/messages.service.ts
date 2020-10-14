@@ -1,4 +1,4 @@
-import { Injectable, ForbiddenException } from '@nestjs/common';
+/* import { Injectable, ForbiddenException } from '@nestjs/common';
 import MembersService from '@modules/members/members.service';
 import { InvalidPropertyError, NotFoundError } from '@src/errors';
 import { FindManyOptions, FindOneOptions, getRepository } from 'typeorm';
@@ -124,4 +124,4 @@ export class MessagesService {
     }
 }
 
-export default MessagesService;
+export default MessagesService; */

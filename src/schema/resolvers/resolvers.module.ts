@@ -1,8 +1,14 @@
 import { Module } from '@nestjs/common';
-import UsersResolver from '@schema/resolvers/users';
+import UsersModule from '@schema/resolvers/users/users.module';
+import AuthModule from '@schema/resolvers/auth/auth.module';
+import TokensModule from '@schema/resolvers/tokens/tokens.module';
 
 @Module({
-    providers: [UsersResolver]
+    imports: [
+        UsersModule,
+        AuthModule,
+        TokensModule
+    ]
 })
 export class ResolversModule {}
 

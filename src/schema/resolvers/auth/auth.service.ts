@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { UsersService } from '@modules/users/users.service';
-import { User } from '@database/entities/user';
+import UsersService from '@schema/resolvers/users/users.service';
+import User from '@database/entities/user';
 import bcrypt from 'bcrypt';
 
 @Injectable()

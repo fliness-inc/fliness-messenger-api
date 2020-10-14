@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { Token } from '@database/entities/token';
 import { JwtService } from '@nestjs/jwt';
 import { getConnection, getRepository } from 'typeorm';
+import Token from '@database/entities/token';
 import * as uuid from 'uuid';
 
 export class Tokens {

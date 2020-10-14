@@ -1,4 +1,4 @@
-import { getRepository, getConnection, Connection } from 'typeorm';
+/* import { getRepository, getConnection, Connection } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { config as setupDotEnv } from 'dotenv';
@@ -348,3 +348,4 @@ describe('[E2E] [InvitationsController] ...', () => {
         });
     });
 });
+ */

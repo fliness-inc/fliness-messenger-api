@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Req, UseGuards, Body, Delete, Param } from '@nestjs/common';
+/* import { Controller, Get, Post, Req, UseGuards, Body, Delete, Param } from '@nestjs/common';
 import { ChatsService, ChatResponse } from '@modules/chats/chats.service';
 import AuthGuard from '@modules/auth/auth.guard';
 import { Request } from 'express';
@@ -48,4 +48,4 @@ export class ChatsController {
     }
 }
 
-export default ChatsController;
+export default ChatsController; */

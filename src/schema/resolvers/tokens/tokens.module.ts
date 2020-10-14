@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { TokensService } from './tokens.service';
 import { JwtModule } from '@nestjs/jwt';
+import TokensService from '@schema/resolvers/tokens/tokens.service';
 
 const { JWT_SECRET_KEY } = process.env;
 

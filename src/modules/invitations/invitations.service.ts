@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+/* import { Injectable } from '@nestjs/common';
 import { getRepository, FindManyOptions, FindOneOptions, FindConditions } from 'typeorm';
 import UsersService from '@modules/users/users.service';
 import Invitation from '@database/entities/invitation';
@@ -142,4 +142,4 @@ export class InvitationsService {
 
 }
 
-export default InvitationsService;
+export default InvitationsService; */

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+/* import { Injectable } from '@nestjs/common';
 import { getRepository, FindManyOptions, DeepPartial, FindOneOptions } from 'typeorm';
 import { Friend } from '@database/entities/friend';
 import { UsersService } from '@modules/users/users.service';
@@ -23,3 +23,4 @@ export class FriendsService {
 }
 
 export default FriendsService;
+ */

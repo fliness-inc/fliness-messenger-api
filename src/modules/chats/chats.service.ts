@@ -1,4 +1,4 @@
-import { Injectable, forwardRef, Inject } from '@nestjs/common';
+/* import { Injectable, forwardRef, Inject } from '@nestjs/common';
 import { FindManyOptions, FindOneOptions, getRepository } from 'typeorm';
 import Chat from '@database/entities/chat';
 import ChatType from '@database/entities/chat-type';
@@ -109,4 +109,4 @@ export class ChatsService {
 
 } 
 
-export default ChatsService;
+export default ChatsService; */

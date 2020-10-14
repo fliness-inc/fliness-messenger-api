@@ -3,7 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import { config as setupDotEnv } from 'dotenv';
 import { JwtService } from '@nestjs/jwt';
 import cookieParser from 'cookie-parser';
-import { getRepository } from 'typeorm';
+import { getRepository, Connection, getConnection } from 'typeorm';
 import { User } from '@database/entities/user';
 import { AppModule } from '@src/app.module';
 import request from 'supertest';
@@ -14,8 +14,9 @@ setupDotEnv();
 
 jest.setTimeout(50000);
 
-describe('[E2E] [AuthController] ...', () => {
+describe('[E2E] [AuthResolver] ...', () => {
     let app: INestApplication;
+    let connection: Connection;
 
     beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -24,16 +25,20 @@ describe('[E2E] [AuthController] ...', () => {
 
         app = moduleFixture.createNestApplication();
         app.use(cookieParser());
+
+        connection = getConnection();
+
         await app.init();
-        await getRepository(User).query('TRUNCATE users, tokens CASCADE');
+        await connection.synchronize(true);
     });
 
     afterEach(async () => {
-        await getRepository(User).query('TRUNCATE users, tokens CASCADE');
+        await connection.query('TRUNCATE users, tokens CASCADE');
     });
 
     afterAll(async () => {
         await app.close();
+        await connection.close();
     }); 
 
     describe('[Login] ...', () => {
@@ -50,9 +55,22 @@ describe('[E2E] [AuthController] ...', () => {
             }));
     
             const res = await request(app.getHttpServer())
-                .post('/auth/login')
-                .send(payload);
-    
+                .post('/graphql')
+                .send({
+                    operationName: 'Login',
+                    query: `
+                        mutation Login($payload: AuthLoginDTO!) {
+                            login(payload: $payload) {
+                                accessToken
+                                refreshToken
+                            }
+                        }
+                    `,
+                    variables: {
+                        payload
+                    }
+                });
+
             expect(res.headers).toHaveProperty('set-cookie');
             expect(res.headers['set-cookie']).toHaveLength(1);
     
@@ -72,17 +90,30 @@ describe('[E2E] [AuthController] ...', () => {
             const httpOnly = cookieParams[4];
             expect(httpOnly).toStrictEqual('HttpOnly');
     
-            expect(res.body).toHaveProperty('accessToken');
-            expect(res.body).toHaveProperty('refreshToken');
-            expect(res.body.refreshToken).toStrictEqual(jwtToken);
+            expect(res.body.data).toHaveProperty('login');
+            expect(res.body.data.login).toHaveProperty('accessToken');
+            expect(res.body.data.login).toHaveProperty('refreshToken');
+            expect(res.body.data.login.refreshToken).toStrictEqual(jwtToken);
         });
     
         it('should return 401 status when trying to get profile information without access token', async () => {
             const res = await request(app.getHttpServer())
-                .get('/me')
-                .send();
+                .post('/graphql')
+                .send({
+                    operationName: 'getMe',
+                    query: `
+                        query getMe {
+                            me {
+                                id
+                                email
+                            }
+                        }
+                    `
+                });
     
-            expect(res.status).toStrictEqual(401);
+            expect(Array.isArray(res.body.errors)).toBeTruthy();
+            expect(res.body.errors).toHaveLength(1);
+            expect(res.body.errors[0].extensions.exception.status).toStrictEqual(401);
         });
     
         it('should return 401 status when trying to get profile information with expired access token', async () => {
@@ -96,13 +127,25 @@ describe('[E2E] [AuthController] ...', () => {
                 name: Faker.internet.userName(), 
                 ...payload,
             }));
-    
+
             const res = await request(app.getHttpServer())
-                .get('/me')
+                .post('/graphql')
                 .set('Authorization', `Bearer ${app.get(JwtService).sign({ id: user.id }, { expiresIn: 0 })}`)
-                .send();
+                .send({
+                    operationName: 'getMe',
+                    query: `
+                        query getMe {
+                            me {
+                                id
+                                email
+                            }
+                        }
+                    `
+                });
     
-            expect(res.status).toStrictEqual(401);
+            expect(Array.isArray(res.body.errors)).toBeTruthy();
+            expect(res.body.errors).toHaveLength(1);
+            expect(res.body.errors[0].extensions.exception.status).toStrictEqual(401);
         });
     
         it('should return 401 status when the user was not found', async () => {
@@ -110,15 +153,30 @@ describe('[E2E] [AuthController] ...', () => {
                 email: Faker.internet.email(),
                 password: Faker.random.word()
             };
-    
+
             const res = await request(app.getHttpServer())
-                .post('/auth/login')
-                .send(payload);
+                .post('/graphql')
+                .send({
+                    operationName: 'Login',
+                    query: `
+                        mutation Login($payload: AuthLoginDTO!) {
+                            login(payload: $payload) {
+                                accessToken
+                                refreshToken
+                            }
+                        }
+                    `,
+                    variables: {
+                        payload
+                    }
+                });
     
-            expect(res.status).toStrictEqual(401);
+            expect(Array.isArray(res.body.errors)).toBeTruthy();
+            expect(res.body.errors).toHaveLength(1);
+            expect(res.body.errors[0].extensions.exception.status).toStrictEqual(401);
         });
     
-        it('should return 401 status when the user was not found', async () => {
+        it('should return 401 status when the user password was not found', async () => {
             const payload = { 
                 email: Faker.internet.email(),
                 password: Faker.random.word()
@@ -132,10 +190,25 @@ describe('[E2E] [AuthController] ...', () => {
             }));
     
             const res = await request(app.getHttpServer())
-                .post('/auth/login')
-                .send(payload);
+                .post('/graphql')
+                .send({
+                    operationName: 'Login',
+                    query: `
+                        mutation Login($payload: AuthLoginDTO!) {
+                            login(payload: $payload) {
+                                accessToken
+                                refreshToken
+                            }
+                        }
+                    `,
+                    variables: {
+                        payload
+                    }
+                });
     
-            expect(res.status).toStrictEqual(401);
+            expect(Array.isArray(res.body.errors)).toBeTruthy();
+            expect(res.body.errors).toHaveLength(1);
+            expect(res.body.errors[0].extensions.exception.status).toStrictEqual(401);
         });
     
         it('should provide access to profile information after successful authorization', async () => {
@@ -151,17 +224,40 @@ describe('[E2E] [AuthController] ...', () => {
             }));
     
             const resLogin = await request(app.getHttpServer())
-                .post('/auth/login')
-                .send(payload);
+                .post('/graphql')
+                .send({
+                    operationName: 'Login',
+                    query: `
+                        mutation Login($payload: AuthLoginDTO!) {
+                            login(payload: $payload) {
+                                accessToken
+                                refreshToken
+                            }
+                        }
+                    `,
+                    variables: {
+                        payload
+                    }
+                });
                 
-            const tokens = resLogin.body;
-    
-            const resMe = await request(app.getHttpServer())
-                .get('/me')
+            const tokens = resLogin.body.data.login;
+
+            const res = await request(app.getHttpServer())
+                .post('/graphql')
                 .set('Authorization', `Bearer ${tokens.accessToken}`)
-                .send();
+                .send({
+                    operationName: 'getMe',
+                    query: `
+                        query getMe {
+                            me {
+                                id
+                                email
+                            }
+                        }
+                    `
+                });
     
-            expect(resMe.body).toHaveProperty('id', user.id);
+            expect(res.body.data).toHaveProperty('me', { id: user.id, email: user.email });
         });
     });
 
@@ -173,19 +269,44 @@ describe('[E2E] [AuthController] ...', () => {
                 password: Faker.random.word()
             };
     
-            const res = await request(app.getHttpServer())
-                .post('/auth/register')
-                .send(payload);
+            const resRegister = await request(app.getHttpServer())
+                .post('/graphql')
+                .send({
+                    operationName: 'Register',
+                    query: `
+                        mutation Register($payload: AuthRegisterDTO!) {
+                            register(payload: $payload) {
+                                accessToken
+                                refreshToken
+                            }
+                        }
+                    `,
+                    variables: {
+                        payload
+                    }
+                });
                 
-            const tokens = res.body;
+            const tokens = resRegister.body.data.register;
     
-            const resMe = await request(app.getHttpServer())
-                .get('/me')
+            const res = await request(app.getHttpServer())
+                .post('/graphql')
                 .set('Authorization', `Bearer ${tokens.accessToken}`)
-                .send();
+                .send({
+                    operationName: 'getMe',
+                    query: `
+                        query getMe {
+                            me {
+                                id
+                                email
+                                name
+                            }
+                        }
+                    `
+                });
     
-            expect(resMe.body).toHaveProperty('name', payload.name);
-            expect(resMe.body).toHaveProperty('email', payload.email);
+            expect(res.body.data).toHaveProperty('me');
+            expect(res.body.data.me).toHaveProperty('email', payload.email);
+            expect(res.body.data.me).toHaveProperty('name', payload.name);
         });
     });
 
@@ -203,15 +324,38 @@ describe('[E2E] [AuthController] ...', () => {
             }));
     
             const resLogin = await request(app.getHttpServer())
-                .post('/auth/login')
-                .send(payload);
+                .post('/graphql')
+                .send({
+                    operationName: 'Login',
+                    query: `
+                        mutation Login($payload: AuthLoginDTO!) {
+                            login(payload: $payload) {
+                                accessToken
+                                refreshToken
+                            }
+                        }
+                    `,
+                    variables: {
+                        payload
+                    }
+                });
                 
-            const tokens = resLogin.body;
-    
-            const resRefresh= await request(app.getHttpServer())
-                .get('/auth/refresh')
+            const tokens = resLogin.body.data.login;
+
+            const resRefresh = await request(app.getHttpServer())
+                .post('/graphql')
                 .set('Cookie', `jwt-token=${tokens.refreshToken}`)
-                .send();
+                .send({
+                    operationName: 'RefreshTokens',
+                    query: `
+                        mutation RefreshTokens {
+                            refresh {
+                                accessToken
+                                refreshToken
+                            }
+                        }
+                    `
+                });
 
             expect(resRefresh.headers).toHaveProperty('set-cookie');
             expect(resRefresh.headers['set-cookie']).toHaveLength(1);
@@ -232,16 +376,28 @@ describe('[E2E] [AuthController] ...', () => {
             const httpOnly = cookieParams[4];
             expect(httpOnly).toStrictEqual('HttpOnly');
     
-            expect(resRefresh.body).toHaveProperty('accessToken');
-            expect(resRefresh.body).toHaveProperty('refreshToken');
-            expect(resRefresh.body.refreshToken).toStrictEqual(jwtToken);
+            expect(resRefresh.body.data.refresh).toHaveProperty('accessToken');
+            expect(resRefresh.body.data.refresh).toHaveProperty('refreshToken');
+            expect(resRefresh.body.data.refresh.refreshToken).toStrictEqual(jwtToken);
 
             const resMe = await request(app.getHttpServer())
-                .get('/me')
-                .set('Authorization', `Bearer ${resRefresh.body.accessToken}`)
-                .send();
+                .post('/graphql')
+                .set('Authorization', `Bearer ${resRefresh.body.data.refresh.accessToken}`)
+                .send({
+                    operationName: 'getMe',
+                    query: `
+                        query getMe {
+                            me {
+                                id
+                                email
+                                name
+                            }
+                        }
+                    `
+                });
     
-            expect(resMe.body).toHaveProperty('id', user.id);
+            expect(resMe.body.data).toHaveProperty('me');
+            expect(resMe.body.data.me).toHaveProperty('email', payload.email);
         });
 
         it('should return 401 status when trying to refresh tokens with the expired refresh token', async () => {
@@ -257,23 +413,61 @@ describe('[E2E] [AuthController] ...', () => {
             }));
     
             const resFirstLogin = await request(app.getHttpServer())
-                .post('/auth/login')
-                .send(payload);
+                .post('/graphql')
+                .send({
+                    operationName: 'Login',
+                    query: `
+                        mutation Login($payload: AuthLoginDTO!) {
+                            login(payload: $payload) {
+                                accessToken
+                                refreshToken
+                            }
+                        }
+                    `,
+                    variables: {
+                        payload
+                    }
+                });
 
-            const firstTokens = resFirstLogin.body;
+            const firstTokens = resFirstLogin.body.data.login;
 
             const resSecondLogin = await request(app.getHttpServer())
-                .post('/auth/login')
-                .send(payload);
+                .post('/graphql')
+                .send({
+                    operationName: 'Login',
+                    query: `
+                        mutation Login($payload: AuthLoginDTO!) {
+                            login(payload: $payload) {
+                                accessToken
+                                refreshToken
+                            }
+                        }
+                    `,
+                    variables: {
+                        payload
+                    }
+                });
                 
-            const secondTokens = resFirstLogin.body;
+            const secondTokens = resFirstLogin.body.data.login;
     
-            const resRefresh= await request(app.getHttpServer())
-                .get('/auth/refresh')
+            const resRefresh = await request(app.getHttpServer())
+                .post('/graphql')
                 .set('Cookie', `jwt-token=${firstTokens.refreshToken}`)
-                .send();
+                .send({
+                    operationName: 'RefreshTokens',
+                    query: `
+                        mutation RefreshTokens {
+                            refresh {
+                                accessToken
+                                refreshToken
+                            }
+                        }
+                    `
+                });
 
-            expect(resRefresh.status).toStrictEqual(401);
+            expect(Array.isArray(resRefresh.body.errors)).toBeTruthy();
+            expect(resRefresh.body.errors).toHaveLength(1);
+            expect(resRefresh.body.errors[0].extensions.exception.status).toStrictEqual(401);
         });
     });
 
@@ -291,22 +485,53 @@ describe('[E2E] [AuthController] ...', () => {
             }));
 
             const resLogin = await request(app.getHttpServer())
-                .post('/auth/login')
-                .send(payload);
+                .post('/graphql')
+                .send({
+                    operationName: 'Login',
+                    query: `
+                        mutation Login($payload: AuthLoginDTO!) {
+                            login(payload: $payload) {
+                                accessToken
+                                refreshToken
+                            }
+                        }
+                    `,
+                    variables: {
+                        payload
+                    }
+                });
 
             const resLogout = await request(app.getHttpServer())
-                .get('/auth/logout')
-                .set('Cookie', `jwt-token=${resLogin.body.refreshToken}`)
-                .send(payload);
+                .post('/graphql')
+                .set('Authorization', `Bearer ${resLogin.body.data.login.accessToken}`)
+                .set('Cookie', `jwt-token=${resLogin.body.data.login.refreshToken}`)
+                .send({
+                    operationName: 'Logout',
+                    query: `
+                        mutation Logout {
+                            logout
+                        }
+                    `
+                });
 
-            expect(resLogout.status).toEqual(200);
+            const resRefresh = await request(app.getHttpServer())
+                .post('/graphql')
+                .set('Cookie', `jwt-token=${resLogin.body.data.login.refreshToken}`)
+                .send({
+                    operationName: 'RefreshTokens',
+                    query: `
+                        mutation RefreshTokens {
+                            refresh {
+                                accessToken
+                                refreshToken
+                            }
+                        }
+                    `
+                });
 
-            const resRefresh= await request(app.getHttpServer())
-                .get('/auth/refresh')
-                .set('Cookie', `jwt-token=${resLogin.body.refreshToken}`)
-                .send();
-
-            expect(resRefresh.status).toEqual(401);
+            expect(Array.isArray(resRefresh.body.errors)).toBeTruthy();
+            expect(resRefresh.body.errors).toHaveLength(1);
+            expect(resRefresh.body.errors[0].extensions.exception.status).toStrictEqual(401);
         });
 
         it('should return 401 status when try to logging out the unauthorized user', async () => {
@@ -322,10 +547,19 @@ describe('[E2E] [AuthController] ...', () => {
             }));
 
             const resLogout = await request(app.getHttpServer())
-                .get('/auth/logout')
-                .send(payload);
+                .post('/graphql')
+                .send({
+                    operationName: 'Logout',
+                    query: `
+                        mutation Logout {
+                            logout
+                        }
+                    `
+                });
 
-            expect(resLogout.status).toEqual(401);
+            expect(Array.isArray(resLogout.body.errors)).toBeTruthy();
+            expect(resLogout.body.errors).toHaveLength(1);
+            expect(resLogout.body.errors[0].extensions.exception.status).toStrictEqual(401);
         });
     });
 });

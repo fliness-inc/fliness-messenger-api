@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+/* import { Module } from '@nestjs/common';
 import MessagesController from '@modules/messages/messages.controller';
 import MessagesService from '@modules/messages/messages.service';
 import MembersModule from '@modules/members/members.module';
@@ -12,4 +12,4 @@ import ChatsModule from '@modules/chats/chats.module';
 })
 export class MessagesModule {}
 
-export default MessagesModule;
+export default MessagesModule; */

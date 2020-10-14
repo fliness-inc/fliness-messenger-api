@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+/* import { Module } from '@nestjs/common';
 import { FriendsController } from './friends.controller';
 import { FriendsService } from './friends.service';
 import { UsersModule } from '@modules/users/users.module';
@@ -11,4 +11,4 @@ import { UsersModule } from '@modules/users/users.module';
 })
 export class FriendsModule {}
 
-export default FriendsModule;
+export default FriendsModule; */

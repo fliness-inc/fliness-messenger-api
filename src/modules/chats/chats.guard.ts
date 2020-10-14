@@ -1,4 +1,4 @@
-import { CanActivate, SetMetadata, ExecutionContext, Inject, ForbiddenException, Injectable } from '@nestjs/common';
+/* import { CanActivate, SetMetadata, ExecutionContext, Inject, ForbiddenException, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import MembersService from '@modules/members/members.service';
@@ -54,4 +54,4 @@ export class ChatGruard implements CanActivate {
     }
 }
 
-export default ChatGruard;
+export default ChatGruard; */

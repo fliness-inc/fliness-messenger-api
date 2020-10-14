@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+/* import { Module } from '@nestjs/common';
 import { InvitationsService } from './invitations.service';
 import { UsersModule } from '@modules/users/users.module';
 import { InvitationsController } from './invitations.controller';
@@ -12,4 +12,4 @@ import { FriendsModule } from '@modules/friends/friends.module';
 })
 export class InvitationsModule {}
 
-export default InvitationsModule;
+export default InvitationsModule; */

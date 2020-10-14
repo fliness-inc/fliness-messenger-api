@@ -2,9 +2,12 @@ import { ObjectType, Field } from '@nestjs/graphql';
 import UUID from '@schema/types/uuid';
 
 @ObjectType()
-export class Entity {
+export class Token {
+    @Field(type => String)
+    public accessToken: string;
+
     @Field(type => UUID)
-    public readonly id: string;
+    public refreshToken: string;
 }
 
-export default Entity;
+export default Token;

@@ -1,4 +1,4 @@
-import { Injectable, Inject, forwardRef } from '@nestjs/common';
+/* import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import UserService from '@modules/users/users.service';
 import ChatService from '@modules/chats/chats.service';
 import Member from '@database/entities/member';
@@ -129,4 +129,4 @@ export class MembersService {
     }
 }
 
-export default MembersService;
+export default MembersService; */
