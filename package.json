@@ -43,6 +43,7 @@
     "apollo-server-express": "^2.18.2",
     "bcrypt": "^5.0.0",
     "cookie-parser": "^1.4.5",
+    "dataloader": "^2.0.0",
     "graphql": "^15.3.0",
     "graphql-tools": "^6.2.4",
     "passport": "^0.4.1",

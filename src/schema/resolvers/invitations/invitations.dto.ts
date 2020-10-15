@@ -1,4 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { InputType, Field } from '@nestjs/graphql';
+import UUID from '@schema/types/uuid';
 
 export enum Status {
     ACCEPTED = 'ACCEPTED',
@@ -12,7 +13,11 @@ export enum Type {
     INVITE_TO_CHANNEL = 'INVITE_TO_CHANNEL'
 }
 
-export class FriendInvitationDTO {
-    @ApiProperty({ type: () => String, description: 'The user ID to whom the friend request is being sent.' })
+@InputType()
+export class CreateInvitationDTO {
+    @Field(type => UUID)
     public readonly userId: string;
+
+    @Field(type => Type)
+    public readonly type: Type
 }

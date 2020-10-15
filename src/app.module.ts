@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GraphQLModule } from '@nestjs/graphql';
 import SchemaModule from '@schema/schema.module';
+import dataloader from 'dataloader';
  
 @Module({
     imports: [
@@ -15,7 +16,14 @@ import SchemaModule from '@schema/schema.module';
                 credentials: true,
                 origin: true
             },
-            context: ({ req, res }) => ({ req, res })
+            context: ({ req, res }) => { 
+                const ctx = { 
+                    res,
+                    req,
+                    dataloaders: new WeakMap()
+                }
+                return ctx; 
+            }
         }),
         SchemaModule
     ]

@@ -8,7 +8,7 @@ import Sort from '@schema/types/sort'; */
 @Module({
     providers: [
         UUID,
-        //DateTime,
+        DateTime,
     ]
 })
 export class TypesModule {}

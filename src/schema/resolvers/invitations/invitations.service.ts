@@ -1,26 +1,17 @@
-/* import { Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { getRepository, FindManyOptions, FindOneOptions, FindConditions } from 'typeorm';
-import UsersService from '@modules/users/users.service';
+import UsersService from '@schema/resolvers/users/users.service';
 import Invitation from '@database/entities/invitation';
 import InvitationType from '@database/entities/invitation-type';
 import InvitationStatus from '@database/entities/invitation-status';
 import { InvalidPropertyError, NotFoundError, OperationInvalidError } from '@src/errors';
-import FriendsService from '@modules/friends/friends.service';
-import { Type, Status } from '@modules/invitations/invitations.dto';
+import FriendsService from '@schema/resolvers/friends/friends.service';
+import { Type, Status } from '@schema/resolvers/invitations/invitations.dto';
 
 export class FindInvitationsOptions {
     public readonly id?: string;
     public readonly senderId?: string;
     public readonly recipientId?: string;
-}
-
-export class InvitationResponse {
-    public readonly id: string;
-    public readonly senderId: string;
-    public readonly recipientId: string;
-    public readonly status: string;
-    public readonly type: string;
-    public readonly expiresAt: Date;
 }
 
 @Injectable()
@@ -96,23 +87,6 @@ export class InvitationsService {
         return getRepository(Invitation).findOne(this.prepareQuery(options));
     }
 
-    public prepareEntity(entity: Invitation): InvitationResponse {
-        const { id, senderId, recipientId, type, status, expiresAt } = entity;
-
-        return { 
-            id,
-            senderId,
-            recipientId,
-            type: type.name,
-            status: status.name,
-            expiresAt,
-        };
-    }
-
-    public prepareEntities(entites: Invitation[]): InvitationResponse[] {
-        return entites.map(entity => this.prepareEntity(entity));
-    }
-
     private async setStatus(id: string, status: Status): Promise<Invitation> {
         const invitation = await this.findOne({ id });
 
@@ -142,4 +116,4 @@ export class InvitationsService {
 
 }
 
-export default InvitationsService; */
+export default InvitationsService;
