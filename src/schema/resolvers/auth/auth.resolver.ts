@@ -1,4 +1,4 @@
-import { Resolver, Mutation, Args, Context } from '@nestjs/graphql';
+import { Resolver, Mutation, Args, Context, ResolveField } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import AuthService from '@schema/resolvers/auth/auth.service';
 import TokensService from '@schema/resolvers/tokens/tokens.service';
@@ -6,15 +6,21 @@ import { Context as AppContext } from '@schema/utils';
 import { AuthLoginDTO, AuthRegisterDTO } from '@schema/resolvers/auth/auth.dto';
 import Token from '@schema/models/token';
 import AuthGuard from '@schema/resolvers/auth/auth.guard';
+import Auth from '@schema/models/auth';
 
-@Resolver()
+@Resolver(of => Auth)
 export class AuthResolver {
     public constructor(
         private readonly authService: AuthService,
         private readonly tokensService: TokensService
     ) {}
 
-    @Mutation(returns => Token)
+    @Mutation(returns => Auth)
+    public async auth(): Promise<Auth> {
+        return <Auth>{};
+    }
+
+    @ResolveField(returns => Token)
     public async login(
         @Args('payload') payload: AuthLoginDTO,
         @Context() ctx: AppContext
@@ -33,7 +39,7 @@ export class AuthResolver {
         return tokens;
     }
 
-    @Mutation(returns => Token)
+    @ResolveField(returns => Token)
     public async register(
         @Args('payload') payload: AuthRegisterDTO,
         @Context() ctx: AppContext
@@ -52,7 +58,7 @@ export class AuthResolver {
         return tokens;
     }
 
-    @Mutation(returns => Token)
+    @ResolveField(returns => Token)
     public async refresh(
         @Context() ctx: AppContext
     ): Promise<Token> {
@@ -70,7 +76,7 @@ export class AuthResolver {
     }
 
     @UseGuards(AuthGuard)
-    @Mutation(returns => Boolean)
+    @ResolveField(returns => Boolean)
     public async logout(
         @Context() ctx: AppContext
     ): Promise<Boolean> {

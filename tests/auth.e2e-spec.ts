@@ -60,9 +60,11 @@ describe('[E2E] [AuthResolver] ...', () => {
                     operationName: 'Login',
                     query: `
                         mutation Login($payload: AuthLoginDTO!) {
-                            login(payload: $payload) {
-                                accessToken
-                                refreshToken
+                            auth {
+                                login(payload: $payload) {
+                                    accessToken
+                                    refreshToken
+                                }
                             }
                         }
                     `,
@@ -90,10 +92,11 @@ describe('[E2E] [AuthResolver] ...', () => {
             const httpOnly = cookieParams[4];
             expect(httpOnly).toStrictEqual('HttpOnly');
     
-            expect(res.body.data).toHaveProperty('login');
-            expect(res.body.data.login).toHaveProperty('accessToken');
-            expect(res.body.data.login).toHaveProperty('refreshToken');
-            expect(res.body.data.login.refreshToken).toStrictEqual(jwtToken);
+            const data = res.body.data;
+            expect(data).toHaveProperty('auth');
+            expect(data.auth).toHaveProperty('login');
+            expect(data.auth.login).toHaveProperty('accessToken');
+            expect(data.auth.login).toHaveProperty('refreshToken', jwtToken);
         });
     
         it('should return 401 status when trying to get profile information without access token', async () => {
@@ -160,9 +163,11 @@ describe('[E2E] [AuthResolver] ...', () => {
                     operationName: 'Login',
                     query: `
                         mutation Login($payload: AuthLoginDTO!) {
-                            login(payload: $payload) {
-                                accessToken
-                                refreshToken
+                            auth {
+                                login(payload: $payload) {
+                                    accessToken
+                                    refreshToken
+                                }
                             }
                         }
                     `,
@@ -195,9 +200,11 @@ describe('[E2E] [AuthResolver] ...', () => {
                     operationName: 'Login',
                     query: `
                         mutation Login($payload: AuthLoginDTO!) {
-                            login(payload: $payload) {
-                                accessToken
-                                refreshToken
+                            auth {
+                                login(payload: $payload) {
+                                    accessToken
+                                    refreshToken
+                                }
                             }
                         }
                     `,
@@ -229,9 +236,11 @@ describe('[E2E] [AuthResolver] ...', () => {
                     operationName: 'Login',
                     query: `
                         mutation Login($payload: AuthLoginDTO!) {
-                            login(payload: $payload) {
-                                accessToken
-                                refreshToken
+                            auth {
+                                login(payload: $payload) {
+                                    accessToken
+                                    refreshToken
+                                }
                             }
                         }
                     `,
@@ -240,7 +249,7 @@ describe('[E2E] [AuthResolver] ...', () => {
                     }
                 });
                 
-            const tokens = resLogin.body.data.login;
+            const tokens = resLogin.body.data.auth.login;
 
             const res = await request(app.getHttpServer())
                 .post('/graphql')
@@ -275,9 +284,11 @@ describe('[E2E] [AuthResolver] ...', () => {
                     operationName: 'Register',
                     query: `
                         mutation Register($payload: AuthRegisterDTO!) {
-                            register(payload: $payload) {
-                                accessToken
-                                refreshToken
+                            auth {
+                                register(payload: $payload) {
+                                    accessToken
+                                    refreshToken
+                                }
                             }
                         }
                     `,
@@ -286,7 +297,7 @@ describe('[E2E] [AuthResolver] ...', () => {
                     }
                 });
                 
-            const tokens = resRegister.body.data.register;
+            const tokens = resRegister.body.data.auth.register;
     
             const res = await request(app.getHttpServer())
                 .post('/graphql')
@@ -329,9 +340,11 @@ describe('[E2E] [AuthResolver] ...', () => {
                     operationName: 'Login',
                     query: `
                         mutation Login($payload: AuthLoginDTO!) {
-                            login(payload: $payload) {
-                                accessToken
-                                refreshToken
+                            auth {
+                                login(payload: $payload) {
+                                    accessToken
+                                    refreshToken
+                                }
                             }
                         }
                     `,
@@ -340,7 +353,7 @@ describe('[E2E] [AuthResolver] ...', () => {
                     }
                 });
                 
-            const tokens = resLogin.body.data.login;
+            const tokens = resLogin.body.data.auth.login;
 
             const resRefresh = await request(app.getHttpServer())
                 .post('/graphql')
@@ -349,9 +362,11 @@ describe('[E2E] [AuthResolver] ...', () => {
                     operationName: 'RefreshTokens',
                     query: `
                         mutation RefreshTokens {
-                            refresh {
-                                accessToken
-                                refreshToken
+                            auth {
+                                refresh {
+                                    accessToken
+                                    refreshToken
+                                }
                             }
                         }
                     `
@@ -376,13 +391,15 @@ describe('[E2E] [AuthResolver] ...', () => {
             const httpOnly = cookieParams[4];
             expect(httpOnly).toStrictEqual('HttpOnly');
     
-            expect(resRefresh.body.data.refresh).toHaveProperty('accessToken');
-            expect(resRefresh.body.data.refresh).toHaveProperty('refreshToken');
-            expect(resRefresh.body.data.refresh.refreshToken).toStrictEqual(jwtToken);
+            const data = resRefresh.body.data;
+            expect(data).toHaveProperty('auth');
+            expect(data.auth).toHaveProperty('refresh');
+            expect(data.auth.refresh).toHaveProperty('accessToken');
+            expect(data.auth.refresh).toHaveProperty('refreshToken', jwtToken);
 
             const resMe = await request(app.getHttpServer())
                 .post('/graphql')
-                .set('Authorization', `Bearer ${resRefresh.body.data.refresh.accessToken}`)
+                .set('Authorization', `Bearer ${resRefresh.body.data.auth.refresh.accessToken}`)
                 .send({
                     operationName: 'getMe',
                     query: `
@@ -418,9 +435,11 @@ describe('[E2E] [AuthResolver] ...', () => {
                     operationName: 'Login',
                     query: `
                         mutation Login($payload: AuthLoginDTO!) {
-                            login(payload: $payload) {
-                                accessToken
-                                refreshToken
+                            auth {
+                                login(payload: $payload) {
+                                    accessToken
+                                    refreshToken
+                                }
                             }
                         }
                     `,
@@ -429,7 +448,7 @@ describe('[E2E] [AuthResolver] ...', () => {
                     }
                 });
 
-            const firstTokens = resFirstLogin.body.data.login;
+            const firstTokens = resFirstLogin.body.data.auth.login;
 
             const resSecondLogin = await request(app.getHttpServer())
                 .post('/graphql')
@@ -437,9 +456,11 @@ describe('[E2E] [AuthResolver] ...', () => {
                     operationName: 'Login',
                     query: `
                         mutation Login($payload: AuthLoginDTO!) {
-                            login(payload: $payload) {
-                                accessToken
-                                refreshToken
+                            auth {
+                                login(payload: $payload) {
+                                    accessToken
+                                    refreshToken
+                                }
                             }
                         }
                     `,
@@ -448,7 +469,7 @@ describe('[E2E] [AuthResolver] ...', () => {
                     }
                 });
                 
-            const secondTokens = resFirstLogin.body.data.login;
+            const secondTokens = resFirstLogin.body.data.auth.login;
     
             const resRefresh = await request(app.getHttpServer())
                 .post('/graphql')
@@ -457,9 +478,11 @@ describe('[E2E] [AuthResolver] ...', () => {
                     operationName: 'RefreshTokens',
                     query: `
                         mutation RefreshTokens {
-                            refresh {
-                                accessToken
-                                refreshToken
+                            auth {
+                                refresh {
+                                    accessToken
+                                    refreshToken
+                                }
                             }
                         }
                     `
@@ -490,9 +513,11 @@ describe('[E2E] [AuthResolver] ...', () => {
                     operationName: 'Login',
                     query: `
                         mutation Login($payload: AuthLoginDTO!) {
-                            login(payload: $payload) {
-                                accessToken
-                                refreshToken
+                            auth {
+                                login(payload: $payload) {
+                                    accessToken
+                                    refreshToken
+                                }
                             }
                         }
                     `,
@@ -503,27 +528,31 @@ describe('[E2E] [AuthResolver] ...', () => {
 
             const resLogout = await request(app.getHttpServer())
                 .post('/graphql')
-                .set('Authorization', `Bearer ${resLogin.body.data.login.accessToken}`)
-                .set('Cookie', `jwt-token=${resLogin.body.data.login.refreshToken}`)
+                .set('Authorization', `Bearer ${resLogin.body.data.auth.login.accessToken}`)
+                .set('Cookie', `jwt-token=${resLogin.body.data.auth.login.refreshToken}`)
                 .send({
                     operationName: 'Logout',
                     query: `
                         mutation Logout {
-                            logout
+                            auth {
+                                logout
+                            }
                         }
                     `
                 });
 
             const resRefresh = await request(app.getHttpServer())
                 .post('/graphql')
-                .set('Cookie', `jwt-token=${resLogin.body.data.login.refreshToken}`)
+                .set('Cookie', `jwt-token=${resLogin.body.data.auth.login.refreshToken}`)
                 .send({
                     operationName: 'RefreshTokens',
                     query: `
                         mutation RefreshTokens {
-                            refresh {
-                                accessToken
-                                refreshToken
+                            auth {
+                                refresh {
+                                    accessToken
+                                    refreshToken
+                                }
                             }
                         }
                     `
@@ -552,7 +581,9 @@ describe('[E2E] [AuthResolver] ...', () => {
                     operationName: 'Logout',
                     query: `
                         mutation Logout {
-                            logout
+                            auth {
+                                logout
+                            }
                         }
                     `
                 });
