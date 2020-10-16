@@ -6,14 +6,14 @@ import { ChatTypeEnum, ChatCreateDTO } from '@schema/resolvers/chats/chats.dto';
 import { ChatGruard, ChatRoles } from '@schema/resolvers/chats/chats.guard';
 import { MemberRoleEnum } from '@schema/resolvers/members/members.dto';
 import ChatsQuery from '@schema/models/chats.mutation';
-import Chat from '@schema/models/chat.model';
+import Chat from '@schema/models/chats.model';
 import CurrentUser from '@schema/resolvers/auth/current-user';
 import User from '@schema/models/user';
 import UUID from '@schema/types/uuid';
 
 @UseGuards(AuthGuard)
 @Resolver(of => User)
-export class ChatModelResolver {
+export class ChatsModelResolver {
 
     public constructor(private readonly chatService: ChatsService) {}
 
@@ -28,4 +28,4 @@ export class ChatModelResolver {
     }
 }
 
-export default ChatModelResolver;
+export default ChatsModelResolver;

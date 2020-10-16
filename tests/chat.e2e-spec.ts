@@ -21,7 +21,7 @@ setupDotEnv();
 
 jest.setTimeout(50000);
 
-describe('[E2E] [ChatController] ...', () => {
+describe('[E2E] [ChatResolver] ...', () => {
     let app: INestApplication;
     let connection: Connection;
 

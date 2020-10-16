@@ -6,10 +6,11 @@ import { ChatTypeEnum, ChatCreateDTO } from '@schema/resolvers/chats/chats.dto';
 import { ChatGruard, ChatRoles } from '@schema/resolvers/chats/chats.guard';
 import { MemberRoleEnum } from '@schema/resolvers/members/members.dto';
 import ChatsMutation from '@schema/models/chats.mutation';
-import Chat from '@schema/models/chat.model';
+import Chat from '@schema/models/chats.model';
 import CurrentUser from '@schema/resolvers/auth/current-user';
 import User from '@schema/models/user';
 import UUID from '@schema/types/uuid';
+import MessagesMutation from '@schema/models/messages.mutation';
 
 @UseGuards(AuthGuard)
 @Resolver(of => ChatsMutation)
@@ -47,6 +48,11 @@ export class ChatsMutationResolver {
             type: <ChatTypeEnum>chat.type.name,
             createdAt: chat.createdAt
         };
+    }
+
+    @ResolveField(type => MessagesMutation, { name: 'messages' })
+    public async messages(): Promise<MessagesMutation> {
+        return <MessagesMutation>{};
     }
 }
 

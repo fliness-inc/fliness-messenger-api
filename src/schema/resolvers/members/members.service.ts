@@ -1,6 +1,6 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
-import UserService from '@schema/resolvers/users/users.service';
-import ChatService from '@schema/resolvers/chats/chats.service';
+import UsersService from '@schema/resolvers/users/users.service';
+import ChatsService from '@schema/resolvers/chats/chats.service';
 import Member from '@database/entities/member';
 import { InvalidPropertyError, NotFoundError, OperationInvalidError } from '@src/errors';
 import MemberRole from '@database/entities/member-role';
@@ -12,19 +12,19 @@ import { FindManyOptionsFunc, FindOneOptionsFunc } from '@schema/utils';
 export class MembersService {
 
     public constructor(
-        private readonly userService: UserService,
-        @Inject(forwardRef(() => ChatService))
-        private readonly chatService: ChatService
+        private readonly usersService: UsersService,
+        @Inject(forwardRef(() => ChatsService))
+        private readonly chatsService: ChatsService
     ) {}
 
 
     public async create(userId: string, chatId: string, roleName: MemberRoleEnum): Promise<Member> {
-        const user = await this.userService.findOne({ where: { id: userId, isDeleted: false } });
+        const user = await this.usersService.findOne({ where: { id: userId, isDeleted: false } });
 
         if (!user)
             throw new InvalidPropertyError(`The user was not found with the id: ${userId}`);
 
-        const chat = await this.chatService.findOne({ where: { id: chatId, isDeleted: false } });
+        const chat = await this.chatsService.findOne({ where: { id: chatId, isDeleted: false } });
 
         if (!chat)
             throw new NotFoundError(`The chat was not found with the id: ${chatId}`);
@@ -55,12 +55,12 @@ export class MembersService {
     }
 
     public async remove(userId: string, chatId: string): Promise<Member> {
-        const user = await this.userService.findOne({ where: { id: userId, isDeleted: false } });
+        const user = await this.usersService.findOne({ where: { id: userId, isDeleted: false } });
 
         if (!user)
             throw new InvalidPropertyError(`The user was not found with the id: ${userId}`);
 
-        const chat = await this.chatService.findOne({ where: { id: chatId, isDeleted: false } });
+        const chat = await this.chatsService.findOne({ where: { id: chatId, isDeleted: false } });
 
         if (!chat)
             throw new NotFoundError(`The chat was not found with the id: ${chatId}`);

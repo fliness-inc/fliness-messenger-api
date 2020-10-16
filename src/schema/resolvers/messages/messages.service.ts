@@ -1,32 +1,25 @@
-/* import { Injectable, ForbiddenException } from '@nestjs/common';
-import MembersService from '@modules/members/members.service';
+import { Injectable, ForbiddenException } from '@nestjs/common';
+import MembersService from '@schema/resolvers/members/members.service';
 import { InvalidPropertyError, NotFoundError } from '@src/errors';
 import { FindManyOptions, FindOneOptions, getRepository } from 'typeorm';
-import { Message } from '@database/entities/message';
-import { FindManyOptionsFunc, FindOneOptionsFunc } from '@src/utils';
+import Message from '@database/entities/message';
+import { FindManyOptionsFunc, FindOneOptionsFunc } from '@schema/utils';
 
-export class CreateMessageOptions {
+export class MessageCreateOptions {
     public readonly text: string;
-}
-
-export class MessageResponse {
-    public readonly id: string;
-    public readonly text: string;
-    public readonly memberId: string;
-    public readonly createdAt: Date;
 }
 
 @Injectable()
 export class MessagesService {
     public constructor(private readonly membersService: MembersService) {}
     
-    public async create(userId: string, chatId: string, options: CreateMessageOptions): Promise<Message> {
+    public async create(userId: string, chatId: string, options: MessageCreateOptions): Promise<Message> {
         const { text } = options;
 
         const member = await this.membersService.findOne({ where: { userId, chatId, isDeleted: false }});
 
         if (!member)
-            throw new InvalidPropertyError(`The member was not found with the user id or chat id`);
+            throw new NotFoundError(`The member was not found with the user id or chat id`);
 
         const messages = getRepository(Message);
         const newMessages = messages.create({
@@ -78,21 +71,6 @@ export class MessagesService {
         }));
     }
 
-    public prepareEntity(entity: Message): MessageResponse {
-        const { id, text, memberId, createdAt } = entity;
-
-        return { 
-            id,
-            text,
-            memberId,
-            createdAt,
-        };
-    }
-
-    public prepareEntities(entites: Message[]): MessageResponse[] {
-        return entites.map(entity => this.prepareEntity(entity));
-    }
-
     private prepareQuery(alias: string, options: FindManyOptions<Message> = {}): FindManyOptions<Message> {
         const { join = {}, select = [] } = options; 
         return {
@@ -124,4 +102,4 @@ export class MessagesService {
     }
 }
 
-export default MessagesService; */
+export default MessagesService;

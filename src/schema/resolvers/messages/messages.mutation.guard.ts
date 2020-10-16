@@ -13,7 +13,7 @@ export { MemberRoleEnum } from '@schema/resolvers/members/members.dto';
 export const ChatRoles = (...roles: string[]) => SetMetadata('roles', roles);
 
 @Injectable()
-export class ChatGruard implements CanActivate {
+export class MessagesCreationGruard implements CanActivate {
     public constructor(
         private readonly reflector: Reflector,
         @Inject(MembersService)
@@ -37,7 +37,7 @@ export class ChatGruard implements CanActivate {
         const ctx = GqlExecutionContext.create(context);
         const req: Request = ctx.getContext().req;
         const { id: userId }: any = req.user;
-        const { chatId } = ctx.getArgs();
+        const { payload: { chatId } } = ctx.getArgs();
 
         const chat = await this.chatsService.findOne({ where: { id: chatId } });
 
@@ -56,4 +56,4 @@ export class ChatGruard implements CanActivate {
     }
 }
 
-export default ChatGruard;
+export default MessagesGruard;

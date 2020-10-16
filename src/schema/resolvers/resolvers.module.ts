@@ -6,7 +6,8 @@ import FriendsModule from '@schema/resolvers/friends/friends.module';
 import InvitationsModule from '@schema/resolvers/invitations/invitations.module';
 import MeModule from '@schema/resolvers/me/me.module';
 import ChatModule from '@schema/resolvers/chats/chats.module';
-import MemberModule from '@schema/resolvers/members/members.module'; 
+import MembersModule from '@schema/resolvers/members/members.module'; 
+import MessagesModule from '@schema/resolvers/messages/messages.module';
 
 @Module({
     imports: [
@@ -17,7 +18,8 @@ import MemberModule from '@schema/resolvers/members/members.module';
         InvitationsModule,
         MeModule,
         ChatModule,
-        MemberModule
+        MembersModule,
+        MessagesModule
     ]
 })
 export class ResolversModule {}

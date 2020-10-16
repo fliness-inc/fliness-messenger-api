@@ -15,3 +15,5 @@ export class Message extends IEntity {
     @JoinColumn({ name: 'member_id' })
     public member: Member;
 }
+
+export default Message;
