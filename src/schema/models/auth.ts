@@ -3,16 +3,16 @@ import Token from '@schema/models/token';
 
 @ObjectType()
 export class Auth {
-    @Field()
+    @Field(type => Token)
     public readonly login: Token;
 
-    @Field()
+    @Field(type => Token)
     public readonly register: Token;
 
-    @Field()
+    @Field(type => Token)
     public readonly refresh: Token;
 
-    @Field()
+    @Field(type => Boolean)
     public readonly logout: Boolean;
 }
 

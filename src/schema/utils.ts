@@ -1,3 +1,4 @@
+import { Catch } from '@nestjs/common';
 import { GqlExceptionFilter, GqlArgumentsHost, Info } from '@nestjs/graphql';
 import { HttpException, ArgumentsHost } from '@nestjs/common';
 import { FindManyOptions, FindOneOptions } from 'typeorm';
@@ -19,9 +20,11 @@ export class Context {
     public dataloaders: WeakMap<typeof Info, DataLoader<string, any, string>>
 }
 
+@Catch(HttpException)
 export class GlobalExceptionFilter implements GqlExceptionFilter {
     catch(exception: HttpException, host: ArgumentsHost) {
         const gqlHost = GqlArgumentsHost.create(host);
+        console.log(exception);
         return new GqlException(exception.message, 'API_ERROR', { 
             message: exception.message,
             statusCode: exception.getStatus()

@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Field, InputType } from '@nestjs/graphql';
 
 export enum ChatTypeEnum {
     DIALOG = 'DIALOG',
@@ -6,24 +6,23 @@ export enum ChatTypeEnum {
     CHANNEL = 'CHANNEL'
 }
 
+@InputType()
 export class ChatCreateDTO {
-    @ApiPropertyOptional({ type: () => String, description: `
-        The title of your chat. If you are creating a group/channel, this property is required.`
-    })
+    @Field({ nullable: true,  description: 'The title of your chat. If you are creating a group/channel, this property is required.' })
     public readonly title?: string;
 
-    @ApiPropertyOptional({ type: () => String, description: 'The description of your chat.' })
+    @Field({ nullable: true, description: 'The description of your chat.' })
     public readonly description?: string;
 
-    @ApiProperty({ enum: ChatTypeEnum, description: 'The type of your chat.' })
+    @Field(type => ChatTypeEnum, { description: 'The type of your chat.' })
     public readonly type: ChatTypeEnum;
 
-    @ApiPropertyOptional({ type: () => [String], description: `
+    @Field(type => [String], { description: `
         IDs of users who will be automatically added to the chat. 
         If you add the ID of the user who is the chat creator, 
         only one member will still be created. 
         If you are creating a dialog, you must specify 
-        a second member.` 
+        a second member.`
     })
     public readonly userIds?: string[];
 }

@@ -11,6 +11,7 @@ import dataloader from 'dataloader';
             debug: true,
             playground: true,
             installSubscriptionHandlers: true,
+            fieldResolverEnhancers: ['guards'],
             autoSchemaFile: true,
             cors: {
                 credentials: true,

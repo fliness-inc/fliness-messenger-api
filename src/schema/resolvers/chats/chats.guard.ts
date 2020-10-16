@@ -1,14 +1,13 @@
-/* import { CanActivate, SetMetadata, ExecutionContext, Inject, ForbiddenException, Injectable } from '@nestjs/common';
+import { CanActivate, SetMetadata, ExecutionContext, Inject, ForbiddenException, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { GqlExecutionContext, Extensions } from '@nestjs/graphql';
 import { Request } from 'express';
-import MembersService from '@modules/members/members.service';
-import ChatsService from '@modules/chats/chats.service';
-import { MemberRoleNameEnum } from '@modules/members/members.dto';
+import MembersService from '@schema/resolvers/members/members.service';
+import ChatsService from '@schema/resolvers/chats/chats.service';
+import { MemberRoleEnum } from '@schema/resolvers/members/members.dto';
 import { NotFoundError } from '@src/errors';
 import { getRepository, In } from 'typeorm';
-import { MemberRole } from '@database/entities/member-role';
-
-export { MemberRoleNameEnum } from '@modules/members/members.dto'
+import MemberRole from '@database/entities/member-role';
 
 export const ChatRoles = (...roles: string[]) => SetMetadata('roles', roles);
 
@@ -23,6 +22,7 @@ export class ChatGruard implements CanActivate {
     ) {}
 
     public async canActivate(context: ExecutionContext): Promise<boolean> {
+
         const requiredRoles = this.reflector.get<string[]>('roles', context.getHandler());
         const roles = await getRepository(MemberRole).find({ 
             where: { 
@@ -33,9 +33,10 @@ export class ChatGruard implements CanActivate {
         if (!roles.length)
             return true;
 
-        const req: Request = context.switchToHttp().getRequest();
+        const ctx = GqlExecutionContext.create(context);
+        const req: Request = ctx.getContext().req;
         const { id: userId }: any = req.user;
-        const { chatId } = req.params;
+        const { chatId } = ctx.getArgs();
 
         const chat = await this.chatsService.findOne({ where: { id: chatId } });
 
@@ -54,4 +55,4 @@ export class ChatGruard implements CanActivate {
     }
 }
 
-export default ChatGruard; */
+export default ChatGruard;

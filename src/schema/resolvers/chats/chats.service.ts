@@ -1,20 +1,12 @@
-/* import { Injectable, forwardRef, Inject } from '@nestjs/common';
+import { Injectable, forwardRef, Inject } from '@nestjs/common';
 import { FindManyOptions, FindOneOptions, getRepository } from 'typeorm';
 import Chat from '@database/entities/chat';
 import ChatType from '@database/entities/chat-type';
-import { ChatTypeEnum } from '@modules/chats/chats.dto';
-import UsersService from '@modules/users/users.service';
+import { ChatTypeEnum } from '@schema/resolvers/chats/chats.dto';
+import UsersService from '@schema/resolvers/users/users.service';
 import { InvalidPropertyError, NotFoundError, OperationInvalidError } from '@src/errors';
-import { MembersService } from '@modules/members/members.service';
-import { MemberRoleNameEnum } from '@modules/members/members.dto';
-
-export class ChatResponse {
-    public readonly id: string;
-    public readonly title?: string;
-    public readonly description?: string;
-    public readonly type: string;
-    public readonly createdAt: Date;
-}
+import MembersService from '@schema/resolvers/members/members.service';
+import { MemberRoleEnum } from '@schema/resolvers/members/members.dto';
 
 export class ChatCreateOptions {
     public readonly title?: string;
@@ -61,10 +53,10 @@ export class ChatsService {
             memberLimit
         }));
 
-        await this.membersService.create(userId, newChat.id, MemberRoleNameEnum.CREATOR);
+        await this.membersService.create(userId, newChat.id, MemberRoleEnum.CREATOR);
 
         for (const id of memberIds)
-            await this.membersService.create(id, newChat.id, MemberRoleNameEnum.MEMBER);
+            await this.membersService.create(id, newChat.id, MemberRoleEnum.MEMBER);
 
         return newChat;
     }
@@ -75,22 +67,6 @@ export class ChatsService {
 
     public async findOne(options?: FindOneOptions<Chat>): Promise<Chat> {
         return getRepository(Chat).findOne(options);
-    }
-
-    public prepareEntity(entity: Chat): ChatResponse {
-        const { id, title, description, type, createdAt } = entity;
-
-        return { 
-            id,
-            title,
-            description,
-            type: type.name,
-            createdAt,
-        };
-    }
-
-    public prepareEntities(entites: Chat[]): ChatResponse[] {
-        return entites.map(entity => this.prepareEntity(entity));
     }
 
     public async remove(chatId: string): Promise<Chat> {
@@ -109,4 +85,4 @@ export class ChatsService {
 
 } 
 
-export default ChatsService; */
+export default ChatsService;

@@ -1,12 +1,12 @@
-/* import { Injectable, Inject, forwardRef } from '@nestjs/common';
-import UserService from '@modules/users/users.service';
-import ChatService from '@modules/chats/chats.service';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
+import UserService from '@schema/resolvers/users/users.service';
+import ChatService from '@schema/resolvers/chats/chats.service';
 import Member from '@database/entities/member';
 import { InvalidPropertyError, NotFoundError, OperationInvalidError } from '@src/errors';
 import MemberRole from '@database/entities/member-role';
-import { MemberResponse, MemberRoleNameEnum } from '@modules/members/members.dto';
+import { MemberRoleEnum } from '@schema/resolvers/members/members.dto';
 import { FindManyOptions, FindOneOptions, getRepository } from 'typeorm';
-import { FindManyOptionsFunc, FindOneOptionsFunc } from '@src/utils';
+import { FindManyOptionsFunc, FindOneOptionsFunc } from '@schema/utils';
 
 @Injectable()
 export class MembersService {
@@ -18,7 +18,7 @@ export class MembersService {
     ) {}
 
 
-    public async create(userId: string, chatId: string, roleName: MemberRoleNameEnum): Promise<Member> {
+    public async create(userId: string, chatId: string, roleName: MemberRoleEnum): Promise<Member> {
         const user = await this.userService.findOne({ where: { id: userId, isDeleted: false } });
 
         if (!user)
@@ -77,22 +77,6 @@ export class MembersService {
         }))
     }
 
-    public prepareEntity(entity: Member): MemberResponse {
-        const { id, userId, chatId, role, createdAt } = entity;
-
-        return { 
-            id,
-            userId,
-            chatId,
-            role: role.name,
-            createdAt,
-        };
-    }
-
-    public prepareEntities(entites: Member[]): MemberResponse[] {
-        return entites.map(entity => this.prepareEntity(entity));
-    }
-
     private prepareQuery(alias: string, options: FindManyOptions<Member> = {}): FindManyOptions<Member> {
         const { join = { leftJoinAndSelect: {} }, select = [] } = options;
         return {
@@ -129,4 +113,4 @@ export class MembersService {
     }
 }
 
-export default MembersService; */
+export default MembersService;

@@ -1,17 +1,16 @@
-/* import { Delete, Get, Controller, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
-import AuthGuard from '@modules/auth/auth.guard';
-import { Request } from 'express';
-import MemberService from '@modules/members/members.service';
-import { MemberResponse, MemberRoleNameEnum } from '@modules/members/members.dto';
-import { ApiBadRequestResponse, ApiConflictResponse, ApiHeader, ApiNotFoundResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { UseGuards } from '@nestjs/common';
+import { Resolver } from '@nestjs/graphql';
+import AuthGuard from '@schema/resolvers/auth/auth.guard';
+import MemberService from '@schema/resolvers/members/members.service';
+import { MemberRoleEnum } from '@schema/resolvers/members/members.dto';
 
 @UseGuards(AuthGuard)
-@Controller()
-export class MembersController {
+@Resolver()
+export class MembersResolver {
 
     public constructor(private readonly memberService: MemberService) {}
 
-    @ApiTags('/chats')
+    /* @ApiTags('/chats')
     @Post('/chats/:chatId/join')
     @ApiNotFoundResponse({ description: 'The chat was not found.' })
     @ApiBadRequestResponse({ description: 'The property of the request was invalid.' })
@@ -40,7 +39,7 @@ export class MembersController {
         const { id: userId }: any = req.user;
         const newMember = await this.memberService.remove(userId, chatId);
         return this.memberService.prepareEntity(newMember);
-    }
+    } */
 }
 
-export default MembersController; */
+export default MembersResolver;
