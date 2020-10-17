@@ -1,0 +1,15 @@
+image: node:latest
+
+cache:
+    paths:
+      - node_modules/
+
+stages: 
+    - test
+
+test_server: 
+    stage: test
+    script:
+        - npm install 
+        - npm run test:watch
+        
