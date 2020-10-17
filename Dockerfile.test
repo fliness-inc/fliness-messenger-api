@@ -13,4 +13,4 @@ COPY . .
 
 EXPOSE ${PORT}
 
-CMD npm run test:watch
+CMD npm run test --runInBand ./tests/
