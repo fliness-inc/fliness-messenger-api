@@ -1,23 +1,4 @@
 image: docker:latest
-
-variables: 
-    PORT: "8080"
-    NODE_ENV: "development"
-    JWT_SECRET_KEY: "1915E4336C67161841981457618D6B6C304942B94220AE28872BE31DBDB99FEB"
-    TYPEORM_CONNECTION: "postgres"
-    TYPEORM_HOST: "localhost"
-    TYPEORM_USERNAME: "postgres"
-    TYPEORM_PASSWORD: "root"
-    TYPEORM_DATABASE: "fliness_messenger"
-    TYPEORM_PORT: "5432"
-    TYPEORM_SYNCHRONIZE: true
-    TYPEORM_LOGGING: false
-    TYPEORM_ENTITIES: "src/database/entities/**/*.ts"
-    TYPEORM_ENTITIES_DIR: "src/database/entities"
-    TYPEORM_MIGRATIONS: "src/database/migrations/**/*.ts"
-    TYPEORM_MIGRATIONS_DIR: "src/database/migrations"
-    TYPEORM_SUBSCRIBERS: "src/database/subscribers/**/*.ts"
-    TYPEORM_SUBSCRIBERS_DIR: "src/database/subscribers"
     
 services:
   - docker:dind   
