@@ -2,7 +2,7 @@ version: '3.1'
 
 services: 
     db:
-        env_file: .env.test
+        #env_file: .env.test
         image: 'postgres'
         ports:
             - ${TYPEORM_PORT}:${TYPEORM_PORT}
@@ -18,7 +18,7 @@ services:
             dockerfile: Dockerfile.test
         ports:
             - ${PORT}:${PORT}
-        env_file: .env.test
+        #env_file: .env.test
         environment: 
             TYPEORM_HOST: 'db'
         depends_on:
