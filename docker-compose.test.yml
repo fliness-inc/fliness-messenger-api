@@ -21,6 +21,16 @@ services:
         #env_file: .env.test
         environment: 
             TYPEORM_HOST: 'db'
+            PORT: ${PORT}
+            JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+            TYPEORM_CONNECTION: ${TYPEORM_CONNECTION}
+            TYPEORM_USERNAME: ${TYPEORM_USERNAME}
+            TYPEORM_PASSWORD: '${TYPEORM_PASSWORD}
+            TYPEORM_DATABASE: ${TYPEORM_DATABASE}
+            TYPEORM_PORT: ${TYPEORM_PORT}
+            TYPEORM_SYNCHRONIZE: ${TYPEORM_SYNCHRONIZE}
+            TYPEORM_ENTITIES: ${TYPEORM_ENTITIES}
+            TYPEORM_SUBSCRIBERS: ${TYPEORM_SUBSCRIBERS}
         depends_on:
             - db
         volumes: 
