@@ -10,7 +10,6 @@ services:
             POSTGRES_USER: ${TYPEORM_USERNAME}
             POSTGRES_PASSWORD: ${TYPEORM_PASSWORD} 
             POSTGRES_DB: ${TYPEORM_DATABASE}
-        restart: always
         container_name: fliness_messenger_database_test
     api:
         build: 
@@ -36,7 +35,6 @@ services:
         volumes: 
             - .:/usr/src/fliness-messenger-api
             - node_modules:/usr/src/fliness-messenger-api/node_modules
-        restart: always
         container_name: fliness_messenger_api_test
 
 volumes: 
