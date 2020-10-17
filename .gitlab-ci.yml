@@ -1,15 +1,13 @@
-image: node:latest
+image: docker:latest
 
-cache:
-    paths:
-      - node_modules/
+services:
+  - docker:dind   
 
 stages: 
     - test
-
-test_server: 
+  
+test_server:
     stage: test
     script:
-        - npm install 
-        - npm run test:watch
-        
+        - apk add --no-cache docker-compose
+        - docker-compose --file docker-compose.test.yml up --build
