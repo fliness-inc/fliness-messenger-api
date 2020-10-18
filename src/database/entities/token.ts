@@ -20,3 +20,5 @@ export class Token extends IEntity {
     @OneToOne(type => User, u => u.id)
     public user: User;
 }
+
+export default Token;

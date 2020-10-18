@@ -7,13 +7,13 @@ import Faker from 'faker';
 import * as uuid from 'uuid';
 import cookieParser from 'cookie-parser';
 import User from '@database/entities/user';
-import AppModule from '@modules/app/app.module';
-import UsersService from '@modules/users/users.service';
-import { Tokens } from '@modules/tokens/tokens.service';
+import AppModule from '@src/app.module';
+import UsersService from '@schema/resolvers/users/users.service';
+import { Tokens } from '@schema/resolvers/tokens/tokens.service';
 import Invitation from '@database/entities/invitation';
-import InvitationsService from '@modules/invitations/invitations.service'
-import FriendsService from '@modules/friends/friends.service';
-import { Type, Status } from '@modules/invitations/invitations.dto';
+import InvitationsService from '@schema/resolvers/invitations/invitations.service'
+import FriendsService from '@schema/resolvers/friends/friends.service';
+import { Type, Status } from '@schema/resolvers/invitations/invitations.dto';
 import { InvitationStatusSeeder, InvitationStatusFactory } from '@database/seeds/invitation-status.seeder';
 import { InvitationTypeSeeder, InvitationTypeFactory } from '@database/seeds/invitation-type.seeder';
 
@@ -21,7 +21,7 @@ setupDotEnv();
 
 jest.setTimeout(50000);
 
-describe('[E2E] [InvitationsController] ...', () => {
+describe('[E2E] [InvitationsResolver] ...', () => {
     let app: INestApplication;
     let connection: Connection
 
@@ -75,16 +75,34 @@ describe('[E2E] [InvitationsController] ...', () => {
                     email: Faker.internet.email(),
                     password: Faker.random.word()
                 };
+
                 const user = await usersService.create({ 
                     name: Faker.internet.userName(),
                     ...payload
                 });
+
                 const res = await request(app.getHttpServer())
-                    .post('/auth/login')
-                    .send(payload);
+                    .post('/graphql')
+                    .send({
+                        operationName: 'Login',
+                        query: `
+                            mutation Login($payload: AuthLoginDTO!) {
+                                auth {
+                                    login(payload: $payload) {
+                                        accessToken
+                                        refreshToken
+                                    }
+                                }
+                            }
+                        `,
+                        variables: {
+                            payload
+                        }
+                    });
+
                 users.push({ 
                     user,
-                    tokens: res.body
+                    tokens: res.body.data.auth.login
                 });
             }
         });
@@ -92,68 +110,214 @@ describe('[E2E] [InvitationsController] ...', () => {
         describe('[Sending] ...', () => {
             it('should send the friend invitation', async () => {
                 const [sender, recipient] = users; 
-    
+
                 const resSend = await request(app.getHttpServer())
-                    .post(`/me/friends/invitations`)
+                    .post('/graphql')
                     .set('Authorization', `Bearer ${sender.tokens.accessToken}`)
-                    .send({ userId: recipient.user.id });
+                    .send({
+                        operationName: 'CreateInvitation',
+                        query: `
+                            mutation CreateInvitation($payload: CreateInvitationDTO!) {
+                                me {
+                                    invitations {
+                                        create(payload: $payload) {
+                                            id
+                                        }
+                                    }
+                                    
+                                }
+                            }
+                        `,
+                        variables: {
+                            payload: {
+                                userId: recipient.user.id, 
+                                type: Type.INVITE_TO_FRIENDS
+                            }
+                        }
+                    });
     
-                expect(resSend.status).toEqual(201);
+                expect(resSend.status).toEqual(200);
     
                 const resGet = await request(app.getHttpServer())
-                    .get(`/me/friends/invitations`)
+                    .post('/graphql')
                     .set('Authorization', `Bearer ${sender.tokens.accessToken}`)
-                    .send();
-    
+                    .send({
+                        operationName: 'GetInvitationFromMe',
+                        query: `
+                            query GetInvitationFromMe {
+                                me {
+                                    invitations {
+                                        fromMe {
+                                            id
+                                            sender {
+                                                id
+                                            }
+                                            recipient {
+                                                id
+                                            }
+                                            type
+                                            status
+                                            expiresAt
+                                        }
+                                    }
+                                }
+                            }
+                        `
+                    });
+                
                 expect(resGet.status).toEqual(200);
-                expect(Array.isArray(resGet.body)).toBeTruthy();
-                expect(resGet.body).toHaveLength(1);
-                expect(resGet.body[0]).toHaveProperty('id');
-                expect(resGet.body[0]).toHaveProperty('senderId', sender.user.id);
-                expect(resGet.body[0]).toHaveProperty('recipientId', recipient.user.id);
-                expect(resGet.body[0]).toHaveProperty('status', Status.WAITING);
-                expect(resGet.body[0]).toHaveProperty('type', Type.INVITE_TO_FRIENDS);
-                expect(resGet.body[0]).toHaveProperty('expiresAt');
+
+                const data = resGet.body.data;
+                expect(data).toHaveProperty('me');
+                expect(data.me).toHaveProperty('invitations');
+                expect(data.me.invitations).toHaveProperty('fromMe');
+
+                const invitations = data.me.invitations.fromMe;
+                expect(Array.isArray(invitations)).toBeTruthy();
+                expect(invitations).toHaveLength(1);
+                expect(invitations[0]).toStrictEqual({
+                    id: invitations[0].id,
+                    sender: { id: sender.user.id },
+                    recipient: { id: recipient.user.id },
+                    status: Status.WAITING,
+                    type: Type.INVITE_TO_FRIENDS,
+                    expiresAt: invitations[0].expiresAt
+                });
     
                 const resGetNew = await request(app.getHttpServer())
-                    .get('/me/friends/invitations/new')
+                    .post('/graphql')
                     .set('Authorization', `Bearer ${recipient.tokens.accessToken}`)
-                    .send();
+                    .send({
+                        operationName: 'GetInvitationForMe',
+                        query: `
+                            query GetInvitationForMe {
+                                me {
+                                    invitations {
+                                        forMe {
+                                            id
+                                            sender {
+                                                id
+                                            }
+                                            recipient {
+                                                id
+                                            }
+                                            type
+                                            status
+                                            expiresAt
+                                        }
+                                    }
+                                }
+                            }
+                        `
+                    });
     
                 expect(resGetNew.status).toEqual(200);
-                expect(Array.isArray(resGetNew.body)).toBeTruthy();
-                expect(resGetNew.body).toHaveLength(1);
-                expect(resGetNew.body).toStrictEqual(resGet.body)
+
+                const forMeData = resGetNew.body.data;
+                expect(forMeData).toHaveProperty('me');
+                expect(forMeData.me).toHaveProperty('invitations');
+                expect(forMeData.me.invitations).toHaveProperty('forMe');
+
+                const newInvitations = forMeData.me.invitations.forMe;
+                expect(Array.isArray(newInvitations)).toBeTruthy();
+                expect(newInvitations).toHaveLength(1);
+                expect(newInvitations).toStrictEqual(invitations);
             });
 
             it('should return 400 status when trying to send the invitation to myself', async () => {
                 const [sender, recipient] = users; 
     
-                const resSend = await request(app.getHttpServer())
-                    .post(`/me/friends/invitations`)
+                const res = await request(app.getHttpServer())
+                    .post('/graphql')
                     .set('Authorization', `Bearer ${sender.tokens.accessToken}`)
-                    .send({ userId: sender.user.id });
+                    .send({
+                        operationName: 'CreateInvitation',
+                        query: `
+                            mutation CreateInvitation($payload: CreateInvitationDTO!) {
+                                me {
+                                    invitations {
+                                        create(payload: $payload) {
+                                            id
+                                        }
+                                    }
+                                    
+                                }
+                            }
+                        `,
+                        variables: {
+                            payload: {
+                                userId: sender.user.id, 
+                                type: Type.INVITE_TO_FRIENDS
+                            }
+                        }
+                    });
     
-                expect(resSend.status).toEqual(400);
+                expect(Array.isArray(res.body.errors)).toBeTruthy();
+                expect(res.body.errors).toHaveLength(1);
+                expect(res.body.errors[0].extensions.exception.status).toStrictEqual(400);
             });
 
             it('should return 400 status when trying to send the invitation to not-exists user', async () => {
                 const [sender, recipient] = users; 
     
-                const resSend = await request(app.getHttpServer())
-                    .post(`/me/friends/invitations`)
+                const res = await request(app.getHttpServer())
+                    .post('/graphql')
                     .set('Authorization', `Bearer ${sender.tokens.accessToken}`)
-                    .send({ userId: uuid.v4() });
+                    .send({
+                        operationName: 'CreateInvitation',
+                        query: `
+                            mutation CreateInvitation($payload: CreateInvitationDTO!) {
+                                me {
+                                    invitations {
+                                        create(payload: $payload) {
+                                            id
+                                        }
+                                    }
+                                    
+                                }
+                            }
+                        `,
+                        variables: {
+                            payload: {
+                                userId: uuid.v4(), 
+                                type: Type.INVITE_TO_FRIENDS
+                            }
+                        }
+                    });
     
-                expect(resSend.status).toEqual(400);
+                expect(Array.isArray(res.body.errors)).toBeTruthy();
+                expect(res.body.errors).toHaveLength(1);
+                expect(res.body.errors[0].extensions.exception.status).toStrictEqual(400);
             });
 
             it('should return 401 status when the unauthorized user trying to send the invitation', async () => {
-                const resSend = await request(app.getHttpServer())
-                    .post(`/me/friends/invitations`)
-                    .send({ userId: uuid.v4() });
+                const res = await request(app.getHttpServer())
+                    .post('/graphql')
+                    .send({
+                        operationName: 'CreateInvitation',
+                        query: `
+                            mutation CreateInvitation($payload: CreateInvitationDTO!) {
+                                me {
+                                    invitations {
+                                        create(payload: $payload) {
+                                            id
+                                        }
+                                    }
+                                    
+                                }
+                            }
+                        `,
+                        variables: {
+                            payload: {
+                                userId: uuid.v4(), 
+                                type: Type.INVITE_TO_FRIENDS
+                            }
+                        }
+                    });
     
-                expect(resSend.status).toEqual(401);
+                expect(Array.isArray(res.body.errors)).toBeTruthy();
+                expect(res.body.errors).toHaveLength(1);
+                expect(res.body.errors[0].extensions.exception.status).toStrictEqual(401);
             });
 
             it('should return 409 status when the user trying to send the invitation to the user that already is friend', async () => {
@@ -165,11 +329,33 @@ describe('[E2E] [InvitationsController] ...', () => {
                 });
                 
                 const res = await request(app.getHttpServer())
-                    .post('/me/friends/invitations')
+                    .post('/graphql')
                     .set('Authorization', `Bearer ${sender.tokens.accessToken}`)
-                    .send({ userId: recipient.user.id });
-    
-                expect(res.status).toEqual(409);
+                    .send({
+                        operationName: 'CreateInvitation',
+                        query: `
+                            mutation CreateInvitation($payload: CreateInvitationDTO!) {
+                                me {
+                                    invitations {
+                                        create(payload: $payload) {
+                                            id
+                                        }
+                                    }
+                                    
+                                }
+                            }
+                        `,
+                        variables: {
+                            payload: {
+                                userId: recipient.user.id, 
+                                type: Type.INVITE_TO_FRIENDS
+                            }
+                        }
+                    });
+                    
+                expect(Array.isArray(res.body.errors)).toBeTruthy();
+                expect(res.body.errors).toHaveLength(1);
+                expect(res.body.errors[0].extensions.exception.status).toStrictEqual(409);
             });
         });
 
@@ -186,56 +372,138 @@ describe('[E2E] [InvitationsController] ...', () => {
                     await app.get<InvitationsService>(InvitationsService).create(recipient.user.id, sender.user.id, Type.INVITE_TO_FRIENDS);
             
                 const resSender = await request(app.getHttpServer())
-                    .get(`/me/friends/invitations`)
+                    .post('/graphql')
                     .set('Authorization', `Bearer ${sender.tokens.accessToken}`)
-                    .send();
+                    .send({
+                        operationName: 'GetInvitationFromMe',
+                        query: `
+                            query GetInvitationFromMe {
+                                me {
+                                    invitations {
+                                        fromMe {
+                                            id
+                                        }
+                                    }
+                                }
+                            }
+                        `
+                    });
     
                 expect(resSender.status).toEqual(200);
-                expect(Array.isArray(resSender.body)).toBeTruthy();
-                expect(resSender.body).toHaveLength(senderNumberInvitations);
+                expect(Array.isArray(resSender.body.data.me.invitations.fromMe)).toBeTruthy();
+                expect(resSender.body.data.me.invitations.fromMe).toHaveLength(senderNumberInvitations);
                     
                 const resNewSender = await request(app.getHttpServer())
-                    .get(`/me/friends/invitations/new`)
+                    .post('/graphql')
                     .set('Authorization', `Bearer ${sender.tokens.accessToken}`)
-                    .send();
+                    .send({
+                        operationName: 'GetInvitationForMe',
+                        query: `
+                            query GetInvitationForMe {
+                                me {
+                                    invitations {
+                                        forMe {
+                                            id
+                                        }
+                                    }
+                                }
+                            }
+                        `
+                    });
     
                 expect(resNewSender.status).toEqual(200);
-                expect(Array.isArray(resNewSender.body)).toBeTruthy();
-                expect(resNewSender.body).toHaveLength(recipientNumberInvitations);
+                expect(Array.isArray(resNewSender.body.data.me.invitations.forMe)).toBeTruthy();
+                expect(resNewSender.body.data.me.invitations.forMe).toHaveLength(recipientNumberInvitations);
 
                 const resRecipientSender = await request(app.getHttpServer())
-                    .get(`/me/friends/invitations`)
+                    .post('/graphql')
                     .set('Authorization', `Bearer ${recipient.tokens.accessToken}`)
-                    .send();
+                    .send({
+                        operationName: 'GetInvitationFromMe',
+                        query: `
+                            query GetInvitationFromMe {
+                                me {
+                                    invitations {
+                                        fromMe {
+                                            id
+                                        }
+                                    }
+                                }
+                            }
+                        `
+                    });
     
                 expect(resRecipientSender.status).toEqual(200);
-                expect(Array.isArray(resRecipientSender.body)).toBeTruthy();
-                expect(resRecipientSender.body).toHaveLength(recipientNumberInvitations);
+                expect(Array.isArray(resRecipientSender.body.data.me.invitations.fromMe)).toBeTruthy();
+                expect(resRecipientSender.body.data.me.invitations.fromMe).toHaveLength(recipientNumberInvitations);
                     
                 const resNewRecipient = await request(app.getHttpServer())
-                    .get(`/me/friends/invitations/new`)
+                    .post('/graphql')
                     .set('Authorization', `Bearer ${recipient.tokens.accessToken}`)
-                    .send();
+                    .send({
+                        operationName: 'GetInvitationForMe',
+                        query: `
+                            query GetInvitationForMe {
+                                me {
+                                    invitations {
+                                        forMe {
+                                            id
+                                        }
+                                    }
+                                }
+                            }
+                        `
+                    });
     
                 expect(resNewRecipient.status).toEqual(200);
-                expect(Array.isArray(resNewRecipient.body)).toBeTruthy();
-                expect(resNewRecipient.body).toHaveLength(senderNumberInvitations);
+                expect(Array.isArray(resNewRecipient.body.data.me.invitations.forMe)).toBeTruthy();
+                expect(resNewRecipient.body.data.me.invitations.forMe).toHaveLength(senderNumberInvitations);
             });
 
             it('should return 401 status when the unauthorized user trying to get the invitation', async () => {
-                const resSend = await request(app.getHttpServer())
-                    .get(`/me/friends/invitations`)
-                    .send({ userId: uuid.v4() });
+                const res = await request(app.getHttpServer())
+                .post('/graphql')
+                    .send({
+                        operationName: 'GetInvitationFromMe',
+                        query: `
+                            query GetInvitationFromMe {
+                                me {
+                                    invitations {
+                                        fromMe {
+                                            id
+                                        }
+                                    }
+                                }
+                            }
+                        `
+                    });
     
-                expect(resSend.status).toEqual(401);
+                expect(Array.isArray(res.body.errors)).toBeTruthy();
+                expect(res.body.errors).toHaveLength(1);
+                expect(res.body.errors[0].extensions.exception.status).toStrictEqual(401);
             });
 
             it('should return 401 status when the unauthorized user trying to get new invitation', async () => {
-                const resSend = await request(app.getHttpServer())
-                    .get(`/me/friends/invitations/new`)
-                    .send({ userId: uuid.v4() });
+                const res = await request(app.getHttpServer())
+                    .post('/graphql')
+                    .send({
+                        operationName: 'GetInvitationForMe',
+                        query: `
+                            query GetInvitationForMe {
+                                me {
+                                    invitations {
+                                        forMe {
+                                            id
+                                        }
+                                    }
+                                }
+                            }
+                        `
+                    });
     
-                expect(resSend.status).toEqual(401);
+                expect(Array.isArray(res.body.errors)).toBeTruthy();
+                expect(res.body.errors).toHaveLength(1);
+                expect(res.body.errors[0].extensions.exception.status).toStrictEqual(401);
             });
         });
 
@@ -244,18 +512,53 @@ describe('[E2E] [InvitationsController] ...', () => {
                 const [sender, recipient] = users;
 
                 const resSend = await request(app.getHttpServer())
-                    .post(`/me/friends/invitations`)
+                    .post('/graphql')
                     .set('Authorization', `Bearer ${sender.tokens.accessToken}`)
-                    .send({ userId: recipient.user.id });
+                    .send({
+                        operationName: 'CreateInvitation',
+                        query: `
+                            mutation CreateInvitation($payload: CreateInvitationDTO!) {
+                                me {
+                                    invitations {
+                                        create(payload: $payload) {
+                                            id
+                                        }
+                                    }
+                                }
+                            }
+                        `,
+                        variables: {
+                            payload: {
+                                userId: recipient.user.id, 
+                                type: Type.INVITE_TO_FRIENDS
+                            }
+                        }
+                    });
 
-                const invitationId = resSend.body.id;
+                const invitationId = resSend.body.data.me.invitations.create.id;
 
                 const res = await request(app.getHttpServer())
-                    .post(`/me/friends/invitations/${invitationId}/accept`)
+                    .post('/graphql')
                     .set('Authorization', `Bearer ${recipient.tokens.accessToken}`)
-                    .send();
+                    .send({
+                        operationName: 'AcceptInvitation',
+                        query: `
+                            mutation AcceptInvitation($invitationId: UUID!) {
+                                me {
+                                    invitations {
+                                        accept(invitationId: $invitationId) {
+                                            id
+                                        }
+                                    }
+                                }
+                            }
+                        `,
+                        variables: {
+                            invitationId
+                        }
+                    });
 
-                expect(res.status).toEqual(201);
+                expect(res.status).toEqual(200);
 
                 const invitation = await app.get<InvitationsService>(InvitationsService).findOne({ id: invitationId })
                 
@@ -268,28 +571,83 @@ describe('[E2E] [InvitationsController] ...', () => {
                 const [sender, recipient] = users;
 
                 const res = await request(app.getHttpServer())
-                    .post(`/me/friends/invitations/${uuid.v4()}/accept`)
+                    .post('/graphql')
                     .set('Authorization', `Bearer ${sender.tokens.accessToken}`)
-                    .send();
+                    .send({
+                        operationName: 'AcceptInvitation',
+                        query: `
+                            mutation AcceptInvitation($invitationId: UUID!) {
+                                me {
+                                    invitations {
+                                        accept(invitationId: $invitationId) {
+                                            id
+                                        }
+                                    }
+                                }
+                            }
+                        `,
+                        variables: {
+                            invitationId: uuid.v4()
+                        }
+                    });
 
-                expect(res.status).toStrictEqual(404);
+                expect(Array.isArray(res.body.errors)).toBeTruthy();
+                expect(res.body.errors).toHaveLength(1);
+                expect(res.body.errors[0].extensions.exception.status).toStrictEqual(404);
             });
 
             it('should return 401 status when the unauthorized user trying to accept the invitation', async () => {
                 const [sender, recipient] = users;
 
                 const resSend = await request(app.getHttpServer())
-                    .post(`/me/friends/invitations`)
+                    .post('/graphql')
                     .set('Authorization', `Bearer ${sender.tokens.accessToken}`)
-                    .send({ userId: recipient.user.id });
+                    .send({
+                        operationName: 'CreateInvitation',
+                        query: `
+                            mutation CreateInvitation($payload: CreateInvitationDTO!) {
+                                me {
+                                    invitations {
+                                        create(payload: $payload) {
+                                            id
+                                        }
+                                    }
+                                }
+                            }
+                        `,
+                        variables: {
+                            payload: {
+                                userId: recipient.user.id, 
+                                type: Type.INVITE_TO_FRIENDS
+                            }
+                        }
+                    });
 
-                const invitationId = resSend.body.id;
+                const invitationId = resSend.body.data.me.invitations.create.id;
 
                 const res = await request(app.getHttpServer())
-                    .post(`/me/friends/invitations/${invitationId}/accept`)
-                    .send();
-                
-                expect(res.status).toEqual(401);
+                    .post('/graphql')
+                    .send({
+                        operationName: 'AcceptInvitation',
+                        query: `
+                            mutation AcceptInvitation($invitationId: UUID!) {
+                                me {
+                                    invitations {
+                                        accept(invitationId: $invitationId) {
+                                            id
+                                        }
+                                    }
+                                }
+                            }
+                        `,
+                        variables: {
+                            invitationId
+                        }
+                    });
+
+                expect(Array.isArray(res.body.errors)).toBeTruthy();
+                expect(res.body.errors).toHaveLength(1);
+                expect(res.body.errors[0].extensions.exception.status).toStrictEqual(401);
             });
         });
 
@@ -298,18 +656,53 @@ describe('[E2E] [InvitationsController] ...', () => {
                 const [sender, recipient] = users;
 
                 const resSend = await request(app.getHttpServer())
-                    .post(`/me/friends/invitations`)
+                    .post('/graphql')
                     .set('Authorization', `Bearer ${sender.tokens.accessToken}`)
-                    .send({ userId: recipient.user.id });
+                    .send({
+                        operationName: 'CreateInvitation',
+                        query: `
+                            mutation CreateInvitation($payload: CreateInvitationDTO!) {
+                                me {
+                                    invitations {
+                                        create(payload: $payload) {
+                                            id
+                                        }
+                                    }
+                                }
+                            }
+                        `,
+                        variables: {
+                            payload: {
+                                userId: recipient.user.id, 
+                                type: Type.INVITE_TO_FRIENDS
+                            }
+                        }
+                    });
 
-                const invitationId = resSend.body.id;
+                const invitationId = resSend.body.data.me.invitations.create.id;
 
                 const res = await request(app.getHttpServer())
-                    .post(`/me/friends/invitations/${invitationId}/reject`)
+                    .post('/graphql')
                     .set('Authorization', `Bearer ${recipient.tokens.accessToken}`)
-                    .send();
+                    .send({
+                        operationName: 'RejectInvitation',
+                        query: `
+                            mutation RejectInvitation($invitationId: UUID!) {
+                                me {
+                                    invitations {
+                                        reject(invitationId: $invitationId) {
+                                            id
+                                        }
+                                    }
+                                }
+                            }
+                        `,
+                        variables: {
+                            invitationId
+                        }
+                    });
 
-                expect(res.status).toEqual(201);
+                expect(res.status).toEqual(200);
 
                 const invitation = await app.get<InvitationsService>(InvitationsService).findOne({ id: invitationId })
                 
@@ -322,29 +715,84 @@ describe('[E2E] [InvitationsController] ...', () => {
                 const [sender, recipient] = users;
 
                 const res = await request(app.getHttpServer())
-                    .post(`/me/friends/invitations/${uuid.v4()}/reject`)
+                    .post('/graphql')
                     .set('Authorization', `Bearer ${sender.tokens.accessToken}`)
-                    .send();
+                    .send({
+                        operationName: 'RejectInvitation',
+                        query: `
+                            mutation RejectInvitation($invitationId: UUID!) {
+                                me {
+                                    invitations {
+                                        reject(invitationId: $invitationId) {
+                                            id
+                                        }
+                                    }
+                                }
+                            }
+                        `,
+                        variables: {
+                            invitationId: uuid.v4()
+                        }
+                    });
 
-                expect(res.status).toStrictEqual(404);
+                expect(Array.isArray(res.body.errors)).toBeTruthy();
+                expect(res.body.errors).toHaveLength(1);
+                expect(res.body.errors[0].extensions.exception.status).toStrictEqual(404);
             });
 
             it('should return 401 status when the unauthorized user trying to reject the invitation', async () => {
                 const [sender, recipient] = users;
 
                 const resSend = await request(app.getHttpServer())
-                    .post(`/me/friends/invitations`)
+                    .post('/graphql')
                     .set('Authorization', `Bearer ${sender.tokens.accessToken}`)
-                    .send({ userId: recipient.user.id });
+                    .send({
+                        operationName: 'CreateInvitation',
+                        query: `
+                            mutation CreateInvitation($payload: CreateInvitationDTO!) {
+                                me {
+                                    invitations {
+                                        create(payload: $payload) {
+                                            id
+                                        }
+                                    }
+                                }
+                            }
+                        `,
+                        variables: {
+                            payload: {
+                                userId: recipient.user.id, 
+                                type: Type.INVITE_TO_FRIENDS
+                            }
+                        }
+                    });
 
-                const invitationId = resSend.body.id;
+                const invitationId = resSend.body.data.me.invitations.create.id;
 
                 const res = await request(app.getHttpServer())
-                    .post(`/me/friends/invitations/${invitationId}/reject`)
-                    .send();
+                    .post('/graphql')
+                    .send({
+                        operationName: 'RejectInvitation',
+                        query: `
+                            mutation RejectInvitation($invitationId: UUID!) {
+                                me {
+                                    invitations {
+                                        reject(invitationId: $invitationId) {
+                                            id
+                                        }
+                                    }
+                                }
+                            }
+                        `,
+                        variables: {
+                            invitationId
+                        }
+                    });
                 
-                expect(res.status).toEqual(401);
+                expect(Array.isArray(res.body.errors)).toBeTruthy();
+                expect(res.body.errors).toHaveLength(1);
+                expect(res.body.errors[0].extensions.exception.status).toStrictEqual(401);
             });
         });
-    });
+    }); 
 });

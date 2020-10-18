@@ -20,7 +20,8 @@
       "@/*": ["*"],
       "@src/*": ["src/*"],
       "@database/*": ["src/database/*"],
-      "@modules/*": ["src/modules/*"]
+      "@modules/*": ["src/modules/*"],
+      "@schema/*": ["src/schema/*"]
     }
   }
 }
