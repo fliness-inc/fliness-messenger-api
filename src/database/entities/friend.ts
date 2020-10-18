@@ -6,10 +6,10 @@ import { User } from './user';
 export class Friend extends IEntity {
     
     @Column({ name: 'user_id', type: 'uuid' })
-    public userId!: string;
+    public userId: string;
 
     @Column({ name: 'friend_id', type: 'uuid' })
-    public friendId!: string;
+    public friendId: string;
 
     @ManyToOne(type => User, u => u.id)
     @JoinColumn({ name: 'user_id' })

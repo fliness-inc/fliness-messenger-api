@@ -1,4 +1,4 @@
-import {Field, ObjectType, ResolveField} from '@nestjs/graphql';
+import {Field, ObjectType } from '@nestjs/graphql';
 import Entity from '@schema/models/entity';
 
 @ObjectType()
