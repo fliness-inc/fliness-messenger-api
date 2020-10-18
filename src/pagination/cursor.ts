@@ -6,6 +6,8 @@ export type PaginationFilters = {
 
 export class CursorCoder {
     public static encode(entity: PaginationFilters) : Cursor {
+        if (typeof entity === 'string') throw new Error('The entity must be a object');
+
         const prepareData = Object.entries(entity).map(data => {
             const [key, value] = data;
 
