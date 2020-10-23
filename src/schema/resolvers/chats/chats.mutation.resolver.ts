@@ -8,7 +8,7 @@ import { MemberRoleEnum } from '@schema/resolvers/members/members.dto';
 import ChatsMutation from '@schema/models/chats.mutation';
 import Chat from '@schema/models/chats.model';
 import CurrentUser from '@schema/resolvers/auth/current-user';
-import User from '@schema/models/user';
+import User from '@schema/models/users.model';
 import UUID from '@schema/types/uuid';
 import MessagesMutation from '@schema/models/messages.mutation';
 

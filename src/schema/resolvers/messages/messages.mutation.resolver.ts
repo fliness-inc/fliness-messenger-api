@@ -7,7 +7,7 @@ import AuthGuard from '@schema/resolvers/auth/auth.guard';
 import Message from '@schema/models/messages.model';
 import MessagesMutation from '@schema/models/messages.mutation';
 import CurrentUser from '@schema/resolvers/auth/current-user';
-import User from '@schema/models/user';
+import User from '@schema/models/users.model';
 import UUID from '@schema/types/uuid';
 
 @UseGuards(AuthGuard)

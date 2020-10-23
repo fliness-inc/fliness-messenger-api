@@ -1,7 +1,7 @@
 import { ObjectType, Field, registerEnumType } from '@nestjs/graphql';
 import Entity from '@schema/models/entity';
 import Chat from '@schema/models/chats.model';
-import User from '@schema/models/user';
+import User from '@schema/models/users.model';
 import DateTime from '@schema/types/datetime';
 import UUID from '@schema/types/uuid';
 import { MemberRoleEnum } from '@schema/resolvers/members/members.dto';

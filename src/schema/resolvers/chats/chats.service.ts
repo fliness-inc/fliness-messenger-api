@@ -1,72 +1,53 @@
 import { Injectable, forwardRef, Inject } from '@nestjs/common';
-import { FindManyOptions, FindOneOptions, getRepository } from 'typeorm';
+import { FindManyOptions, FindOneOptions, getRepository, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import Chat from '@database/entities/chat';
-import ChatType from '@database/entities/chat-type';
 import { ChatTypeEnum } from '@schema/resolvers/chats/chats.dto';
 import UsersService from '@schema/resolvers/users/users.service';
 import { InvalidPropertyError, NotFoundError, OperationInvalidError } from '@src/errors';
 import MembersService from '@schema/resolvers/members/members.service';
-import { MemberRoleEnum } from '@schema/resolvers/members/members.dto';
-
-export class ChatCreateOptions {
-    public readonly title?: string;
-    public readonly description?: string;
-    public readonly userIds?: string[];
-}
+import IChat, { CreateChatOptions } from '@schema/resolvers/chats/types/chat.interface';
+import Dialog from '@schema/resolvers/chats/types/dialogs';
+import Group from '@schema/resolvers/chats/types/groups';
+import Channel from '@schema/resolvers/chats/types/channel';
 
 @Injectable()
 export class ChatsService {
 
+    private readonly chatsResolvers = new Map<ChatTypeEnum, IChat>();
+
     public constructor(
+        @InjectRepository(Chat)
+        private readonly chatsRepository: Repository<Chat>,
         private readonly usersService: UsersService,
         @Inject(forwardRef(() => MembersService))
         private readonly membersService: MembersService
-    ) {}
+    ) {
+        this.chatsResolvers.set(ChatTypeEnum.DIALOG, new Dialog(this.chatsRepository, membersService));
+        this.chatsResolvers.set(ChatTypeEnum.GROUP, new Group(this.chatsRepository, membersService));
+        this.chatsResolvers.set(ChatTypeEnum.CHANNEL, new Channel(this.chatsRepository, membersService));
+    }
 
-    public async create(userId: string, type: ChatTypeEnum, options: ChatCreateOptions = {}): Promise<Chat> {
+    public async create(userId: string, type: ChatTypeEnum, options: CreateChatOptions = {}): Promise<Chat> {
         const user = await this.usersService.findOne({ where: { id: userId } });
-        const { title, description, userIds } = options;
 
         if (!user)
             throw new InvalidPropertyError(`The user was not found with the id: ${userId}`);
 
-        const chatType = await getRepository(ChatType).findOne({ where: { name: type } });
+        const resolver = this.chatsResolvers.get(type);
 
-        if (!chatType)
+        if (!resolver)
             throw new InvalidPropertyError(`The chat type was not found: ${type}`);
 
-        const memberIds = userIds && Array.isArray(userIds) ? userIds.filter(id => id !== userId) : [];
-
-        if (type === ChatTypeEnum.DIALOG && !memberIds.length)
-            throw new InvalidPropertyError(`The type chat is ${type} and so the userIds must contain the id of the second user`);
-
-        const memberLimit: number | null = type === ChatTypeEnum.DIALOG ? 2 : null;
-        
-        if (memberLimit && memberIds.length > memberLimit - 1) // minus one - the creator
-            throw new OperationInvalidError(`The chat already has maximum number of members`);
-
-        const chats = getRepository(Chat);
-        const newChat = await chats.save(chats.create({
-            type: chatType,
-            title,
-            description,
-            memberLimit
-        }));
-
-        await this.membersService.create(userId, newChat.id, MemberRoleEnum.CREATOR);
-
-        for (const id of memberIds)
-            await this.membersService.create(id, newChat.id, MemberRoleEnum.MEMBER);
-
-        return newChat;
+        return resolver.create(userId, options);
     }
 
     public async find(options?: FindManyOptions<Chat>): Promise<Chat[]> {
-        return getRepository(Chat).find(options);
+        return this.chatsRepository.find(options);
     }
 
     public async findOne(options?: FindOneOptions<Chat>): Promise<Chat> {
-        return getRepository(Chat).findOne(options);
+        return this.chatsRepository.findOne(options);
     }
 
     public async remove(chatId: string): Promise<Chat> {
@@ -75,9 +56,7 @@ export class ChatsService {
         if (!chat)
             throw new NotFoundError(`The chat was not find with the id: ${chatId}`);
 
-        const chats = getRepository(Chat);
-
-        return chats.save(chats.create({
+        return this.chatsRepository.save(this.chatsRepository.create({
             ...chat,
             isDeleted: true
         }));

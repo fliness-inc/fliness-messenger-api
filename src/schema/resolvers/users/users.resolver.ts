@@ -1,6 +1,6 @@
 import { UseGuards } from '@nestjs/common';
 import { Resolver, Query, Mutation } from '@nestjs/graphql';
-import User from '@schema/models/user';
+import User from '@schema/models/users.model';
 import AuthGuard from '@schema/resolvers/auth/auth.guard';
 import UsersService from '@schema/resolvers/users/users.service';
 import CurrentUser from '@schema/resolvers/auth/current-user';

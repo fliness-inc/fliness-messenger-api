@@ -1,5 +1,5 @@
 import {ObjectType, InputType, registerEnumType} from '@nestjs/graphql';
-import User from '@schema/models/user';
+import User from '@schema/models/users.model';
 import { Connection } from '@schema/generics/pagination';
 import PaginationInput from '@schema/input/pagination';
 

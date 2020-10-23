@@ -1,6 +1,6 @@
 import { UseGuards } from '@nestjs/common';
 import { Resolver, Field, Parent, Query, ResolveField, ObjectType, Mutation, Context, Info } from '@nestjs/graphql';
-import User from '@schema/models/user';
+import User from '@schema/models/users.model';
 import Invitation from '@schema/models/invitation';
 import { Type, Status } from '@schema/resolvers/invitations/invitations.dto';
 import { InvitationsService } from '@schema/resolvers/invitations/invitations.service';

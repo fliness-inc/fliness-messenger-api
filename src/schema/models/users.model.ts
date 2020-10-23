@@ -8,6 +8,9 @@ export class User extends Entity {
 
     @Field(type => String)
     public readonly email: string;
+
+    @Field(type => String, { nullable: true })
+    public readonly avatar?: string;
 }
 
 export default User;

@@ -1,6 +1,6 @@
-import {Scalar, CustomScalar} from '@nestjs/graphql';
+import { Scalar, CustomScalar } from '@nestjs/graphql';
 import { Kind, ValueNode } from 'graphql';
-import {validate, version} from 'uuid';
+import { validate, version } from 'uuid';
 
 @Scalar('UUID')
 export class UUID implements CustomScalar<string, string> {

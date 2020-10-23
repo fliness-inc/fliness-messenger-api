@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GraphQLModule } from '@nestjs/graphql';
 import SchemaModule from '@schema/schema.module';
-import dataloader from 'dataloader';
  
 @Module({
     imports: [
@@ -15,7 +14,7 @@ import dataloader from 'dataloader';
             autoSchemaFile: true,
             cors: {
                 credentials: true,
-                origin: true
+                origin: '*'
             },
             context: ({ req, res }) => { 
                 const ctx = { 

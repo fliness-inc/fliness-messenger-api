@@ -1,5 +1,5 @@
 import Faker from 'faker';
-import { InvitationStatus } from '@/src/database/entities/invitation-status';
+import { InvitationStatus } from '@database/entities/invitation-status';
 import Factory from './factory';
 import Seeder from './seeder';
 

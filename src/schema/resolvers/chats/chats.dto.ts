@@ -26,3 +26,9 @@ export class ChatCreateDTO {
     })
     public readonly userIds?: string[];
 }
+
+@InputType()
+export class ChatsFilter {
+    @Field({ nullable: true,  description: 'The type of the chat.' })
+    public readonly type: ChatTypeEnum;
+}

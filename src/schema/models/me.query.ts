@@ -1,5 +1,5 @@
 import { ObjectType, Field } from '@nestjs/graphql';
-import User from '@schema/models/user';
+import User from '@schema/models/users.model';
 import InvitationsQuery from '@schema/models/invitations.query';
 import UsersConnection from '@schema/models/users.pagination';
 

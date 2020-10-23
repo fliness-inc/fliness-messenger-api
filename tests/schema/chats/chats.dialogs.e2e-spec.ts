@@ -3,7 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import { config as setupDotEnv } from 'dotenv';
 import cookieParser from 'cookie-parser';
 import { getConnection, Connection, getRepository } from 'typeorm';
-import { User } from '@database/entities/user';
+import User from '@database/entities/user';
 import { AppModule } from '@src/app.module';
 import request from 'supertest';
 import * as uuid from 'uuid';
@@ -321,7 +321,7 @@ describe('[E2E] [ChatResolver] ...', () => {
                 expect(await getRepository(Chat).count()).toEqual(0);
             });
 
-            it('should return 409 when the userIds property contain more one member id and not contain  the creator id', async () => {
+            it('should return 400 when the userIds property contain more one member id and not contain  the creator id', async () => {
                 const [creator, companion, otherUser] = users;
     
                 const res = await request(app.getHttpServer())
@@ -350,7 +350,7 @@ describe('[E2E] [ChatResolver] ...', () => {
     
                 expect(Array.isArray(res.body.errors)).toBeTruthy();
                 expect(res.body.errors).toHaveLength(1);
-                expect(res.body.errors[0].extensions.exception.status).toStrictEqual(409);
+                expect(res.body.errors[0].extensions.exception.status).toStrictEqual(400);
 
                 expect(await getRepository(Member).count()).toEqual(0);
                 expect(await getRepository(Chat).count()).toEqual(0);

@@ -1,5 +1,4 @@
-import {Module} from '@nestjs/common';
-
+import { Module } from '@nestjs/common';
 import UUID from '@schema/types/uuid';
 import DateTime from '@schema/types/datetime';
 import Cursor from '@schema/types/cursor';

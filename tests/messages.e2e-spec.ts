@@ -3,7 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import { config as setupDotEnv } from 'dotenv';
 import cookieParser from 'cookie-parser';
 import { getConnection, Connection } from 'typeorm';
-import { User } from '@database/entities/user';
+import User from '@database/entities/user';
 import { AppModule } from '@src/app.module';
 import request from 'supertest';
 import * as uuid from 'uuid';

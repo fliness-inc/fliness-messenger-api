@@ -1,6 +1,6 @@
 import { ObjectType, Field, registerEnumType } from '@nestjs/graphql';
 import Entity from '@schema/models/entity';
-import User from '@schema/models/user';
+import User from '@schema/models/users.model';
 import Datetime from '@schema/types/datetime';
 import { Status, Type } from '@schema/resolvers/invitations/invitations.dto';
 import UUID from '@schema/types/uuid';

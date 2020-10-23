@@ -13,18 +13,17 @@ import UsersService from '@schema/resolvers/users/users.service';
 import { Tokens } from '@schema/resolvers/tokens/tokens.service';
 import { ChatTypeSeeder, ChatTypeFactory } from '@database/seeds/chat-type.seeder';
 import { MemberRoleSeeder, MemberRoleFactory } from '@database/seeds/member-role';
-import { FriendSeeder, FriendFactory } from '@database/seeds/friends.seeder';
 import UserEntity from '@database/entities/user';
-import FriendEntity from '@database/entities/friend';
-import FriendsService from '@schema/resolvers/friends/friends.service';
+import ChatEntity from '@database/entities/chat';
 import { CursorCoder } from '@src/pagination/cursor';
-import { UserPaginationField } from '@schema/models/users.pagination';
+import ChatsService from '@schema/resolvers/chats/chats.service';
+import { ChatPaginationField } from '@schema/models/chats.pagination';
 
 setupDotEnv();
 
 jest.setTimeout(50000);
 
-describe('[E2E] [FriendsResolver] ...', () => {
+describe('[E2E] [ChatsResolver] ...', () => {
     let app: INestApplication;
     let connection: Connection;
 
@@ -40,7 +39,7 @@ describe('[E2E] [FriendsResolver] ...', () => {
         connection = getConnection();
 
         await connection.synchronize(true);
-        await connection.query('TRUNCATE friends CASCADE');
+        await connection.query('TRUNCATE chats, members CASCADE');
 
         const chatTypeSeeder = new ChatTypeSeeder(new ChatTypeFactory());
         await chatTypeSeeder.run(1, { name: ChatTypeEnum.DIALOG });
@@ -57,20 +56,22 @@ describe('[E2E] [FriendsResolver] ...', () => {
     });
 
     afterAll(async () => {
-        await connection.query('TRUNCATE friends CASCADE');
+        await connection.query('TRUNCATE chats, members CASCADE');
         await app.close();
         await connection.close();
     }); 
 
-    describe('[Friends] ...', () => {
+    describe('[Dialogs] ...', () => {
 
-        const users: { user: UserEntity, tokens: Tokens }[] = [];
-        let friends: FriendEntity[] = [];
+        const user: UserEntity = <any>{};
+        const tokens: Tokens = <any>{}
+        let chats: ChatEntity[] = [];
     
         beforeAll(async () => {
             const usersService = app.get<UsersService>(UsersService);
+            const users: { user: UserEntity, password: string }[] = [];
 
-            for (let i = 0; i < 10; ++i) {
+            for (let i = 0; i < 11; ++i) {
                 const payload = { 
                     email: Faker.internet.email(),
                     password: Faker.random.word()
@@ -79,60 +80,67 @@ describe('[E2E] [FriendsResolver] ...', () => {
                     name: Faker.internet.userName(),
                     ...payload
                 });
-                const res = await request(app.getHttpServer())
-                    .post('/graphql')
-                    .send({
-                        operationName: 'Login',
-                        query: `
-                            mutation Login($payload: AuthLoginDTO!) {
-                                auth {
-                                    login(payload: $payload) {
-                                        accessToken
-                                        refreshToken
-                                    }
-                                }
-                            }
-                        `,
-                        variables: {
-                            payload
-                        }
-                    });
-                users.push({ 
-                    user,
-                    tokens: res.body.data.auth.login
-                });
+                
+                users.push({ user, password: payload.password });
             }
 
-            const friendSeeder = new FriendSeeder(new FriendFactory());
+            Object.assign(user, users[0].user);
 
+            const res = await request(app.getHttpServer())
+                .post('/graphql')
+                .send({
+                    operationName: 'Login',
+                    query: `
+                        mutation Login($payload: AuthLoginDTO!) {
+                            auth {
+                                login(payload: $payload) {
+                                    accessToken
+                                    refreshToken
+                                }
+                            }
+                        }
+                    `,
+                    variables: {
+                        payload: {
+                            email: user.email,
+                            password: users[0].password
+                        }
+                    }
+                });
+
+            Object.assign(tokens, res.body.data.auth.login);
+
+            const chatsService = app.get<ChatsService>(ChatsService);
             for (let i = 1; i < users.length; ++i)
-                friends.push((await friendSeeder.run(1, { 
-                    userId: users[0].user.id, 
-                    friendId: users[i].user.id
-                }))[0]);
-
-            friends = friends.sort((f, s) => (f.friendId > s.friendId ? 1 : f.friendId < s.friendId ? -1 : 0));
+                chats.push(await chatsService
+                    .create(user.id, ChatTypeEnum.DIALOG, { userIds: [users[i].user.id] }));
+                
+            chats = chats.sort((f, s) => (f.id > s.id ? 1 : f.id < s.id ? -1 : 0));
         });
         
         describe('[Getting] [Pagination] [Next] ...', () => {
 
             // start [] [] [] [] [] ... end
-            it('should return the first 5 friends of the user', async () => {
+            it('should return the first 5 chats of the user', async () => {
                 const first = 5;
+                const key = ChatPaginationField.ID.replace('.', '_');
                 const res = await request(app.getHttpServer())
                     .post('/graphql')
-                    .set('Authorization', `Bearer ${users[0].tokens.accessToken}`)
+                    .set('Authorization', `Bearer ${tokens.accessToken}`)
                     .send({
-                        operationName: 'GetFriends',
+                        operationName: 'GetChats',
                         query: `
-                            query GetFriends($pagination: UserPaginationInput) {
+                            query GetChats($pagination: ChatPaginationInput) {
                                 me {
-                                    friends(pagination: $pagination) {
+                                    chats(pagination: $pagination) {
                                         edges {
                                             cursor
                                             node {
                                                 id
-                                                name
+                                                title
+                                                description
+                                                type
+                                                createdAt
                                             }
                                         }
                                         totalCount
@@ -147,27 +155,31 @@ describe('[E2E] [FriendsResolver] ...', () => {
                             }
                         `,
                         variables: {
-                            pagination: { 
+                            pagination: {
                                 first
                             }
                         }
                     });
-            
-                const key = UserPaginationField.ID.replace('.', '_');
 
                 expect(res.status).toEqual(200);
                 expect(res.body).toStrictEqual({
                     data: {
                         me: {
-                            friends: {
-                                edges: friends.slice(0, first).map((f: any) => ({ 
-                                    cursor: CursorCoder.encode({ [key]: f.friendId }), 
-                                    node: { id: f.friendId, name: users.find(u => u.user.id === f.friendId).user.name } 
+                            chats: {
+                                edges: chats.slice(0, first).map(chat => ({ 
+                                    cursor: CursorCoder.encode({ [key]: chat.id }), 
+                                    node: { 
+                                        id: chat.id, 
+                                        title: chat.title, 
+                                        description: chat.description, 
+                                        type: chat.type.name,
+                                        createdAt: chat.createdAt.toISOString()
+                                    } 
                                 })),
-                                totalCount: friends.length,
+                                totalCount: chats.length,
                                 pageInfo: {
-                                    startCursor: CursorCoder.encode({ [key]: friends[0].friendId }),
-                                    endCursor: CursorCoder.encode({ [key]: friends[friends.length-1].friendId }),
+                                    startCursor: CursorCoder.encode({ [key]: chats[0].id }),
+                                    endCursor: CursorCoder.encode({ [key]: chats[chats.length - 1].id }),
                                     hasNextPage: true,
                                     hasPreviousPage: false
                                 }
@@ -175,27 +187,30 @@ describe('[E2E] [FriendsResolver] ...', () => {
                         }
                     }
                 });
+                expect(res.body.data.me.chats.edges).toHaveLength(first);
             });
 
             // start ... [] [] [] [] [] ... end
-            it('should return the first 5 frineds after the second friend of the user', async () => {
+            it('should return the first 5 chats after the second friend of the user', async () => {
                 const first = 5;
-                const key = UserPaginationField.ID.replace('.', '_');
-
+                const key = ChatPaginationField.ID.replace('.', '_');
                 const res = await request(app.getHttpServer())
                     .post('/graphql')
-                    .set('Authorization', `Bearer ${users[0].tokens.accessToken}`)
+                    .set('Authorization', `Bearer ${tokens.accessToken}`)
                     .send({
-                        operationName: 'GetFriends',
+                        operationName: 'GetChats',
                         query: `
-                            query GetFriends($pagination: UserPaginationInput) {
+                            query GetChats($pagination: ChatPaginationInput) {
                                 me {
-                                    friends(pagination: $pagination) {
+                                    chats(pagination: $pagination) {
                                         edges {
                                             cursor
                                             node {
                                                 id
-                                                name
+                                                title
+                                                description
+                                                type
+                                                createdAt
                                             }
                                         }
                                         totalCount
@@ -210,9 +225,9 @@ describe('[E2E] [FriendsResolver] ...', () => {
                             }
                         `,
                         variables: {
-                            pagination: { 
+                            pagination: {
                                 first,
-                                after: CursorCoder.encode({ [key]: friends[1].friendId })
+                                after: CursorCoder.encode({ [key]: chats[1].id })
                             }
                         }
                     });
@@ -221,15 +236,21 @@ describe('[E2E] [FriendsResolver] ...', () => {
                 expect(res.body).toStrictEqual({
                     data: {
                         me: {
-                            friends: {
-                                edges: friends.slice(2, first+2).map((f: any) => ({ 
-                                    cursor: CursorCoder.encode({ [key]: f.friendId }), 
-                                    node: { id: f.friendId, name: users.find(u => u.user.id === f.friendId).user.name } 
+                            chats: {
+                                edges: chats.slice(2, first+2).map(chat => ({ 
+                                    cursor: CursorCoder.encode({ [key]: chat.id }), 
+                                    node: { 
+                                        id: chat.id, 
+                                        title: chat.title, 
+                                        description: chat.description, 
+                                        type: chat.type.name,
+                                        createdAt: chat.createdAt.toISOString()
+                                    } 
                                 })),
-                                totalCount: friends.length,
+                                totalCount: chats.length,
                                 pageInfo: {
-                                    startCursor: CursorCoder.encode({ [key]: friends[0].friendId }),
-                                    endCursor: CursorCoder.encode({ [key]: friends[friends.length-1].friendId }),
+                                    startCursor: CursorCoder.encode({ [key]: chats[0].id }),
+                                    endCursor: CursorCoder.encode({ [key]: chats[chats.length - 1].id }),
                                     hasNextPage: true,
                                     hasPreviousPage: true
                                 }
@@ -237,27 +258,30 @@ describe('[E2E] [FriendsResolver] ...', () => {
                         }
                     }
                 });
+                expect(res.body.data.me.chats.edges).toHaveLength(first);
             });
 
             // start ... [] [] [] [] [] end
-            it('should return the last 5 friends of the user', async () => {
+            it('should return the last 5 chats of the user', async () => {
                 const first = 5;
-                const key = UserPaginationField.ID.replace('.', '_');
-
+                const key = ChatPaginationField.ID.replace('.', '_');
                 const res = await request(app.getHttpServer())
                     .post('/graphql')
-                    .set('Authorization', `Bearer ${users[0].tokens.accessToken}`)
+                    .set('Authorization', `Bearer ${tokens.accessToken}`)
                     .send({
-                        operationName: 'GetFriends',
+                        operationName: 'GetChats',
                         query: `
-                            query GetFriends($pagination: UserPaginationInput) {
+                            query GetChats($pagination: ChatPaginationInput) {
                                 me {
-                                    friends(pagination: $pagination) {
+                                    chats(pagination: $pagination) {
                                         edges {
                                             cursor
                                             node {
                                                 id
-                                                name
+                                                title
+                                                description
+                                                type
+                                                createdAt
                                             }
                                         }
                                         totalCount
@@ -272,9 +296,9 @@ describe('[E2E] [FriendsResolver] ...', () => {
                             }
                         `,
                         variables: {
-                            pagination: { 
+                            pagination: {
                                 first,
-                                after: CursorCoder.encode({ [key]: friends[4].friendId })
+                                after: CursorCoder.encode({ [key]: chats[4].id })
                             }
                         }
                     });
@@ -283,15 +307,21 @@ describe('[E2E] [FriendsResolver] ...', () => {
                 expect(res.body).toStrictEqual({
                     data: {
                         me: {
-                            friends: {
-                                edges: friends.slice(5, first+5).map((f: any) => ({ 
-                                    cursor: CursorCoder.encode({ [key]: f.friendId }), 
-                                    node: { id: f.friendId, name: users.find(u => u.user.id === f.friendId).user.name } 
+                            chats: {
+                                edges: chats.slice(5, first+5).map(chat => ({ 
+                                    cursor: CursorCoder.encode({ [key]: chat.id }), 
+                                    node: { 
+                                        id: chat.id, 
+                                        title: chat.title, 
+                                        description: chat.description, 
+                                        type: chat.type.name,
+                                        createdAt: chat.createdAt.toISOString()
+                                    } 
                                 })),
-                                totalCount: friends.length,
+                                totalCount: chats.length,
                                 pageInfo: {
-                                    startCursor: CursorCoder.encode({ [key]: friends[0].friendId }),
-                                    endCursor: CursorCoder.encode({ [key]: friends[friends.length-1].friendId }),
+                                    startCursor: CursorCoder.encode({ [key]: chats[0].id }),
+                                    endCursor: CursorCoder.encode({ [key]: chats[chats.length - 1].id }),
                                     hasNextPage: false,
                                     hasPreviousPage: true
                                 }
@@ -299,27 +329,30 @@ describe('[E2E] [FriendsResolver] ...', () => {
                         }
                     }
                 });
+                expect(res.body.data.me.chats.edges).toHaveLength(first);
             });
 
             // start ... [] [] end
-            it('should return the last 5 friends of the user after the third of the end', async () => {
+            it('should return the last 5 chats of the user after the third of the end', async () => {
                 const first = 5;
-                const key = UserPaginationField.ID.replace('.', '_');
-
+                const key = ChatPaginationField.ID.replace('.', '_');
                 const res = await request(app.getHttpServer())
                     .post('/graphql')
-                    .set('Authorization', `Bearer ${users[0].tokens.accessToken}`)
+                    .set('Authorization', `Bearer ${tokens.accessToken}`)
                     .send({
-                        operationName: 'GetFriends',
+                        operationName: 'GetChats',
                         query: `
-                            query GetFriends($pagination: UserPaginationInput) {
+                            query GetChats($pagination: ChatPaginationInput) {
                                 me {
-                                    friends(pagination: $pagination) {
+                                    chats(pagination: $pagination) {
                                         edges {
                                             cursor
                                             node {
                                                 id
-                                                name
+                                                title
+                                                description
+                                                type
+                                                createdAt
                                             }
                                         }
                                         totalCount
@@ -334,9 +367,9 @@ describe('[E2E] [FriendsResolver] ...', () => {
                             }
                         `,
                         variables: {
-                            pagination: { 
+                            pagination: {
                                 first,
-                                after: CursorCoder.encode({ [key]: friends[7].friendId })
+                                after: CursorCoder.encode({ [key]: chats[7].id })
                             }
                         }
                     });
@@ -345,15 +378,21 @@ describe('[E2E] [FriendsResolver] ...', () => {
                 expect(res.body).toStrictEqual({
                     data: {
                         me: {
-                            friends: {
-                                edges: friends.slice(8, first+8).map((f: any) => ({ 
-                                    cursor: CursorCoder.encode({ [key]: f.friendId }), 
-                                    node: { id: f.friendId, name: users.find(u => u.user.id === f.friendId).user.name } 
+                            chats: {
+                                edges: chats.slice(8, first+8).map(chat => ({ 
+                                    cursor: CursorCoder.encode({ [key]: chat.id }), 
+                                    node: { 
+                                        id: chat.id, 
+                                        title: chat.title, 
+                                        description: chat.description, 
+                                        type: chat.type.name,
+                                        createdAt: chat.createdAt.toISOString()
+                                    } 
                                 })),
-                                totalCount: friends.length,
+                                totalCount: chats.length,
                                 pageInfo: {
-                                    startCursor: CursorCoder.encode({ [key]: friends[0].friendId }),
-                                    endCursor: CursorCoder.encode({ [key]: friends[friends.length-1].friendId }),
+                                    startCursor: CursorCoder.encode({ [key]: chats[0].id }),
+                                    endCursor: CursorCoder.encode({ [key]: chats[chats.length - 1].id }),
                                     hasNextPage: false,
                                     hasPreviousPage: true
                                 }
@@ -361,6 +400,7 @@ describe('[E2E] [FriendsResolver] ...', () => {
                         }
                     }
                 });
+                expect(res.body.data.me.chats.edges).toHaveLength(2);
             });
         });
     });

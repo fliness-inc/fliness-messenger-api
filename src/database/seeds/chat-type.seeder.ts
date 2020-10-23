@@ -5,9 +5,9 @@ import Seeder from '@database/seeds/seeder';
 
 export class ChatTypeFactory implements Factory<ChatType> {
     public create({ name }: Partial<ChatType> = {}) {
-        const user = new ChatType();
-        user.name = name || Faker.random.word();
-        return user;
+        const chatType = new ChatType();
+        chatType.name = name || Faker.random.word();
+        return chatType;
     }
 }
 

@@ -1,6 +1,7 @@
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import IEntity from './entity';
 import ChatType from './chat-type';
+import Member from './member';
 
 @Entity({ name: 'chats' })
 export class Chat extends IEntity {
@@ -15,11 +16,14 @@ export class Chat extends IEntity {
     public memberLimit: number;
 
     @Column({ name: 'type_id', type: 'uuid' })
-    public typId: string;
+    public typeId: string;
 
     @ManyToOne(type => ChatType)
     @JoinColumn({ name: 'type_id' })
     public type: ChatType;
+
+    @OneToMany(type => Member, member => member.chat)
+    public members: Member[];
 }
 
 export default Chat;
