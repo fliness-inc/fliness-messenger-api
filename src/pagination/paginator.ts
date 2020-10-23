@@ -1,8 +1,8 @@
-import {SelectQueryBuilder, ObjectType} from 'typeorm';
-import {Cursor, CursorCoder, PaginationFilters} from '@src/pagination/cursor';
-import {PaginationQuery} from '@src/pagination/query';
-import {Order, Operator, Direction} from '@src/pagination/enums';
-import {PaginationResult, PaginationEdge} from '@src/pagination/result';
+import { SelectQueryBuilder, ObjectType } from 'typeorm';
+import { Cursor, CursorCoder, PaginationFilters } from '@src/pagination/cursor';
+import { PaginationQuery } from '@src/pagination/query';
+import { Order, Operator, Direction } from '@src/pagination/enums';
+import { PaginationResult, PaginationEdge } from '@src/pagination/result';
 
 export class PaginatorConfig<Entity> {
     public readonly builder: SelectQueryBuilder<Entity>;
@@ -204,6 +204,8 @@ export class Paginator<Entity> {
     private preparePaginationFilters(entity: Entity): PaginationFilters {
         const { keys } = this;
         const paginationFilters: PaginationFilters = {};
+
+        if (!entity) return paginationFilters;
 
         keys.forEach(key => {
             const k = key.replace('.', '_');

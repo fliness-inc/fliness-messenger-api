@@ -42,7 +42,8 @@ export class ChatsModelResolver {
             .leftJoin('chat.members', 'member', 'member.user_id = :userId', { userId: user.id })
             .where('chat.is_deleted = :isDeleted', { isDeleted: false });
 
-        if (filter.type) builder.andWhere('chat.type = :type', filter);
+        if (filter.type) builder.andWhere('type.name = :type', filter);
+        else if (filter.id) builder.andWhere('chat.id = :id', filter);
 
         if (!fields.includes(ChatPaginationField.ID))
             fields.push(ChatPaginationField.ID);

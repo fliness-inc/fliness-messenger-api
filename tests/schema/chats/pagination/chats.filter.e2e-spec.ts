@@ -54,7 +54,7 @@ describe('[E2E] [ChatResolver] ...', () => {
     });
 
     afterEach(async () => {
-        await connection.query('TRUNCATE chats, members CASCADE');
+        //await connection.query('TRUNCATE chats, members CASCADE');
     });
 
     afterAll(async () => {
@@ -65,6 +65,7 @@ describe('[E2E] [ChatResolver] ...', () => {
     describe('[Dialogs] ...', () => {
 
         const users: { user: User, tokens: Tokens }[] = [];
+        let chats = []; 
     
         beforeAll(async () => {
             const usersService = app.get<UsersService>(UsersService);
@@ -101,6 +102,21 @@ describe('[E2E] [ChatResolver] ...', () => {
                     tokens: res.body.data.auth.login
                 });
             }
+
+            const chatsService = app.get<ChatsService>(ChatsService);
+            for (let i = 1; i < users.length; ++i)
+                chats.push(await chatsService
+                    .create(users[0].user.id, ChatTypeEnum.DIALOG, { userIds: [users[i].user.id] }));
+            
+            for (let i = 1; i < users.length/2; ++i)
+                chats.push(await chatsService
+                    .create(users[0].user.id, ChatTypeEnum.GROUP, { userIds: [users[i].user.id] }));
+
+            for (let i = 1; i < users.length/4; ++i)
+                chats.push(await chatsService
+                    .create(users[0].user.id, ChatTypeEnum.CHANNEL, { userIds: [users[i].user.id] }));
+
+            chats = chats.sort((f, s) => (f.id > s.id ? 1 : f.id < s.id ? -1 : 0));
         });
 
         describe('[Filter] ...', () => {
@@ -108,13 +124,7 @@ describe('[E2E] [ChatResolver] ...', () => {
             it('should return the chats of the DIALOG type', async () => {
                 const [creator, companion] = users;
 
-                let chats = []; 
-                const chatsService = app.get<ChatsService>(ChatsService);
-                for (let i = 1; i < users.length; ++i)
-                    chats.push(await chatsService
-                        .create(creator.user.id, ChatTypeEnum.DIALOG, { userIds: [users[i].user.id] }));
-                    
-                chats = chats.sort((f, s) => (f.id > s.id ? 1 : f.id < s.id ? -1 : 0));
+                const neededChats = chats.filter(c => c.type.name === ChatTypeEnum.DIALOG);
     
                 const key = ChatPaginationField.ID.replace('.', '_');
                 const res = await request(app.getHttpServer())
@@ -123,9 +133,9 @@ describe('[E2E] [ChatResolver] ...', () => {
                     .send({
                         operationName: 'GetChats',
                         query: `
-                            query GetChats {
+                            query GetChats($filter: ChatsFilter) {
                                 me {
-                                    chats {
+                                    chats(filter: $filter) {
                                         edges {
                                             cursor
                                             node {
@@ -142,7 +152,12 @@ describe('[E2E] [ChatResolver] ...', () => {
                                     }
                                 }
                             }
-                        `
+                        `,
+                        variables: {
+                            filter: {
+                                type: ChatTypeEnum.DIALOG 
+                            }
+                        }
                     });
             
                 expect(res.status).toEqual(200);
@@ -150,16 +165,79 @@ describe('[E2E] [ChatResolver] ...', () => {
                     data: {
                         me: {
                             chats: {
-                                edges: chats.map(chat => ({ 
+                                edges: neededChats.map(chat => ({ 
                                     cursor: CursorCoder.encode({ [key]: chat.id }), 
                                     node: { 
                                         id: chat.id,
                                     } 
                                 })),
-                                totalCount: chats.length,
+                                totalCount: neededChats.length,
                                 pageInfo: {
-                                    startCursor: CursorCoder.encode({ [key]: chats[0].id }),
-                                    endCursor: CursorCoder.encode({ [key]: chats[chats.length - 1].id }),
+                                    startCursor: CursorCoder.encode({ [key]: neededChats[0].id }),
+                                    endCursor: CursorCoder.encode({ [key]: neededChats[neededChats.length - 1].id }),
+                                    hasNextPage: false,
+                                    hasPreviousPage: false
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+            
+            it('should return the chat of the specific id', async () => {
+                const [creator, companion] = users;
+
+                const neededChat = chats[0];
+
+                const key = ChatPaginationField.ID.replace('.', '_');
+                const res = await request(app.getHttpServer())
+                    .post('/graphql')
+                    .set('Authorization', `Bearer ${creator.tokens.accessToken}`)
+                    .send({
+                        operationName: 'GetChats',
+                        query: `
+                            query GetChats($filter: ChatsFilter) {
+                                me {
+                                    chats(filter: $filter) {
+                                        edges {
+                                            cursor
+                                            node {
+                                                id
+                                            }
+                                        }
+                                        totalCount
+                                        pageInfo {
+                                            startCursor
+                                            endCursor
+                                            hasNextPage
+                                            hasPreviousPage
+                                        }
+                                    }
+                                }
+                            }
+                        `,
+                        variables: {
+                            filter: {
+                                id: neededChat.id 
+                            }
+                        }
+                    });
+            
+                expect(res.status).toEqual(200);
+                expect(res.body).toStrictEqual({
+                    data: {
+                        me: {
+                            chats: {
+                                edges: [{ 
+                                    cursor: CursorCoder.encode({ [key]: neededChat.id }), 
+                                    node: { 
+                                        id: neededChat.id,
+                                    } 
+                                }],
+                                totalCount: 1,
+                                pageInfo: {
+                                    startCursor: CursorCoder.encode({ [key]: neededChat.id }),
+                                    endCursor: CursorCoder.encode({ [key]: neededChat.id }),
                                     hasNextPage: false,
                                     hasPreviousPage: false
                                 }
