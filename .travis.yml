@@ -1,0 +1,10 @@
+language: node_js
+
+services:
+  - docker
+  
+before_install:
+  - apk add --no-cache docker-compose
+
+script:
+  - docker-compose --file docker-compose.test.yml up --build --abort-on-container-exit
