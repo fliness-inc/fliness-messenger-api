@@ -153,7 +153,7 @@ describe('[E2E] [FriendsResolver] ...', () => {
                         }
                     });
             
-                const key = UserPaginationField.ID.replace('.', '_');
+                const key = UserPaginationField.ID;
 
                 expect(res.status).toEqual(200);
                 expect(res.body).toStrictEqual({
@@ -181,7 +181,7 @@ describe('[E2E] [FriendsResolver] ...', () => {
             // start ... [] [] [] [] [] ... end
             it('should return the last 5 friends after the second (8) friend of the end', async () => {
                 const last = 5;
-                const key = UserPaginationField.ID.replace('.', '_');
+                const key = UserPaginationField.ID;
                 const res = await request(app.getHttpServer())
                     .post('/graphql')
                     .set('Authorization', `Bearer ${users[0].tokens.accessToken}`)
@@ -247,7 +247,7 @@ describe('[E2E] [FriendsResolver] ...', () => {
             // start [] [] [] [] [] ... end
             it('should return the last 5 friends of the user', async () => {
                 const last = 5;
-                const key = UserPaginationField.ID.replace('.', '_');
+                const key = UserPaginationField.ID;
                 const res = await request(app.getHttpServer())
                     .post('/graphql')
                     .set('Authorization', `Bearer ${users[0].tokens.accessToken}`)
@@ -313,7 +313,7 @@ describe('[E2E] [FriendsResolver] ...', () => {
             // start [] [] ... end
             it('should return the last 5 friends of the user after the third of the end', async () => {
                 const last = 5;
-                const key = UserPaginationField.ID.replace('.', '_');
+                const key = UserPaginationField.ID;
                 const res = await request(app.getHttpServer())
                     .post('/graphql')
                     .set('Authorization', `Bearer ${users[0].tokens.accessToken}`)

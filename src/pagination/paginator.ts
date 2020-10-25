@@ -37,7 +37,7 @@ export class Paginator<Entity> {
     }: PaginatorConfig<Entity>) {
         this.builder = builder.clone();
         this.keys = keys;
-        this.uniqueKey = uniqueKey.replace('.', '_');
+        this.uniqueKey = uniqueKey/* .replace('.', '_') */;
         this.order = order;
         this.limit = limit;
         this.direction = direction;
@@ -102,15 +102,19 @@ export class Paginator<Entity> {
     public hasNextEntity(entities: Entity[], lastEntity: Entity): boolean {
         const fullFetchedData = entities.length === this.limit || !this.hasAfterCursor();
 
+        const key = this.uniqueKey.replace('.', '_');
+
         return fullFetchedData &&
-            entities[entities.length - 1][this.uniqueKey] !== lastEntity[this.uniqueKey];
+            entities[entities.length - 1][key] !== lastEntity[key];
     }
 
     public hasPreviousEntity(entities: Entity[], firstEntity: Entity): boolean {
         const fullFetchedData = entities.length === this.limit || !this.hasBeforeCursor();
 
+        const key = this.uniqueKey.replace('.', '_');
+        
         return fullFetchedData && 
-            entities[0][this.uniqueKey] !== firstEntity[this.uniqueKey];
+            entities[0][key] !== firstEntity[key];
     }
 
     public async getFirstEntity(): Promise<Entity> {
@@ -205,11 +209,10 @@ export class Paginator<Entity> {
         const { keys } = this;
         const paginationFilters: PaginationFilters = {};
 
-        if (!entity) return paginationFilters;
+        if (!entity || !keys) return paginationFilters;
 
         keys.forEach(key => {
-            const k = key.replace('.', '_');
-            paginationFilters[k] = entity[k];
+            paginationFilters[key] = entity[key.replace('.', '_')];
         });
 
         return paginationFilters;

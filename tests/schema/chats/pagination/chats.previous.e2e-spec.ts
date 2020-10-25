@@ -123,7 +123,7 @@ describe('[E2E] [ChatsResolver] ...', () => {
             // start ... [] [] [] [] [] end
             it('should return the last 5 chats of the user', async () => {
                 const last = 5;
-                const key = ChatPaginationField.ID.replace('.', '_');
+                const key = ChatPaginationField.ID;
                 const res = await request(app.getHttpServer())
                     .post('/graphql')
                     .set('Authorization', `Bearer ${tokens.accessToken}`)
@@ -193,7 +193,7 @@ describe('[E2E] [ChatsResolver] ...', () => {
             // start ... [] [] [] [] [] ... end
             it('should return the last 5 chats after the second (8) chats of the end', async () => {
                 const last = 5;
-                const key = ChatPaginationField.ID.replace('.', '_');
+                const key = ChatPaginationField.ID;
                 const res = await request(app.getHttpServer())
                     .post('/graphql')
                     .set('Authorization', `Bearer ${tokens.accessToken}`)
@@ -264,7 +264,7 @@ describe('[E2E] [ChatsResolver] ...', () => {
             // start [] [] [] [] [] ... end
             it('should return the last 5 chats of the user', async () => {
                 const last = 5;
-                const key = ChatPaginationField.ID.replace('.', '_');
+                const key = ChatPaginationField.ID;
                 const res = await request(app.getHttpServer())
                     .post('/graphql')
                     .set('Authorization', `Bearer ${tokens.accessToken}`)
@@ -335,7 +335,7 @@ describe('[E2E] [ChatsResolver] ...', () => {
             // start [] [] ... end
             it('should return the last 5 chats of the user after the third of the end', async () => {
                 const last = 5;
-                const key = ChatPaginationField.ID.replace('.', '_');
+                const key = ChatPaginationField.ID;
                 const res = await request(app.getHttpServer())
                     .post('/graphql')
                     .set('Authorization', `Bearer ${tokens.accessToken}`)

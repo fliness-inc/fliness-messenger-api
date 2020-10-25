@@ -120,7 +120,7 @@ describe('[E2E] [ChatsResolver] ...', () => {
         describe('[Getting] [Pagination] [All] ...', () => {
             it('should return all chats of the user', async () => {
 
-                const key = ChatPaginationField.ID.replace('.', '_');
+                const key = ChatPaginationField.ID;
                 const res = await request(app.getHttpServer())
                     .post('/graphql')
                     .set('Authorization', `Bearer ${tokens.accessToken}`)

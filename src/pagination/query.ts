@@ -18,10 +18,15 @@ export class PaginationQuery<Entity> {
         this.builder.andWhere(new Brackets(qb => {
             Object.entries(filters).forEach(filter => {
                 const [key, val] = filter;
-                qb.orWhere(`${query}${key} ${operator} :${key}`, filters);
-                query = `${query}${key} = :${key} AND `;
+
+                const t = key.split('.').map(k => `"${k}"`).join('.');
+                
+                qb.orWhere(`${query}${t} ${operator} :${key}`, filters);
+                query = `${query}${t} = :${key} AND `;
             });
         }));
+
+        const t = this.builder.getSql();
 
         return this;
     }

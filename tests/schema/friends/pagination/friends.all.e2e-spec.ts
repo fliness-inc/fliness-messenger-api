@@ -116,7 +116,7 @@ describe('[E2E] [FriendsResolver] ...', () => {
 
                 friends = friends.sort((f, s) => (f.friendId > s.friendId ? 1 : f.friendId < s.friendId ? -1 : 0));
 
-                const key = UserPaginationField.ID.replace('.', '_');
+                const key = UserPaginationField.ID;
                 const res = await request(app.getHttpServer())
                     .post('/graphql')
                     .set('Authorization', `Bearer ${users[0].tokens.accessToken}`)

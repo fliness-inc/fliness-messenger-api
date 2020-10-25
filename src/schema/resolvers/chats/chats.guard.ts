@@ -24,7 +24,7 @@ export class ChatGruard implements CanActivate {
 
     public async canActivate(context: ExecutionContext): Promise<boolean> {
 
-        const requiredRoles = this.reflector.get<string[]>('roles', context.getHandler());
+        const requiredRoles = this.reflector.get<string[]>('roles', context.getHandler()) || [];
         const roles = await getRepository(MemberRole).find({ 
             where: { 
                 name: In(requiredRoles) 

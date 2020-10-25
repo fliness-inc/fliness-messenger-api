@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import IEntity from './entity';
 import Member from './member';
 
@@ -11,7 +11,7 @@ export class Message extends IEntity {
     @Column({ name: 'member_id', type: 'uuid' })
     public memberId: string;
 
-    @OneToOne(type => Member)
+    @ManyToOne(type => Member)
     @JoinColumn({ name: 'member_id' })
     public member: Member;
 }

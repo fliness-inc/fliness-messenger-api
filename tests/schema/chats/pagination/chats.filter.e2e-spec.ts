@@ -119,14 +119,14 @@ describe('[E2E] [ChatResolver] ...', () => {
             chats = chats.sort((f, s) => (f.id > s.id ? 1 : f.id < s.id ? -1 : 0));
         });
 
-        describe('[Filter] ...', () => {
+        describe('[Getting] [Filtering] ...', () => {
 
             it('should return the chats of the DIALOG type', async () => {
                 const [creator, companion] = users;
 
                 const neededChats = chats.filter(c => c.type.name === ChatTypeEnum.DIALOG);
     
-                const key = ChatPaginationField.ID.replace('.', '_');
+                const key = ChatPaginationField.ID;
                 const res = await request(app.getHttpServer())
                     .post('/graphql')
                     .set('Authorization', `Bearer ${creator.tokens.accessToken}`)
@@ -189,7 +189,7 @@ describe('[E2E] [ChatResolver] ...', () => {
 
                 const neededChat = chats[0];
 
-                const key = ChatPaginationField.ID.replace('.', '_');
+                const key = ChatPaginationField.ID;
                 const res = await request(app.getHttpServer())
                     .post('/graphql')
                     .set('Authorization', `Bearer ${creator.tokens.accessToken}`)

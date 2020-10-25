@@ -1,8 +1,9 @@
 import { Injectable, ForbiddenException } from '@nestjs/common';
 import MembersService from '@schema/resolvers/members/members.service';
 import { InvalidPropertyError, NotFoundError } from '@src/errors';
-import { FindManyOptions, FindOneOptions, getRepository } from 'typeorm';
+import { FindManyOptions, FindOneOptions, getRepository, Repository } from 'typeorm';
 import Message from '@database/entities/message';
+import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptionsFunc, FindOneOptionsFunc } from '@schema/utils';
 
 export class MessageCreateOptions {
@@ -11,7 +12,11 @@ export class MessageCreateOptions {
 
 @Injectable()
 export class MessagesService {
-    public constructor(private readonly membersService: MembersService) {}
+    public constructor(
+        @InjectRepository(Message)
+        private readonly messageRepository: Repository<Message>,
+        private readonly membersService: MembersService
+    ) {}
     
     public async create(userId: string, chatId: string, options: MessageCreateOptions): Promise<Message> {
         const { text } = options;
@@ -21,16 +26,14 @@ export class MessagesService {
         if (!member)
             throw new NotFoundError(`The member was not found with the user id or chat id`);
 
-        const messages = getRepository(Message);
-        const newMessages = messages.create({
+        const newMessages = this.messageRepository.create({
             memberId: member.id,
             text
         });
-        return messages.save(newMessages);
+        return this.messageRepository.save(newMessages);
     }
 
     public async remove(userId: string, messageId: string): Promise<Message> {
-        const messages = getRepository(Message);
         const message = await this.findOne({ 
             where: { 
                 id: messageId, 
@@ -65,7 +68,7 @@ export class MessagesService {
         if (member.userId !== messageMember.userId)
             throw new ForbiddenException(`You dont have permission`);
 
-        return messages.save(messages.create({
+        return this.messageRepository.save(this.messageRepository.create({
             ...message,
             isDeleted: true
         }));
@@ -92,13 +95,13 @@ export class MessagesService {
     public async find(options?: FindManyOptions<Message> | FindManyOptionsFunc<Message>): Promise<Message[]> {
         const alias = 'messages';
         const op = typeof options === 'function' ? options(alias) : options;
-        return getRepository(Message).find(this.prepareQuery(alias, op));
+        return this.messageRepository.find(this.prepareQuery(alias, op));
     }
 
     public async findOne(options?: FindOneOptions<Message> | FindOneOptionsFunc<Message>): Promise<Message | undefined> {
         const alias = 'messages';
         const op = typeof options === 'function' ? options(alias) : options;
-        return getRepository(Message).findOne(this.prepareQuery(alias, op));
+        return this.messageRepository.findOne(this.prepareQuery(alias, op));
     }
 }
 

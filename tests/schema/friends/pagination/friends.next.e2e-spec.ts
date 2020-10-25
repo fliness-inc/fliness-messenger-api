@@ -153,7 +153,7 @@ describe('[E2E] [FriendsResolver] ...', () => {
                         }
                     });
             
-                const key = UserPaginationField.ID.replace('.', '_');
+                const key = UserPaginationField.ID;
 
                 expect(res.status).toEqual(200);
                 expect(res.body).toStrictEqual({
@@ -180,7 +180,7 @@ describe('[E2E] [FriendsResolver] ...', () => {
             // start ... [] [] [] [] [] ... end
             it('should return the first 5 frineds after the second friend of the user', async () => {
                 const first = 5;
-                const key = UserPaginationField.ID.replace('.', '_');
+                const key = UserPaginationField.ID;
 
                 const res = await request(app.getHttpServer())
                     .post('/graphql')
@@ -242,7 +242,7 @@ describe('[E2E] [FriendsResolver] ...', () => {
             // start ... [] [] [] [] [] end
             it('should return the last 5 friends of the user', async () => {
                 const first = 5;
-                const key = UserPaginationField.ID.replace('.', '_');
+                const key = UserPaginationField.ID;
 
                 const res = await request(app.getHttpServer())
                     .post('/graphql')
@@ -304,7 +304,7 @@ describe('[E2E] [FriendsResolver] ...', () => {
             // start ... [] [] end
             it('should return the last 5 friends of the user after the third of the end', async () => {
                 const first = 5;
-                const key = UserPaginationField.ID.replace('.', '_');
+                const key = UserPaginationField.ID;
 
                 const res = await request(app.getHttpServer())
                     .post('/graphql')
