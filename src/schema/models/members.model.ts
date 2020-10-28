@@ -35,4 +35,4 @@ export class Member extends Entity {
     public readonly updatedAt: Date;
 }
 
-export default Chat;
+export default Member;

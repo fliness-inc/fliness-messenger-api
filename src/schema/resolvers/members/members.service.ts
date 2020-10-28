@@ -7,11 +7,15 @@ import MemberRole from '@database/entities/member-role';
 import { MemberRoleEnum } from '@schema/resolvers/members/members.dto';
 import { FindManyOptions, FindOneOptions, getRepository } from 'typeorm';
 import { FindManyOptionsFunc, FindOneOptionsFunc } from '@schema/utils';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class MembersService {
 
     public constructor(
+        @InjectRepository(Member)
+        private readonly membersRespository: Repository<Member>,
         private readonly usersService: UsersService,
         @Inject(forwardRef(() => ChatsService))
         private readonly chatsService: ChatsService
@@ -44,14 +48,13 @@ export class MembersService {
         if (!memberRole)
             throw new InvalidPropertyError(`The member role was not found: ${roleName}`);
 
-        const members = getRepository(Member);
-        const newMember = members.create({
+        const newMember = this.membersRespository.create({
             userId: user.id,
             chatId: chat.id,
-            roleId: memberRole.id
+            role: memberRole,
         });
 
-        return members.save(newMember);
+        return this.membersRespository.save(newMember, { reload: true });
     }
 
     public async remove(userId: string, chatId: string): Promise<Member> {
@@ -87,6 +90,7 @@ export class MembersService {
                 'userId', 
                 'chatId', 
                 'role',
+                'updatedAt',
                 'createdAt',
             ],
             join: {
