@@ -5,8 +5,8 @@ services:
   
 env:
   - DOCKER_COMPOSE_VERSION=1.27.4
-  - TRAVIS_JOB_ID=$TRAVIS_JOB_ID 
-  - TRAVIS_BRANCH=$TRAVIS_BRANCH
+  - TRAVIS_JOB_ID=${TRAVIS_JOB_ID}
+  - TRAVIS_BRANCH=${TRAVIS_BRANCH}
 
 before_install:
   - sudo rm /usr/local/bin/docker-compose
@@ -15,4 +15,4 @@ before_install:
   - sudo mv docker-compose /usr/local/bin
 
 script:
-  - docker-compose --file docker-compose.test.yml up --build --abort-on-container-exit 
+  - docker-compose --file docker-compose.test.yml up --build --abort-on-container-exit
