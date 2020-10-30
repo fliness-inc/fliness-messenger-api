@@ -30,6 +30,8 @@ services:
             TYPEORM_SYNCHRONIZE: ${TYPEORM_SYNCHRONIZE}
             TYPEORM_ENTITIES: ${TYPEORM_ENTITIES}
             TYPEORM_SUBSCRIBERS: ${TYPEORM_SUBSCRIBERS}
+            TRAVIS_JOB_ID: ${TRAVIS_JOB_ID}
+            TRAVIS_BRANCH: ${TRAVIS_BRANCH}
         depends_on:
             - db
         volumes: 
