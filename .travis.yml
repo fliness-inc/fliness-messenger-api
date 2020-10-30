@@ -13,5 +13,5 @@ before_install:
   - sudo mv docker-compose /usr/local/bin
 
 script:
-  - echo "$TRAVIS_JOB_ID $TRAVIS_BRANCH"
+  - echo $TRAVIS_JOB_ID
   - docker-compose --file docker-compose.test.yml up --build --abort-on-container-exit 
