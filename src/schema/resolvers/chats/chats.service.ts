@@ -62,6 +62,11 @@ export class ChatsService {
         }));
     }
 
+    public async findByIds(ids: string[], options?: FindManyOptions<Chat>): Promise<Chat[]> {
+        const chats = await this.chatsRepository.findByIds(ids, options);
+        return ids.map(id => chats.find(u => u.id === id));
+    } 
+
 } 
 
 export default ChatsService;

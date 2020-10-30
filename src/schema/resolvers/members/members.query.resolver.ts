@@ -1,8 +1,7 @@
 import { UseGuards } from '@nestjs/common';
 import { Resolver, ResolveField, Field, Args, Parent } from '@nestjs/graphql';
 import AuthGuard from '@schema/resolvers/auth/auth.guard';
-import MemberService from '@schema/resolvers/members/members.service';
-import { MemberRoleEnum, MembersFilter } from '@schema/resolvers/members/members.dto';
+import { MembersFilter } from '@schema/resolvers/members/members.dto';
 import Chat from '@schema/models/chats.model';
 import Sort from '@schema/types/sort';
 import { Direction, Order } from '@src/pagination/enums';
@@ -16,12 +15,11 @@ import * as Pagination from '@src/pagination/paginator';
 
 @UseGuards(AuthGuard)
 @Resolver(of => Chat)
-export class MembersResolver {
+export class MembersQueryResolver {
 
     public constructor(
         @InjectRepository(Member)
         private readonly membersRespository: Repository<Member>,
-        private readonly membersService: MemberService
     ) {}
 
     @Field(type => MemberConnection, { name: 'members' })
@@ -78,4 +76,4 @@ export class MembersResolver {
     }
 }
 
-export default MembersResolver;
+export default MembersQueryResolver;

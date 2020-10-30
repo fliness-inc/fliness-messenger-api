@@ -17,14 +17,13 @@ export class GqlException extends ApolloError {
 export class Context {
     public req: Request;
     public res: Response;
-    public dataloaders: WeakMap<typeof Info, DataLoader<string, any, string>>
+    public dataloaders: WeakMap<object, DataLoader<string, any, string>>
 }
 
 @Catch(HttpException)
 export class GlobalExceptionFilter implements GqlExceptionFilter {
     catch(exception: HttpException, host: ArgumentsHost) {
         const gqlHost = GqlArgumentsHost.create(host);
-        console.log(exception);
         return new GqlException(exception.message, 'API_ERROR', { 
             message: exception.message,
             statusCode: exception.getStatus()

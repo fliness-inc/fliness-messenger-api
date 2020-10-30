@@ -13,4 +13,4 @@ COPY . .
 
 EXPOSE ${PORT}
 
-CMD npm run test --runInBand ./tests/
+CMD npm run test:cov ./tests/

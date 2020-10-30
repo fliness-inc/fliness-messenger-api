@@ -157,6 +157,12 @@ describe('[E2E] [MembersResolver] ...', () => {
                                                             id
                                                             chatId
                                                             userId
+                                                            chat {
+                                                                id
+                                                            }
+                                                            user {
+                                                                id
+                                                            }
                                                             role
                                                             createdAt
                                                             updatedAt
@@ -183,6 +189,7 @@ describe('[E2E] [MembersResolver] ...', () => {
                         }
                     });
 
+                console.log(res.body);
                 expect(res.status).toEqual(200);
 
                 const chat = res.body.data.me.chats.edges[0].node;
@@ -194,6 +201,8 @@ describe('[E2E] [MembersResolver] ...', () => {
                         node: { 
                             id: m.id, 
                             role: m.role.name, 
+                            user: { id: m.userId },
+                            chat: { id: m.chatId },
                             chatId: m.chatId,
                             userId: m.userId,
                             createdAt: m.createdAt.toISOString(),
