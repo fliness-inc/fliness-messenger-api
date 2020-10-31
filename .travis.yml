@@ -14,3 +14,4 @@ before_install:
 
 script:
   - docker-compose --file docker-compose.test.yml up --build --abort-on-container-exit
+  - bash <(curl -s https://codecov.io/bash)
