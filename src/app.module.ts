@@ -12,9 +12,10 @@ import SchemaModule from '@schema/schema.module';
             installSubscriptionHandlers: true,
             fieldResolverEnhancers: ['guards'],
             autoSchemaFile: true,
+            introspection: true,
             cors: {
                 credentials: true,
-                origin: '*'
+                origin: true
             },
             context: ({ req, res }) => { 
                 const ctx = { 
