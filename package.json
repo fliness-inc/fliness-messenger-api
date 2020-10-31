@@ -17,7 +17,7 @@
     "test": "jest",
     "test:watch": "jest --watch --runInBand",
     "test:cov": "jest --coverage --runInBand",
-    "test:coveralls": "jest --coverage --runInBand && bash <(curl -s https://codecov.io/bash)",
+    "test:coveralls": "jest --coverage --runInBand | bash <(curl -s https://codecov.io/bash)",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --runInBand ./tests",
     "test:e2e:watch": "jest --watch --runInBand ./tests",
