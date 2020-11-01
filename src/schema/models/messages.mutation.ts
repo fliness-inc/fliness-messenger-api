@@ -1,12 +1,12 @@
-import { ObjectType, Field, registerEnumType } from '@nestjs/graphql';
+import { ObjectType, Field } from '@nestjs/graphql';
 import Message from '@schema/models/messages.model';
 
 @ObjectType()
 export class MessagesMutation {
-    @Field(type => Message)
+    @Field(() => Message)
     public readonly create: Message;
 
-    @Field(type => Message) 
+    @Field(() => Message) 
     public readonly remove: Message;
 }
 

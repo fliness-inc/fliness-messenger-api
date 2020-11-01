@@ -4,8 +4,8 @@ import MeMutationResolver from '@schema/resolvers/me/me.mutation.resolver';
 import UsersModule from '@schema/resolvers/users/users.module';
 
 @Module({
-    imports: [UsersModule],
-    providers: [MeQueryResolver, MeMutationResolver]
+	imports: [UsersModule],
+	providers: [MeQueryResolver, MeMutationResolver]
 })
 export class MeModule {}
 

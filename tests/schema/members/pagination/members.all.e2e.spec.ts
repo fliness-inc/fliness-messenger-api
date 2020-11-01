@@ -6,19 +6,16 @@ import { getConnection, Connection } from 'typeorm';
 import User from '@database/entities/user';
 import { AppModule } from '@src/app.module';
 import request from 'supertest';
-import * as uuid from 'uuid';
 import Faker from 'faker';
 import { ChatTypeEnum } from '@schema/resolvers/chats/chats.dto';
 import { MemberRoleEnum } from '@schema/resolvers/members/members.dto';
 import UsersService from '@schema/resolvers/users/users.service';
 import { Tokens } from '@schema/resolvers/tokens/tokens.service';
 import { ChatTypeSeeder, ChatTypeFactory } from '@database/seeds/chat-type.seeder';
-import { MemberRoleSeeder, MemberRoleFactory } from '@database/seeds/member-role';
+import { MemberRoleSeeder, MemberRoleFactory } from '@database/seeds/member-role.seeder';
 import MembersService from '@schema/resolvers/members/members.service';
 import Chat from '@database/entities/chat';
 import ChatsService from '@schema/resolvers/chats/chats.service';
-import MessagesService from '@schema/resolvers/messages/messages.service';
-import Message from '@database/entities/message';
 import { MemberPaginationField } from '@schema/models/members.pagination';
 import { CursorCoder } from '@src/pagination/cursor';
 import Member from '@database/entities/member';
@@ -189,7 +186,6 @@ describe('[E2E] [MembersResolver] ...', () => {
                         }
                     });
 
-                console.log(res.body);
                 expect(res.status).toEqual(200);
 
                 const chat = res.body.data.me.chats.edges[0].node;

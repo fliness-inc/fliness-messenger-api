@@ -4,30 +4,30 @@ import { GraphQLModule } from '@nestjs/graphql';
 import SchemaModule from '@schema/schema.module';
  
 @Module({
-    imports: [
-        TypeOrmModule.forRoot(), 
-        GraphQLModule.forRoot({
-            debug: true,
-            playground: true,
-            installSubscriptionHandlers: true,
-            fieldResolverEnhancers: ['guards'],
-            autoSchemaFile: true,
-            introspection: true,
-            cors: {
-                credentials: true,
-                origin: true
-            },
-            context: ({ req, res }) => { 
-                const ctx = { 
-                    res,
-                    req,
-                    dataloaders: new WeakMap()
-                }
-                return ctx; 
-            }
-        }),
-        SchemaModule
-    ]
+	imports: [
+		TypeOrmModule.forRoot(), 
+		GraphQLModule.forRoot({
+			debug: true,
+			playground: true,
+			installSubscriptionHandlers: true,
+			fieldResolverEnhancers: ['guards'],
+			autoSchemaFile: true,
+			introspection: true,
+			cors: {
+				credentials: true,
+				origin: true
+			},
+			context: ({ req, res }) => { 
+				const ctx = { 
+					res,
+					req,
+					dataloaders: new WeakMap()
+				}
+				return ctx; 
+			}
+		}),
+		SchemaModule
+	]
 })
 export class AppModule {}
 

@@ -7,31 +7,31 @@ import UUID from '@schema/types/uuid';
 import { MemberRoleEnum } from '@schema/resolvers/members/members.dto';
 
 registerEnumType(MemberRoleEnum, {
-    name: 'MemberRole'
+	name: 'MemberRole'
 });
 
 @ObjectType()
 export class Member extends Entity {
 
-    @Field(type => UUID)
+    @Field(() => UUID)
     public readonly chatId: string;
     
-    @Field(type => Chat)
+    @Field(() => Chat)
     public readonly chat?: Chat;
 
-    @Field(type => UUID)
+    @Field(() => UUID)
     public readonly userId: string;
     
-    @Field(type => User)
+    @Field(() => User)
     public readonly user?: User;
 
-    @Field(type => MemberRoleEnum)
+    @Field(() => MemberRoleEnum)
     public readonly role: MemberRoleEnum;
 
-    @Field(type => DateTime)
+    @Field(() => DateTime)
     public readonly createdAt: Date;
 
-    @Field(type => DateTime)
+    @Field(() => DateTime)
     public readonly updatedAt: Date;
 }
 

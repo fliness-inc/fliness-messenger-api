@@ -10,17 +10,17 @@ import MembersModule from '@schema/resolvers/members/members.module';
 import MessagesModule from '@schema/resolvers/messages/messages.module';
 
 @Module({
-    imports: [
-        UsersModule,
-        AuthModule,
-        TokensModule,
-        FriendsModule,
-        InvitationsModule,
-        MeModule,
-        ChatModule,
-        MembersModule,
-        MessagesModule
-    ]
+	imports: [
+		UsersModule,
+		AuthModule,
+		TokensModule,
+		FriendsModule,
+		InvitationsModule,
+		MeModule,
+		ChatModule,
+		MembersModule,
+		MessagesModule
+	]
 })
 export class ResolversModule {}
 

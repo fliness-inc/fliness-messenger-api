@@ -5,10 +5,10 @@ import UsersConnection from '@schema/models/users.pagination';
 
 @ObjectType()
 export class MeQuery extends User {
-    @Field(type => InvitationsQuery)
+    @Field(() => InvitationsQuery)
     public readonly invitations?: InvitationsQuery;
 
-    @Field(type => UsersConnection)
+    @Field(() => UsersConnection)
     public readonly friends?: UsersConnection;
 }
 

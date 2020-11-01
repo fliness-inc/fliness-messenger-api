@@ -11,7 +11,7 @@ export class Message extends IEntity {
     @Column({ name: 'member_id', type: 'uuid' })
     public memberId: string;
 
-    @ManyToOne(type => Member)
+    @ManyToOne(() => Member)
     @JoinColumn({ name: 'member_id' })
     public member: Member;
 }

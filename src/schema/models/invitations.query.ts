@@ -1,13 +1,13 @@
-import { ObjectType, Field, ResolveField, Query, Parent } from '@nestjs/graphql';
+import { ObjectType, Field } from '@nestjs/graphql';
 import Invitation from '@schema/models/invitations.query';
 
 @ObjectType() 
 export class InvitationQuery {
 
-    @Field(type => [Invitation])
+    @Field(() => [Invitation])
     public readonly fromMe: Invitation[];
 
-    @Field(type => [Invitation])
+    @Field(() => [Invitation])
     public readonly forMe: Invitation[];
 }
 

@@ -7,13 +7,13 @@ import AuthService from '@schema/resolvers/auth/auth.service';
 import AuthResolver from '@schema/resolvers/auth/auth.resolver';
 
 @Module({
-    imports: [
-        TokensModule,
-        UsersModule,
-        PassportModule,
-    ],
-    providers: [JwtStrategy, AuthService, AuthResolver],
-    exports: [JwtStrategy, AuthService],
+	imports: [
+		TokensModule,
+		UsersModule,
+		PassportModule,
+	],
+	providers: [JwtStrategy, AuthService, AuthResolver],
+	exports: [JwtStrategy, AuthService],
 })
 export class AuthModule {}
 

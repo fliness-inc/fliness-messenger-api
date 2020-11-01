@@ -11,7 +11,7 @@ export enum MemberPaginationField {
 }
 
 registerEnumType(MemberPaginationField, {
-    name: 'MemberPaginationField'
+	name: 'MemberPaginationField'
 });
 
 @InputType()

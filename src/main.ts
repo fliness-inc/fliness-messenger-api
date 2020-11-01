@@ -9,15 +9,15 @@ setupDotEnv();
 const { PORT = 8080 } = process.env;
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  app.enableCors({
-      origin: true,
-      credentials: true,
-  });
-  app.use(cookieParser());
-  app.useGlobalFilters(new GlobalExceptionFilter());
+	const app = await NestFactory.create(AppModule);
+	app.enableCors({
+		origin: true,
+		credentials: true,
+	});
+	app.use(cookieParser());
+	app.useGlobalFilters(new GlobalExceptionFilter());
 
-  await app.listen(PORT);
+	await app.listen(PORT);
 }
 
 bootstrap();

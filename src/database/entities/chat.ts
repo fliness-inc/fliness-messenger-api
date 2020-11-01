@@ -18,11 +18,11 @@ export class Chat extends IEntity {
     @Column({ name: 'type_id', type: 'uuid' })
     public typeId: string;
 
-    @ManyToOne(type => ChatType)
+    @ManyToOne(() => ChatType)
     @JoinColumn({ name: 'type_id' })
     public type: ChatType;
 
-    @OneToMany(type => Member, member => member.chat)
+    @OneToMany(() => Member, member => member.chat)
     public members: Member[];
 }
 

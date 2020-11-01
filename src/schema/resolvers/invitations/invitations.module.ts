@@ -7,14 +7,14 @@ import FriendsModule from '@schema/resolvers/friends/friends.module';
 import InvitationResolver from '@schema/resolvers/invitations/invitation.resolver';
 
 @Module({
-    imports: [UsersModule, FriendsModule],
-    providers: [
-        InvitationResolver,
-        InvitationsQueryResolver, 
-        InvitationsMutationResolver, 
-        InvitationsService
-    ],
-    exports: [InvitationsService]
+	imports: [UsersModule, FriendsModule],
+	providers: [
+		InvitationResolver,
+		InvitationsQueryResolver, 
+		InvitationsMutationResolver, 
+		InvitationsService
+	],
+	exports: [InvitationsService]
 })
 export class InvitationsModule {}
 

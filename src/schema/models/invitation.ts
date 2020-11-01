@@ -5,32 +5,31 @@ import Datetime from '@schema/types/datetime';
 import { Status, Type } from '@schema/resolvers/invitations/invitations.dto';
 import UUID from '@schema/types/uuid';
 
-
 registerEnumType(Status, { name: 'InvitationsStatus' });
 registerEnumType(Type, { name: 'InvitationsType' });
 
 @ObjectType()
 export class Invitation extends Entity {
 
-    @Field(type => User)
+    @Field(() => User)
     public sender?: User;
 
-    @Field(type => UUID)
+    @Field(() => UUID)
     public senderId: string;
 
-    @Field(type => User)
+    @Field(() => User)
     public recipient?: User;
 
-    @Field(type => UUID)
+    @Field(() => UUID)
     public recipientId: string;
 
-    @Field(type => Type)
+    @Field(() => Type)
     public type: Type;
 
-    @Field(type => Status)
+    @Field(() => Status)
     public status: Status;
 
-    @Field(type => Datetime)
+    @Field(() => Datetime)
     public expiresAt: Date;
 }
 

@@ -3,10 +3,10 @@ import UUID from '@schema/types/uuid';
 
 @ObjectType()
 export class Token {
-    @Field(type => String)
+    @Field(() => String)
     public accessToken: string;
 
-    @Field(type => UUID)
+    @Field(() => UUID)
     public refreshToken: string;
 }
 

@@ -1,4 +1,4 @@
-import { ObjectType, Field, registerEnumType } from '@nestjs/graphql';
+import { ObjectType, Field } from '@nestjs/graphql';
 import Entity from '@schema/models/entity';
 import DateTime from '@schema/types/datetime';
 import Member from '@schema/models/members.model';
@@ -6,19 +6,19 @@ import UUID from '@schema/types/uuid';
 
 @ObjectType()
 export class Message extends Entity {
-    @Field(type => String)
+    @Field(() => String)
     public readonly text: string;
 
-    @Field(type => UUID) 
+    @Field(() => UUID) 
     public readonly memberId: string;
 
-    @Field(type => Member)
+    @Field(() => Member)
     public readonly member?: Member;
 
-    @Field(type => DateTime)
+    @Field(() => DateTime)
     public readonly createdAt: Date;
 
-    @Field(type => DateTime)
+    @Field(() => DateTime)
     public readonly updatedAt: Date;
 }
 

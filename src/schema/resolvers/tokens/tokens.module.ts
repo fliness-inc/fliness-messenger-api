@@ -5,13 +5,13 @@ import TokensService from '@schema/resolvers/tokens/tokens.service';
 const { JWT_SECRET_KEY } = process.env;
 
 @Module({
-    imports: [
-        JwtModule.register({
-            secret: JWT_SECRET_KEY,
-        })
-    ],
-    providers: [TokensService],
-    exports: [TokensService]
+	imports: [
+		JwtModule.register({
+			secret: JWT_SECRET_KEY,
+		})
+	],
+	providers: [TokensService],
+	exports: [TokensService]
 })
 export class TokensModule {}
 

@@ -3,8 +3,8 @@ import UsersService from '@schema/resolvers/users/users.service';
 import UsersResolver from '@schema/resolvers/users/users.resolver';
 
 @Module({
-    providers: [UsersService, UsersResolver],
-    exports: [UsersService]
+	providers: [UsersService, UsersResolver],
+	exports: [UsersService]
 })
 export class UsersModule {}
 

@@ -1,16 +1,16 @@
-import { ObjectType, Field, ResolveField, Query, Parent } from '@nestjs/graphql';
+import { ObjectType, Field } from '@nestjs/graphql';
 import Invitation from '@schema/models/invitation';
 
 @ObjectType() 
 export class InvitationsMutaion {
 
-    @Field(type => Invitation)
+    @Field(() => Invitation)
     public readonly create: Invitation;
 
-    @Field(type => Invitation)
+    @Field(() => Invitation)
     public readonly accept: Invitation;
 
-    @Field(type => Invitation)
+    @Field(() => Invitation)
     public readonly reject: Invitation;
 }
 

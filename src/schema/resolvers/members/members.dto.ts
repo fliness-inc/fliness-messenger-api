@@ -9,15 +9,15 @@ export enum MemberRoleEnum {
 
 @InputType()
 export class MembersFilter {
-    @Field(type => UUID, { 
-        nullable: true,  
-        description: 'The id of the member.' 
+    @Field(() => UUID, { 
+    	nullable: true,  
+    	description: 'The id of the member.' 
     })
     public readonly id: string;
 
-    @Field(type => MemberRoleEnum, { 
-        nullable: true,  
-        description: 'The role of the member.' 
+    @Field(() => MemberRoleEnum, { 
+    	nullable: true,  
+    	description: 'The role of the member.' 
     })
     public readonly role: MemberRoleEnum;
 }

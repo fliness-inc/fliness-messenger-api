@@ -13,7 +13,7 @@ import { MemberRoleEnum } from '@schema/resolvers/members/members.dto';
 import UsersService from '@schema/resolvers/users/users.service';
 import { Tokens } from '@schema/resolvers/tokens/tokens.service';
 import { ChatTypeSeeder, ChatTypeFactory } from '@database/seeds/chat-type.seeder';
-import { MemberRoleSeeder, MemberRoleFactory } from '@database/seeds/member-role';
+import { MemberRoleSeeder, MemberRoleFactory } from '@database/seeds/member-role.seeder';
 import { FriendSeeder, FriendFactory } from '@database/seeds/friends.seeder';
 import UserEntity from '@database/entities/user';
 import FriendsService from '@schema/resolvers/friends/friends.service';

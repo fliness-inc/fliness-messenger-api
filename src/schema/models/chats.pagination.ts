@@ -11,7 +11,7 @@ export enum ChatPaginationField {
 }
 
 registerEnumType(ChatPaginationField, {
-    name: 'ChatPaginationField'
+	name: 'ChatPaginationField'
 });
 
 @InputType()

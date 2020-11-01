@@ -1,39 +1,29 @@
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, InputType, registerEnumType } from '@nestjs/graphql';
 import UUID from '@schema/types/uuid';
-import DateTime from '@schema/types/datetime';
+import Filter from '@schema/generics/filter';
 
 @InputType()
 export class MessageCreateDTO {
-    @Field(type => String, { description: 'The content of your message.' })
+    @Field(() => String, { description: 'The content of your message.' })
     public readonly text: string;
 
-    @Field(type => UUID)
+    @Field(() => UUID)
     public readonly chatId: string;
 }
 
-@InputType()
-export class MessageFilter {
-    @Field(type => UUID, { 
-        nullable: true,  
-        description: 'The id of the message.' 
-    })
-    public readonly id?: string;
-
-    @Field(type => String, { 
-        nullable: true,  
-        description: 'The text of the message.' 
-    })
-    public readonly text?: string;
-
-    @Field(type => DateTime, { 
-        nullable: true,  
-        description: 'The creation time of the message.' 
-    })
-    public readonly createdAt?: Date;
-
-    @Field(type => DateTime, { 
-        nullable: true,  
-        description: 'The last updating time of the message.' 
-    })
-    public readonly updatedAt?: Date;
+export enum MessageFieldArgumentEnum {
+    ID = '"message"."id"',
+    TEXT = '"message"."text"',
+    UPDATED_At = '"message"."updated_at"',
+    CREATED_At = '"message"."created_at"',
+    MEMBER_ID = '"member"."id"',
+    MEMBER_USER_ID = '"member"."user_id"',
+    MEMBER_CHAT_ID = '"member"."chat_id"'
 }
+
+registerEnumType(MessageFieldArgumentEnum, {
+	name: 'MessageFieldName'
+});
+
+@InputType()
+export class MessageFilter extends Filter(MessageFieldArgumentEnum, { name: 'MessageFilter' }) {}

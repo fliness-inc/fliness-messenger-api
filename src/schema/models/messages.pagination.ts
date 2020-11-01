@@ -11,7 +11,7 @@ export enum MessagePaginationField {
 }
 
 registerEnumType(MessagePaginationField, {
-    name: 'MessagePaginationField'
+	name: 'MessagePaginationField'
 });
 
 @InputType()

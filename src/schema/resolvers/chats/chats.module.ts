@@ -8,9 +8,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import Chat from '@database/entities/chat'
 
 @Module({
-    imports: [UsersModule, forwardRef(() => MembersModule), TypeOrmModule.forFeature([Chat])],
-    providers: [ChatsModelResolver, ChatsMutationResolver, ChatsService],
-    exports: [ChatsService]
+	imports: [UsersModule, forwardRef(() => MembersModule), TypeOrmModule.forFeature([Chat])],
+	providers: [ChatsModelResolver, ChatsMutationResolver, ChatsService],
+	exports: [ChatsService]
 })
 export class ChatsModule {}
 

@@ -2,10 +2,9 @@ import { ObjectType, Field, registerEnumType } from '@nestjs/graphql';
 import Entity from '@schema/models/entity';
 import { ChatTypeEnum } from '@schema/resolvers/chats/chats.dto';
 import DateTime from '@schema/types/datetime';
-import UUID from '@schema/types/uuid';
 
 registerEnumType(ChatTypeEnum, {
-    name: 'ChatType'
+	name: 'ChatType'
 })
 
 @ObjectType()
@@ -16,10 +15,10 @@ export class Chat extends Entity {
     @Field({ nullable: true })
     public readonly description?: string;
 
-    @Field(type => ChatTypeEnum)
+    @Field(() => ChatTypeEnum)
     public readonly type: ChatTypeEnum;
 
-    @Field(type => DateTime)
+    @Field(() => DateTime)
     public readonly createdAt: Date;
 }
 

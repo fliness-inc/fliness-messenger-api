@@ -10,7 +10,7 @@ export enum UserPaginationField {
 }
 
 registerEnumType(UserPaginationField, {
-    name: 'UserPaginationField'
+	name: 'UserPaginationField'
 });
 
 @InputType()

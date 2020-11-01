@@ -15,8 +15,8 @@ export class User extends IEntity {
 
   @BeforeInsert()
   private encodePassword() {
-    const salt = bcrypt.genSaltSync();
-    this.password = bcrypt.hashSync(this.password, salt);
+  	const salt = bcrypt.genSaltSync();
+  	this.password = bcrypt.hashSync(this.password, salt);
   }
 }
 

@@ -1,6 +1,6 @@
 import { CursorCoder, Cursor, PaginationFilters } from '@src/pagination/cursor';
 
-describe('[Tesing] Pagination', () => {
+describe('[E2E] [Pagination] ', () => {
     describe('The cursor coder', () => {
         it('should encode and decode the cursor', () => {
             const paginationFilters: PaginationFilters  = { id: 'sdfasf', name: 'fdsafasdf', createdAt: new Date(), number: 5 };

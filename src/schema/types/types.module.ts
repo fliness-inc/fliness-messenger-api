@@ -5,12 +5,12 @@ import Cursor from '@schema/types/cursor';
 import Sort from '@schema/types/sort';
 
 @Module({
-    providers: [
-        UUID,
-        DateTime,
-        Cursor,
-        Sort
-    ]
+	providers: [
+		UUID,
+		DateTime,
+		Cursor,
+		Sort
+	]
 })
 export class TypesModule {}
 

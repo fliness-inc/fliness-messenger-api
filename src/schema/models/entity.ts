@@ -3,7 +3,7 @@ import UUID from '@schema/types/uuid';
 
 @ObjectType()
 export class Entity {
-    @Field(type => UUID)
+    @Field(() => UUID)
     public readonly id: string;
 }
 

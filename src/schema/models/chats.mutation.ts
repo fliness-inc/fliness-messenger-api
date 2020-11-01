@@ -4,13 +4,13 @@ import MessagesMutation from '@schema/models/messages.mutation';
 
 @ObjectType()
 export class ChatsMutation {
-    @Field(type => Chat)
+    @Field(() => Chat)
     public readonly create: Chat;
 
-    @Field(type => Chat)
+    @Field(() => Chat)
     public readonly remove: Chat;
 
-    @Field(type => MessagesMutation)
+    @Field(() => MessagesMutation)
     public readonly messages: MessagesMutation;
 }
 

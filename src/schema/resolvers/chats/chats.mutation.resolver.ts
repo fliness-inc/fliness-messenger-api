@@ -13,46 +13,46 @@ import UUID from '@schema/types/uuid';
 import MessagesMutation from '@schema/models/messages.mutation';
 
 @UseGuards(AuthGuard)
-@Resolver(of => ChatsMutation)
+@Resolver(() => ChatsMutation)
 export class ChatsMutationResolver {
 
-    public constructor(private readonly chatService: ChatsService) {}
+	public constructor(private readonly chatService: ChatsService) {}
 
-    @ResolveField(type => Chat, { name: 'create' })
-    public async create(
+    @ResolveField(() => Chat, { name: 'create' })
+	public async create(
         @CurrentUser() user: User,
         @Args('payload') payload: ChatCreateDTO
-    ): Promise<Chat> {
-        const chat = await this.chatService.create(user.id, payload.type, payload);
-        return {
-            id: chat.id,
-            title: chat.title,
-            description: chat.description,
-            type: <ChatTypeEnum>chat.type.name,
-            createdAt: chat.createdAt
-        };
-    }
+	): Promise<Chat> {
+		const chat = await this.chatService.create(user.id, payload.type, payload);
+		return {
+			id: chat.id,
+			title: chat.title,
+			description: chat.description,
+			type: <ChatTypeEnum>chat.type.name,
+			createdAt: chat.createdAt
+		};
+	}
 
     @UseGuards(ChatGruard)
     @ChatRoles(MemberRoleEnum.CREATOR)
-    @ResolveField(type => Chat, { name: 'remove' })
+    @ResolveField(() => Chat, { name: 'remove' })
     public async remove(
         @CurrentUser() user: User,
         @Args('chatId', { type: () => UUID }) chatId: string
     ): Promise<Chat> {
-        const chat = await this.chatService.remove(chatId);
-        return {
-            id: chat.id,
-            title: chat.title,
-            description: chat.description,
-            type: <ChatTypeEnum>chat.type.name,
-            createdAt: chat.createdAt
-        };
+    	const chat = await this.chatService.remove(chatId);
+    	return {
+    		id: chat.id,
+    		title: chat.title,
+    		description: chat.description,
+    		type: <ChatTypeEnum>chat.type.name,
+    		createdAt: chat.createdAt
+    	};
     }
 
-    @ResolveField(type => MessagesMutation, { name: 'messages' })
+    @ResolveField(() => MessagesMutation, { name: 'messages' })
     public async messages(): Promise<MessagesMutation> {
-        return <MessagesMutation>{};
+    	return <MessagesMutation>{};
     }
 }
 

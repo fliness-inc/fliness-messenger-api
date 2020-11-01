@@ -9,25 +9,25 @@ export enum ChatTypeEnum {
 
 @InputType()
 export class ChatCreateDTO {
-    @Field(type => String, { 
-        nullable: true,  
-        description: 'The title of your chat. If you are creating a group/channel, this property is required.' 
+    @Field(() => String, { 
+    	nullable: true,  
+    	description: 'The title of your chat. If you are creating a group/channel, this property is required.' 
     })
     public readonly title?: string;
 
-    @Field(type => String, { 
-        nullable: true, 
-        description: 'The description of your chat.' 
+    @Field(() => String, { 
+    	nullable: true, 
+    	description: 'The description of your chat.' 
     })
     public readonly description?: string;
 
-    @Field(type => ChatTypeEnum, { 
-        description: 'The type of your chat.' 
+    @Field(() => ChatTypeEnum, { 
+    	description: 'The type of your chat.' 
     })
     public readonly type: ChatTypeEnum;
 
-    @Field(type => [String], { 
-        description: `IDs of users who will be automatically added to the chat. 
+    @Field(() => [String], { 
+    	description: `IDs of users who will be automatically added to the chat. 
             If you add the ID of the user who is the chat creator, 
             only one member will still be created. 
             If you are creating a dialog, you must specify 
@@ -38,15 +38,15 @@ export class ChatCreateDTO {
 
 @InputType()
 export class ChatsFilter {
-    @Field(type => UUID, { 
-        nullable: true,  
-        description: 'The id of the chat.' 
+    @Field(() => UUID, { 
+    	nullable: true,  
+    	description: 'The id of the chat.' 
     })
     public readonly id: string;
 
-    @Field(type => ChatTypeEnum, { 
-        nullable: true,  
-        description: 'The type of the chat.' 
+    @Field(() => ChatTypeEnum, { 
+    	nullable: true,  
+    	description: 'The type of the chat.' 
     })
     public readonly type: ChatTypeEnum;
 }

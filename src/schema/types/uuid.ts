@@ -4,30 +4,30 @@ import { validate, version } from 'uuid';
 
 @Scalar('UUID')
 export class UUID implements CustomScalar<string, string> {
-    public parseValue(value: string): string {
-        if (validate(value) && version(value) === 4)
-            return value;
+	public parseValue(value: string): string {
+		if (validate(value) && version(value) === 4)
+			return value;
         
-        return null;
-    }
+		return null;
+	}
 
-    public serialize(value: string): string {
-        if (validate(value) && version(value) === 4)
-            return value;
+	public serialize(value: string): string {
+		if (validate(value) && version(value) === 4)
+			return value;
         
-        return null;
-    }
+		return null;
+	}
 
-    public parseLiteral(ast: ValueNode): string | null {
-        if (ast.kind === Kind.STRING && 
+	public parseLiteral(ast: ValueNode): string | null {
+		if (ast.kind === Kind.STRING && 
             validate(ast.value) && 
             version(ast.value) === 4) 
-        {
-            return ast.value
-        }
+		{
+			return ast.value
+		}
 
-        return null;
-    }
+		return null;
+	}
 }
 
 export default UUID;

@@ -21,19 +21,19 @@ export class Invitation extends IEntity {
     @Column({ name: 'expires_at', default: () => 'NOW()' })
     public expiresAt: Date;
 
-    @ManyToOne(type => User)
+    @ManyToOne(() => User)
     @JoinColumn({ name: 'sender_id' })
     public sender: User;
 
-    @ManyToOne( type => User)
+    @ManyToOne(() => User)
     @JoinColumn({ name: 'recipient_id' })
     public recipient: User;
 
-    @ManyToOne( type => InvitationType)
+    @ManyToOne(() => InvitationType)
     @JoinColumn({ name: 'type_id' })
     public type: InvitationType;
 
-    @ManyToOne( type => InvitationStatus)
+    @ManyToOne(() => InvitationStatus)
     @JoinColumn({ name: 'status_id' })
     public status: InvitationStatus;
 } 

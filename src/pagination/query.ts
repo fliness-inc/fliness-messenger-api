@@ -6,46 +6,44 @@ export class PaginationQuery<Entity> {
     private readonly builder: SelectQueryBuilder<Entity>;
 
     public constructor(builder: SelectQueryBuilder<Entity>) {
-        this.builder = builder.clone();
+    	this.builder = builder.clone();
     }
 
     public filter(
-        filters: PaginationFilters, 
-        operator: Operator = Operator.MORE_THEN
+    	filters: PaginationFilters, 
+    	operator: Operator = Operator.MORE_THEN
     ): PaginationQuery<Entity> {
-        let query = '';
+    	let query = '';
 
-        this.builder.andWhere(new Brackets(qb => {
-            Object.entries(filters).forEach(filter => {
-                const [key, val] = filter;
+    	this.builder.andWhere(new Brackets(qb => {
+    		Object.entries(filters).forEach(filter => {
+    			const [key] = filter;
 
-                const t = key.split('.').map(k => `"${k}"`).join('.');
+    			const t = key.split('.').map(k => `"${k}"`).join('.');
                 
-                qb.orWhere(`${query}${t} ${operator} :${key}`, filters);
-                query = `${query}${t} = :${key} AND `;
-            });
-        }));
+    			qb.orWhere(`${query}${t} ${operator} :${key}`, filters);
+    			query = `${query}${t} = :${key} AND `;
+    		});
+    	}));
 
-        const t = this.builder.getSql();
-
-        return this;
+    	return this;
     }
 
     public orderBy(keys: string[], order: Order = Order.ASC): PaginationQuery<Entity> {
-        const orderByCondition: OrderByCondition = {};
+    	const orderByCondition: OrderByCondition = {};
 
-        keys.forEach(key => orderByCondition[`${key}`] = order);
+    	keys.forEach(key => orderByCondition[`${key}`] = order);
 
-        this.builder.orderBy(orderByCondition);
-        return this;
+    	this.builder.orderBy(orderByCondition);
+    	return this;
     }
 
     public take(value: number): PaginationQuery<Entity> {
-        this.builder.limit(value);
-        return this;
+    	this.builder.limit(value);
+    	return this;
     }
 
     public build(): SelectQueryBuilder<Entity> {
-        return this.builder.clone();
+    	return this.builder.clone();
     }
 }

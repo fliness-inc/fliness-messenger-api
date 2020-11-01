@@ -15,9 +15,9 @@ export enum Type {
 
 @InputType()
 export class CreateInvitationDTO {
-    @Field(type => UUID)
+    @Field(() => UUID)
     public readonly userId: string;
 
-    @Field(type => Type)
+    @Field(() => Type)
     public readonly type: Type
 }
