@@ -184,7 +184,11 @@ describe('[E2E] [MembersResolver] ...', () => {
                                 }
                             }, 
                             membersFilter: {
-                                id: member.id
+                                field: {
+                                    name: 'ID',
+                                    op: 'EQUALS',
+                                    val: member.id
+                                }
                             }
                         }
                     });
@@ -267,7 +271,11 @@ describe('[E2E] [MembersResolver] ...', () => {
                                 }
                             }, 
                             membersFilter: {
-                                role: MemberRoleEnum.MEMBER
+                                field: {
+                                    name: 'ROLE_NAME',
+                                    op: 'EQUALS',
+                                    val: MemberRoleEnum.MEMBER
+                                }
                             }
                         }
                     });

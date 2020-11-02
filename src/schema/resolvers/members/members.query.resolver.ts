@@ -10,6 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import Member from '@database/entities/member';
 import { Repository } from 'typeorm';
 import * as Pagination from '@src/pagination/paginator';
+import Filter from '@src/filter/filter';
 
 @UseGuards(AuthGuard)
 @Resolver(() => Chat)
@@ -44,8 +45,8 @@ export class MembersQueryResolver {
     		.where('member.is_deleted = :isDeleted', { isDeleted: false })
     		.andWhere('member.chat_id = :chatId', { chatId: chat.id });
 
-    	if (filter.role) builder.andWhere('role.name = :role', filter);
-    	else if (filter.id) builder.andWhere('member.id = :id', filter);
+    	const filterManager = new Filter(builder);
+    	filterManager.make(filter);
 
     	if (!fields.includes(MemberPaginationField.ID))
     		fields.push(MemberPaginationField.ID);
