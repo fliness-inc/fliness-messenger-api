@@ -6,7 +6,7 @@ import { getConnection, Connection, SelectQueryBuilder } from 'typeorm';
 import { AppModule } from '@src/app.module';
 import Message from '@database/entities/message';
 import Filter, { FilterArg, OperatorTypeEnum } from '@src/filter/filter';
-import { MessageFieldArgumentEnum } from '@schema/resolvers/messages/messages.dto';
+import { MessagesFieldArgumentEnum } from '@schema/resolvers/messages/messages.dto';
 import * as uuid from 'uuid';
 
 setupDotEnv();
@@ -48,7 +48,7 @@ describe('[E2E] [Filter] ...', () => {
             const filter = new Filter(builder.clone());
             const query: FilterArg = {
                 field: {
-                    name: MessageFieldArgumentEnum.ID,
+                    name: MessagesFieldArgumentEnum.ID,
                     op: OperatorTypeEnum.EQUALS,
                     val: uuid.v4()
                 }
@@ -66,9 +66,9 @@ describe('[E2E] [Filter] ...', () => {
             const filter = new Filter(builder.clone());
             const query: FilterArg = {
                 OR: [
-                    { field: { name: MessageFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() } },
-                    { field: { name: MessageFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() } },
-                    { field: { name: MessageFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() } },
+                    { field: { name: MessagesFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() } },
+                    { field: { name: MessagesFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() } },
+                    { field: { name: MessagesFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() } },
                 ]
             };
 
@@ -84,11 +84,11 @@ describe('[E2E] [Filter] ...', () => {
             const filter = new Filter(builder.clone());
             const query: FilterArg = {
                 OR: [
-                    { field: { name: MessageFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() } },
-                    { field: { name: MessageFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() } },
+                    { field: { name: MessagesFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() } },
+                    { field: { name: MessagesFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() } },
                     { AND: [ 
-                            { field: { name: MessageFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() }},
-                            { field: { name: MessageFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() }} 
+                            { field: { name: MessagesFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() }},
+                            { field: { name: MessagesFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() }} 
                         ] 
                     },
                 ]
@@ -106,14 +106,14 @@ describe('[E2E] [Filter] ...', () => {
             const filter = new Filter(builder.clone());
             const query: FilterArg = {
                 OR: [
-                    { field: { name: MessageFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() } },
-                    { field: { name: MessageFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() } },
+                    { field: { name: MessagesFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() } },
+                    { field: { name: MessagesFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() } },
                     { AND: [ 
-                            { field: { name: MessageFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() } },
+                            { field: { name: MessagesFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() } },
                             { OR: [
-                                    { field: { name: MessageFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() } },
-                                    { field: { name: MessageFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() } },
-                                    { field: { name: MessageFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() } }
+                                    { field: { name: MessagesFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() } },
+                                    { field: { name: MessagesFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() } },
+                                    { field: { name: MessagesFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() } }
                                 ] 
                             } 
                         ] 
@@ -133,11 +133,11 @@ describe('[E2E] [Filter] ...', () => {
             const filter = new Filter(builder.clone());
             const query: FilterArg = {
                 AND: [
-                    { field: { name: MessageFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() } },
-                    { field: { name: MessageFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() } },
+                    { field: { name: MessagesFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() } },
+                    { field: { name: MessagesFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() } },
                     { OR: [ 
-                            { field: { name: MessageFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() }},
-                            { field: { name: MessageFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() }} 
+                            { field: { name: MessagesFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() }},
+                            { field: { name: MessagesFieldArgumentEnum.ID, op: OperatorTypeEnum.EQUALS, val: uuid.v4() }} 
                         ] 
                     },
                 ]
@@ -156,7 +156,7 @@ describe('[E2E] [Filter] ...', () => {
             const filter = new Filter(builder.clone());
             const query: FilterArg = {
                 field: {
-                    name: MessageFieldArgumentEnum.ID,
+                    name: MessagesFieldArgumentEnum.ID,
                     op: OperatorTypeEnum.EQUALS,
                     val: uuid.v4()
                 }
@@ -173,7 +173,7 @@ describe('[E2E] [Filter] ...', () => {
             const filter = new Filter(builder.clone());
             const query: FilterArg = {
                 field: {
-                    name: MessageFieldArgumentEnum.ID,
+                    name: MessagesFieldArgumentEnum.ID,
                     op: OperatorTypeEnum.LESS,
                     val: uuid.v4()
                 }
@@ -190,7 +190,7 @@ describe('[E2E] [Filter] ...', () => {
             const filter = new Filter(builder.clone());
             const query: FilterArg = {
                 field: {
-                    name: MessageFieldArgumentEnum.ID,
+                    name: MessagesFieldArgumentEnum.ID,
                     op: OperatorTypeEnum.LESS_OR_EQUAL,
                     val: uuid.v4()
                 }
@@ -207,7 +207,7 @@ describe('[E2E] [Filter] ...', () => {
             const filter = new Filter(builder.clone());
             const query: FilterArg = {
                 field: {
-                    name: MessageFieldArgumentEnum.ID,
+                    name: MessagesFieldArgumentEnum.ID,
                     op: OperatorTypeEnum.GREATER,
                     val: uuid.v4()
                 }
@@ -224,7 +224,7 @@ describe('[E2E] [Filter] ...', () => {
             const filter = new Filter(builder.clone());
             const query: FilterArg = {
                 field: {
-                    name: MessageFieldArgumentEnum.ID,
+                    name: MessagesFieldArgumentEnum.ID,
                     op: OperatorTypeEnum.GREATER_OR_EQUAL,
                     val: uuid.v4()
                 }
@@ -241,7 +241,7 @@ describe('[E2E] [Filter] ...', () => {
             const filter = new Filter(builder.clone());
             const query: FilterArg = {
                 field: {
-                    name: MessageFieldArgumentEnum.ID,
+                    name: MessagesFieldArgumentEnum.ID,
                     op: OperatorTypeEnum.NOT_EQUAL,
                     val: uuid.v4()
                 }
@@ -260,7 +260,7 @@ describe('[E2E] [Filter] ...', () => {
             const filter = new Filter(builder.clone().leftJoin('message.member', 'member'));
             const query: FilterArg = {
                 field: {
-                    name: MessageFieldArgumentEnum.MEMBER_ID,
+                    name: MessagesFieldArgumentEnum.MEMBER_ID,
                     op: OperatorTypeEnum.EQUALS,
                     val: uuid.v4()
                 }
@@ -277,7 +277,7 @@ describe('[E2E] [Filter] ...', () => {
             const filter = new Filter(builder.clone().leftJoin('message.member', 'member'));
             const query: FilterArg = {
                 field: {
-                    name: MessageFieldArgumentEnum.MEMBER_USER_ID,
+                    name: MessagesFieldArgumentEnum.MEMBER_USER_ID,
                     op: OperatorTypeEnum.EQUALS,
                     val: uuid.v4()
                 }

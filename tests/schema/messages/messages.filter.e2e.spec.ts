@@ -20,8 +20,6 @@ import MessagesService from '@schema/resolvers/messages/messages.service';
 import Message from '@database/entities/message';
 import { MessagePaginationField } from '@schema/models/messages.pagination';
 import { CursorCoder } from '@src/pagination/cursor';
-import { OperatorTypeEnum } from '@src/filter/filter';
-import { MessageFieldArgumentEnum } from '@schema/resolvers/messages/messages.dto';
 
 setupDotEnv();
 
@@ -143,7 +141,7 @@ describe('[E2E] [MessagesResolver] ...', () => {
                     .send({
                         operationName: 'GetMessage',
                         query: `
-                            query GetMessage($chatsFilter: ChatsFilter, $messageFilter: MessageFilter) {
+                            query GetMessage($chatsFilter: ChatsFilter, $messageFilter: MessagesFilter) {
                                 me {
                                     chats(filter: $chatsFilter) {
                                         edges {
@@ -175,7 +173,11 @@ describe('[E2E] [MessagesResolver] ...', () => {
                         `,
                         variables: {
                             chatsFilter: {
-                                id: dialog.id
+                                field: { 
+                                    name: 'ID', 
+                                    op: 'EQUALS', 
+                                    val: dialog.id
+                                }
                             },
                             messageFilter: {
                                 field: {

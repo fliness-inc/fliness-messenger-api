@@ -1,6 +1,7 @@
 import { Field, InputType, registerEnumType } from '@nestjs/graphql';
 import UUID from '@schema/types/uuid';
 import Filter from '@schema/generics/filter';
+import Messages from '@database/entities/message';
 
 @InputType()
 export class MessageCreateDTO {
@@ -11,19 +12,19 @@ export class MessageCreateDTO {
     public readonly chatId: string;
 }
 
-export enum MessageFieldArgumentEnum {
+export enum MessagesFieldArgumentEnum {
     ID = '"message"."id"',
     TEXT = '"message"."text"',
-    UPDATED_At = '"message"."updated_at"',
-    CREATED_At = '"message"."created_at"',
+    UPDATED_AT = '"message"."updated_at"',
+    CREATED_AT = '"message"."created_at"',
     MEMBER_ID = '"member"."id"',
     MEMBER_USER_ID = '"member"."user_id"',
     MEMBER_CHAT_ID = '"member"."chat_id"'
 }
 
-registerEnumType(MessageFieldArgumentEnum, {
-	name: 'MessageFieldName'
+registerEnumType(MessagesFieldArgumentEnum, {
+	name: 'MessagesFieldName'
 });
 
 @InputType()
-export class MessageFilter extends Filter(MessageFieldArgumentEnum, { name: 'MessageFilter' }) {}
+export class MessagesFilter extends Filter<Messages>(Messages, MessagesFieldArgumentEnum) {}

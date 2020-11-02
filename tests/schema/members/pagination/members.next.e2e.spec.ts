@@ -178,7 +178,11 @@ describe('[E2E] [MembersResolver] ...', () => {
                         `,
                         variables: {
                             chatsFilter: {
-                                id: dialog.id
+                                field: { 
+                                    name: 'ID', 
+                                    op: 'EQUALS', 
+                                    val: dialog.id
+                                }
                             },
                             membersPagination: {
                                 first
@@ -258,7 +262,11 @@ describe('[E2E] [MembersResolver] ...', () => {
                         `,
                         variables: {
                             chatsFilter: {
-                                id: dialog.id
+                                field: { 
+                                    name: 'ID', 
+                                    op: 'EQUALS', 
+                                    val: dialog.id
+                                }
                             },
                             membersPagination: {
                                 first,
@@ -339,7 +347,11 @@ describe('[E2E] [MembersResolver] ...', () => {
                         `,
                         variables: {
                             chatsFilter: {
-                                id: dialog.id
+                                field: { 
+                                    name: 'ID', 
+                                    op: 'EQUALS', 
+                                    val: dialog.id
+                                }
                             },
                             membersPagination: {
                                 first,
@@ -420,7 +432,11 @@ describe('[E2E] [MembersResolver] ...', () => {
                         `,
                         variables: {
                             chatsFilter: {
-                                id: dialog.id
+                                field: { 
+                                    name: 'ID', 
+                                    op: 'EQUALS', 
+                                    val: dialog.id
+                                }
                             },
                             membersPagination: {
                                 first,

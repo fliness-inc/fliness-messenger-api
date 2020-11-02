@@ -176,7 +176,11 @@ describe('[E2E] [MessagesResolver] ...', () => {
                         `,
                         variables: {
                             chatsFilter: {
-                                id: dialog.id
+                                field: { 
+                                    name: 'ID', 
+                                    op: 'EQUALS', 
+                                    val: dialog.id
+                                }
                             },
                             messagePagination: {
                                 first
@@ -254,7 +258,11 @@ describe('[E2E] [MessagesResolver] ...', () => {
                         `,
                         variables: {
                             chatsFilter: {
-                                id: dialog.id
+                                field: { 
+                                    name: 'ID', 
+                                    op: 'EQUALS', 
+                                    val: dialog.id
+                                }
                             },
                             messagePagination: {
                                 first,
@@ -333,7 +341,11 @@ describe('[E2E] [MessagesResolver] ...', () => {
                         `,
                         variables: {
                             chatsFilter: {
-                                id: dialog.id
+                                field: { 
+                                    name: 'ID', 
+                                    op: 'EQUALS', 
+                                    val: dialog.id
+                                }
                             },
                             messagePagination: {
                                 first,
@@ -412,7 +424,11 @@ describe('[E2E] [MessagesResolver] ...', () => {
                         `,
                         variables: {
                             chatsFilter: {
-                                id: dialog.id
+                                field: { 
+                                    name: 'ID', 
+                                    op: 'EQUALS', 
+                                    val: dialog.id
+                                }
                             },
                             messagePagination: {
                                 first,

@@ -8,7 +8,7 @@ import { Direction, Order } from '@src/pagination/enums';
 import Sort from '@schema/types/sort';
 import { getRepository } from 'typeorm';
 import * as Pagination from '@src/pagination/paginator';
-import { MessageFilter } from '@schema/resolvers/messages/messages.dto';
+import { MessagesFilter } from '@schema/resolvers/messages/messages.dto';
 import Filter from '@src/filter/filter';
 
 @UseGuards(AuthGuard/*, ChatGruard */)
@@ -24,7 +24,7 @@ export class MessagesModelResolver {
         @Parent() chat: Chat,
         	@Args('pagination', { type: () => MessagePaginationInput, nullable: true }) pagination: MessagePaginationInput = {},
         	@Args('sort', { type: () => Sort, nullable: true }) sort: Sort = { by: Order.ASC },
-        	@Args('filter', { type: () => MessageFilter, nullable: true }) filter: MessageFilter = {}
+        	@Args('filter', { type: () => MessagesFilter, nullable: true }) filter: MessagesFilter = {}
     ): Promise<MessageConnection> {
         
     	const { after, before, first, last, fields = [] } = pagination;

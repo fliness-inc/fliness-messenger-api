@@ -1,13 +1,14 @@
 import { Field, registerEnumType, InputType } from '@nestjs/graphql';
 import { OperatorTypeEnum } from '@src/filter/filter';
+import { Type } from '@nestjs/common';
 
 registerEnumType(OperatorTypeEnum, {
 	name: 'ArgumentOperatorType'
 });
 
-export function Filter<T>(enumType: any, options): any {
+export function Filter<T>(classRef: Type<T>, enumType: any): any {
 
-    @InputType(`${options.name}ArgumentField`)
+    @InputType(`${classRef.name}FilterArgumentField`)
 	abstract class FilterArgumentField {
         @Field(() => enumType)
         public readonly name: T;
@@ -19,10 +20,10 @@ export function Filter<T>(enumType: any, options): any {
         public readonly val: string;
     }
 
-    @InputType({ isAbstract: true })
+    @InputType(`${classRef.name}Filter`, { isAbstract: true }) 
     abstract class FilterArgument {
-        @Field(() => FilterArgumentField)
-        public readonly field: FilterArgumentField;
+        @Field(() => FilterArgumentField, { nullable: true })
+        public readonly field?: FilterArgumentField;
         
         @Field(() => [FilterArgument], { nullable: true })
         public readonly AND?: FilterArgument[];

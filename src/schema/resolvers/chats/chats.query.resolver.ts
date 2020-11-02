@@ -11,6 +11,7 @@ import ChatEntity from '@database/entities/chat';
 import { getRepository } from 'typeorm';
 import * as Pagination from '@src/pagination/paginator';
 import { ChatsFilter } from '@schema/resolvers/chats/chats.dto';
+import Filter from '@src/filter/filter';
 
 @UseGuards(AuthGuard)
 @Resolver(() => MeQuery)
@@ -24,7 +25,7 @@ export class ChatsModelResolver {
         @CurrentUser() user: User,
         	@Args('pagination', { type: () => ChatPaginationInput, nullable: true }) pagination: ChatPaginationInput = {},
         	@Args('sort', { type: () => Sort, nullable: true }) sort: Sort = { by: Order.ASC },
-        	@Args('filter', { type: () => ChatsFilter, nullable: true }) filter:ChatsFilter = <any>{}
+        	@Args('filter', { type: () => ChatsFilter, nullable: true }) filter: ChatsFilter = <any>{}
     ): Promise<ChatsConnection> {
 
     	const { after, before, first, last, fields = [] } = pagination;
@@ -36,11 +37,12 @@ export class ChatsModelResolver {
     		.addSelect('chat.created_at')
     		.addSelect('type.name')
     		.leftJoin('chat.type', 'type')
-    		.leftJoin('chat.members', 'member', 'member.user_id = :userId', { userId: user.id })
-    		.where('chat.is_deleted = :isDeleted', { isDeleted: false });
+    		.leftJoin('chat.members', 'member')
+			.where('chat.is_deleted = :isDeleted', { isDeleted: false })
+			.andWhere('member.user_id = :userId', { userId: user.id });
 
-    	if (filter.type) builder.andWhere('type.name = :type', filter);
-    	else if (filter.id) builder.andWhere('chat.id = :id', filter);
+		const filterManager = new Filter(builder);
+		filterManager.make(filter);
 
     	if (!fields.includes(ChatPaginationField.ID))
     		fields.push(ChatPaginationField.ID);

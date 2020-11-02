@@ -1,5 +1,6 @@
-import { Field, InputType } from '@nestjs/graphql';
-import UUID from '@schema/types/uuid';
+import { Field, InputType, registerEnumType } from '@nestjs/graphql';
+import Filter from '@schema/generics/filter';
+import Chats from '@database/entities/chat';
 
 export enum ChatTypeEnum {
     DIALOG = 'DIALOG',
@@ -36,17 +37,17 @@ export class ChatCreateDTO {
     public readonly userIds?: string[];
 }
 
-@InputType()
-export class ChatsFilter {
-    @Field(() => UUID, { 
-    	nullable: true,  
-    	description: 'The id of the chat.' 
-    })
-    public readonly id: string;
-
-    @Field(() => ChatTypeEnum, { 
-    	nullable: true,  
-    	description: 'The type of the chat.' 
-    })
-    public readonly type: ChatTypeEnum;
+export enum ChatsFieldArgumentEnum {
+    ID = '"chat"."id"',
+    TITLE = '"chat"."title"',
+    DESCRIPTION = '"chat"."description"',
+    CREATED_AT = '"chat"."created_at"',
+    TYPE_NAME = '"type"."name"',
 }
+
+registerEnumType(ChatsFieldArgumentEnum, {
+	name: 'ChatsFieldName'
+});
+
+@InputType()
+export class ChatsFilter extends Filter<Chats>(Chats, ChatsFieldArgumentEnum) {}

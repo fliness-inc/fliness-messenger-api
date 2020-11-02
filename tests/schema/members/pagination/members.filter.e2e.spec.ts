@@ -177,7 +177,11 @@ describe('[E2E] [MembersResolver] ...', () => {
                         `,
                         variables: {
                             chatsFilter: {
-                                id: dialog.id
+                                field: { 
+                                    name: 'ID', 
+                                    op: 'EQUALS', 
+                                    val: dialog.id
+                                }
                             }, 
                             membersFilter: {
                                 id: member.id
@@ -256,7 +260,11 @@ describe('[E2E] [MembersResolver] ...', () => {
                         `,
                         variables: {
                             chatsFilter: {
-                                id: dialog.id
+                                field: { 
+                                    name: 'ID', 
+                                    op: 'EQUALS', 
+                                    val: dialog.id
+                                }
                             }, 
                             membersFilter: {
                                 role: MemberRoleEnum.MEMBER

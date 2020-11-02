@@ -151,7 +151,11 @@ describe('[E2E] [ChatResolver] ...', () => {
                         `,
                         variables: {
                             filter: {
-                                type: ChatTypeEnum.DIALOG 
+                                field: { 
+                                    name: 'TYPE_NAME', 
+                                    op: 'EQUALS', 
+                                    val: ChatTypeEnum.DIALOG 
+                                }
                             }
                         }
                     });
@@ -214,7 +218,11 @@ describe('[E2E] [ChatResolver] ...', () => {
                         `,
                         variables: {
                             filter: {
-                                id: neededChat.id 
+                                field: { 
+                                    name: 'ID', 
+                                    op: 'EQUALS', 
+                                    val: neededChat.id 
+                                }
                             }
                         }
                     });
