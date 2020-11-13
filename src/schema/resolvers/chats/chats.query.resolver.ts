@@ -38,11 +38,11 @@ export class ChatsModelResolver {
     		.addSelect('type.name')
     		.leftJoin('chat.type', 'type')
     		.leftJoin('chat.members', 'member')
-			.where('chat.is_deleted = :isDeleted', { isDeleted: false })
-			.andWhere('member.user_id = :userId', { userId: user.id });
+    		.where('chat.is_deleted = :isDeleted', { isDeleted: false })
+    		.andWhere('member.user_id = :userId', { userId: user.id });
 
-		const filterManager = new Filter(builder);
-		filterManager.make(filter);
+    	const filterManager = new Filter(builder);
+    	filterManager.make(filter);
 
     	if (!fields.includes(ChatPaginationField.ID))
     		fields.push(ChatPaginationField.ID);

@@ -1,5 +1,6 @@
-import { InputType, Field } from '@nestjs/graphql';
-import UUID from '@schema/types/uuid';
+import { InputType, registerEnumType } from '@nestjs/graphql';
+import Filter from '@schema/generics/filter';
+import Members from '@database/entities/member';
 
 export enum MemberRoleEnum {
     CREATOR = 'CREATOR',
@@ -7,17 +8,18 @@ export enum MemberRoleEnum {
     MEMBER = 'MEMBER'
 }
 
-@InputType()
-export class MembersFilter {
-    @Field(() => UUID, { 
-    	nullable: true,  
-    	description: 'The id of the member.' 
-    })
-    public readonly id: string;
-
-    @Field(() => MemberRoleEnum, { 
-    	nullable: true,  
-    	description: 'The role of the member.' 
-    })
-    public readonly role: MemberRoleEnum;
+export enum MembersFieldArgumentEnum {
+    ID = '"member"."id"',
+    CHAT_ID = '"member"."chat_id"',
+    USER_ID = '"member"."user_id"',
+    UPDATED_AT = '"member"."updated_at"',
+    CREATED_AT = '"member"."created_at"',
+    ROLE_NAME = '"role"."name"',
 }
+
+registerEnumType(MembersFieldArgumentEnum, {
+	name: 'MembersFieldName'
+});
+
+@InputType()
+export class MembersFilter extends Filter<Members>(Members, MembersFieldArgumentEnum) {}
