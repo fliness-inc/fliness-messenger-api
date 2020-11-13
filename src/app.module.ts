@@ -15,7 +15,7 @@ import SchemaModule from '@schema/schema.module';
 			introspection: true,
 			cors: {
 				credentials: true,
-				origin: true
+				origin: 'http://localhost:3000'
 			},
 			context: ({ req, res }) => { 
 				const ctx = { 

@@ -9,11 +9,11 @@ services:
             POSTGRES_USER: ${TYPEORM_USERNAME}
             POSTGRES_PASSWORD: ${TYPEORM_PASSWORD} 
             POSTGRES_DB: ${TYPEORM_DATABASE}
-        container_name: fliness_messenger_database_test
+        container_name: fliness_messenger_database_prod
     api:
         build: 
             context: .
-            dockerfile: Dockerfile.test
+            dockerfile: Dockerfile.prod
         ports:
             - ${PORT}:${PORT}
         environment:
@@ -35,7 +35,7 @@ services:
         volumes: 
             - .:/usr/src/fliness-messenger-api
             - node_modules:/usr/src/fliness-messenger-api/node_modules
-        container_name: fliness_messenger_api_test
+        container_name: fliness_messenger_api_prod
 
 volumes: 
     node_modules:

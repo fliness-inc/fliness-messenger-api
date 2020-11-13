@@ -12,7 +12,7 @@ export { MemberRoleEnum } from '@schema/resolvers/members/members.dto';
 export const ChatRoles = (...roles: string[]) => SetMetadata('roles', roles);
 
 @Injectable()
-export class MessagesCreationGruard implements CanActivate {
+export class MessagesCreationGuard implements CanActivate {
 	public constructor(
         private readonly reflector: Reflector,
         @Inject(MembersService)
@@ -55,4 +55,4 @@ export class MessagesCreationGruard implements CanActivate {
 	}
 }
 
-export default MessagesGruard;
+export default MessagesCreationGuard;
