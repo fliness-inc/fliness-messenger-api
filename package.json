@@ -24,7 +24,7 @@
     "db:create": "createdb --username=postgres --owner=postgres fliness_messenger",
     "db:drop": "dropdb --username=postgres fliness_messenger",
     "db:init": "npm run migration:generate initial && npm run migration:run && rm -rf ./dist/database/migrations",
-    "db:seeds:run": "ts-node -r tsconfig-paths/register ./src/database/seeds/index.ts",
+    "db:seeds:run": "node dist/src/database/seeds/index.js",
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
     "migration:generate": "npm run typeorm -- migration:generate -n",
     "migration:run": "npm run typeorm -- migration:run",

@@ -13,4 +13,5 @@ COPY . .
 
 EXPOSE ${PORT}
 
-CMD npm run build && npm run db:init && npm run db:seeds:run && npm run start:prod
+
+CMD npm run build && npm run db:seeds:run && node ./dist/src/main.js
