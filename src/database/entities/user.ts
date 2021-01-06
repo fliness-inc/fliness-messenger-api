@@ -1,6 +1,6 @@
 import { Column, Entity, BeforeInsert } from 'typeorm';
 import IEntity from '@database/entities/entity';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 @Entity({ name: 'users' })
 export class User extends IEntity {
