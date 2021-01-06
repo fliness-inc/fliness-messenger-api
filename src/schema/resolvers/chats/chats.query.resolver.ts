@@ -2,9 +2,9 @@ import { UseGuards} from '@nestjs/common';
 import { Resolver, ResolveField, Args, Field } from '@nestjs/graphql';
 import AuthGuard from '@schema/resolvers/auth/auth.guard';
 import CurrentUser from '@schema/resolvers/auth/current-user';
-import User from '@schema/models/users.model';
-import MeQuery from '@schema/models/me.query';
-import ChatsConnection, { ChatPaginationField, ChatPaginationInput } from '@schema/models/chats.pagination';
+import User from '@schema/models/users/users.model';
+import MeQuery from '@schema/models/me/me.query';
+import ChatsConnection, { ChatPaginationField, ChatPaginationInput } from '@schema/models/chats/chats.model.pagination';
 import Sort from '@schema/types/sort';
 import { Direction, Order } from '@src/pagination/enums';
 import ChatEntity from '@database/entities/chat';
@@ -31,15 +31,15 @@ export class ChatsModelResolver {
     	const { after, before, first, last, fields = [] } = pagination;
         
     	const builder = getRepository(ChatEntity).createQueryBuilder('chat')
-    		.select('chat.id')
-    		.addSelect('chat.title')
-    		.addSelect('chat.description')
-    		.addSelect('chat.created_at')
-    		.addSelect('type.name')
+    		.select(Pagination.makeSelectField('chat', 'id'))
+    		.addSelect(Pagination.makeSelectField('chat', 'title'))
+    		.addSelect(Pagination.makeSelectField('chat', 'description'))
+    		.addSelect(Pagination.makeSelectField('chat', 'created_at'))
+    		.addSelect(Pagination.makeSelectField('type', 'name'))
     		.leftJoin('chat.type', 'type')
-    		.leftJoin('chat.members', 'member')
-    		.where('chat.is_deleted = :isDeleted', { isDeleted: false })
-    		.andWhere('member.user_id = :userId', { userId: user.id });
+    		.leftJoin('chat.members', 'members')
+    		.where('"chat"."is_deleted" = :isDeleted', { isDeleted: false })
+    		.andWhere('"members"."user_id" = :userId', { userId: user.id });
 
     	const filterManager = new Filter(builder);
     	filterManager.make(filter);
@@ -59,12 +59,12 @@ export class ChatsModelResolver {
     	});
 
     	return paginator.paginate((entity: any) => ({
-    		id: entity.chat_id,
-    		title: entity.chat_title,
-    		description: entity.chat_description,
-    		createdAt: entity.created_at,
-    		type: entity.type_name
-    	})
+				id: entity.chat_id,
+				title: entity.chat_title,
+				description: entity.chat_description,
+				createdAt: entity.chat_created_at,
+				type: entity.type_name
+			})
     	);
     }
 }

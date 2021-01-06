@@ -5,12 +5,12 @@ import AuthGuard from '@schema/resolvers/auth/auth.guard';
 import { ChatTypeEnum, ChatCreateDTO } from '@schema/resolvers/chats/chats.dto';
 import { ChatGruard, ChatRoles } from '@schema/resolvers/chats/chats.guard';
 import { MemberRoleEnum } from '@schema/resolvers/members/members.dto';
-import ChatsMutation from '@schema/models/chats.mutation';
-import Chat from '@schema/models/chats.model';
+import ChatsMutation from '@schema/models/chats/chats.mutation';
+import Chat from '@schema/models/chats/chats.model';
 import CurrentUser from '@schema/resolvers/auth/current-user';
-import User from '@schema/models/users.model';
+import User from '@schema/models/users/users.model';
 import UUID from '@schema/types/uuid';
-import MessagesMutation from '@schema/models/messages.mutation';
+import MessagesMutation from '@schema/models/messages/messages.mutation';
 
 @UseGuards(AuthGuard)
 @Resolver(() => ChatsMutation)

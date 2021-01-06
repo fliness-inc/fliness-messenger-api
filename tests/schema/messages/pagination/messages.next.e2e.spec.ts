@@ -13,13 +13,13 @@ import { MemberRoleEnum } from '@schema/resolvers/members/members.dto';
 import UsersService from '@schema/resolvers/users/users.service';
 import { Tokens } from '@schema/resolvers/tokens/tokens.service';
 import { ChatTypeSeeder, ChatTypeFactory } from '@database/seeds/chat-type.seeder';
-import { MemberRoleSeeder, MemberRoleFactory } from '@/src/database/seeds/member-role.seeder';
+import { MemberRoleSeeder, MemberRoleFactory } from '@database/seeds/member-role.seeder';
 import MembersService from '@schema/resolvers/members/members.service';
 import Chat from '@database/entities/chat';
 import ChatsService from '@schema/resolvers/chats/chats.service';
 import MessagesService from '@schema/resolvers/messages/messages.service';
 import Message from '@database/entities/message';
-import { MessagePaginationField } from '@schema/models/messages.pagination';
+import { MessagePaginationField } from '@schema/models/messages/messages.model.pagination';
 import { CursorCoder } from '@src/pagination/cursor';
 
 setupDotEnv();
@@ -52,10 +52,6 @@ describe('[E2E] [MessagesResolver] ...', () => {
         await memberPriviliegeSeeder.run(1, { name: MemberRoleEnum.CREATOR, weight: 1.0 });
         await memberPriviliegeSeeder.run(1, { name: MemberRoleEnum.ADMIN, weight: 0.5 });
         await memberPriviliegeSeeder.run(1, { name: MemberRoleEnum.MEMBER, weight: 0.1 });
-    });
-
-    afterEach(async () => {
-        //await connection.query('TRUNCATE messages CASCADE');
     });
 
     afterAll(async () => {

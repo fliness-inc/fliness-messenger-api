@@ -1,9 +1,9 @@
 import { Resolver, Mutation, ResolveField } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
-import MeMutation from '@/src/schema/models/me.mutation';
+import MeMutation from '@schema/models/me/me.mutation';
 import AuthGuard from '@schema/resolvers/auth/auth.guard';
-import InvitationsMutation from '@schema/models/invitations.mutation';
-import ChatsMutation from '@schema/models/chats.mutation';
+import InvitationsMutation from '@schema/models/invitations/invitations.mutation';
+import ChatsMutation from '@schema/models/chats/chats.mutation';
 
 @Resolver(() => MeMutation)
 export class MeMutationResolver {

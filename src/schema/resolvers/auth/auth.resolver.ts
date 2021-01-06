@@ -4,9 +4,9 @@ import AuthService from '@schema/resolvers/auth/auth.service';
 import TokensService from '@schema/resolvers/tokens/tokens.service';
 import { Context as AppContext } from '@schema/utils';
 import { AuthLoginDTO, AuthRegisterDTO } from '@schema/resolvers/auth/auth.dto';
-import Token from '@schema/models/token';
+import Token from '@schema/models/tokens/tokens.model';
 import AuthGuard from '@schema/resolvers/auth/auth.guard';
-import Auth from '@schema/models/auth';
+import Auth from '@schema/models/auth/auth';
 
 @Resolver(() => Auth)
 export class AuthResolver {

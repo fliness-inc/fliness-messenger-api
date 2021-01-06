@@ -1,9 +1,9 @@
 import { UseGuards } from '@nestjs/common';
 import { Resolver, Field, ResolveField, Parent, Args } from '@nestjs/graphql';
 import AuthGuard from '@schema/resolvers/auth/auth.guard';
-import Chat from '@schema/models/chats.model';
+import Chat from '@schema/models/chats/chats.model';
 import MessageEntity from '@database/entities/message';
-import { MessageConnection, MessagePaginationInput, MessagePaginationField } from '@schema/models/messages.pagination';
+import { MessageConnection, MessagePaginationInput, MessagePaginationField } from '@schema/models/messages/messages.model.pagination';
 import { Direction, Order } from '@src/pagination/enums';
 import Sort from '@schema/types/sort';
 import { getRepository } from 'typeorm';

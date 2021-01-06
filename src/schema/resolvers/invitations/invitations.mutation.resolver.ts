@@ -1,11 +1,11 @@
 import { UseGuards } from '@nestjs/common';
 import { Resolver, ResolveField, Args } from '@nestjs/graphql';
-import User from '@schema/models/users.model';
-import Invitation from '@schema/models/invitation';
+import User from '@schema/models/users/users.model';
+import Invitation from '@schema/models/invitations/invitation.model';
 import { Type, Status, CreateInvitationDTO } from '@schema/resolvers/invitations/invitations.dto';
 import { InvitationsService } from '@schema/resolvers/invitations/invitations.service';
 import AuthGuard from '@schema/resolvers/auth/auth.guard';
-import InvitationsMutation from '@schema/models/invitations.mutation';
+import InvitationsMutation from '@schema/models/invitations/invitations.mutation';
 import CurrentUser from '@schema/resolvers/auth/current-user';
 import UUID from '@schema/types/uuid';
 

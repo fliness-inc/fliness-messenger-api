@@ -37,7 +37,7 @@ export class Paginator<Entity> {
     }: PaginatorConfig<Entity>) {
     	this.builder = builder.clone();
     	this.keys = keys;
-    	this.uniqueKey = uniqueKey/* .replace('.', '_') */;
+    	this.uniqueKey = uniqueKey;
     	this.order = order;
     	this.limit = limit;
     	this.direction = direction;
@@ -102,7 +102,8 @@ export class Paginator<Entity> {
     public hasNextEntity(entities: Entity[], lastEntity: Entity): boolean {
     	const fullFetchedData = entities.length === this.limit || !this.hasAfterCursor();
 
-    	const key = this.uniqueKey.replace('.', '_');
+		const [ table, col ] = this.uniqueKey.replace(/"/g, '').split('.');
+		const key = makeFormatedField(table, col);
 
     	return fullFetchedData &&
             entities[entities.length - 1][key] !== lastEntity[key];
@@ -111,7 +112,8 @@ export class Paginator<Entity> {
     public hasPreviousEntity(entities: Entity[], firstEntity: Entity): boolean {
     	const fullFetchedData = entities.length === this.limit || !this.hasBeforeCursor();
 
-    	const key = this.uniqueKey.replace('.', '_');
+    	const [ table, col ] = this.uniqueKey.replace(/"/g, '').split('.');
+		const key = makeFormatedField(table, col);
         
     	return fullFetchedData && 
             entities[0][key] !== firstEntity[key];
@@ -209,14 +211,42 @@ export class Paginator<Entity> {
     	const { keys } = this;
     	const paginationFilters: PaginationFilters = {};
 
-    	if (!entity || !keys) return paginationFilters;
+		if (!entity || !keys) return paginationFilters;
 
     	keys.forEach(key => {
-    		paginationFilters[key] = entity[key.replace('.', '_')];
+			const [ table, col ] = key.replace(/"/g, '').split('.');
+			paginationFilters[key] = entity[makeFormatedField(table, col)];
     	});
 
     	return paginationFilters;
     }
+}
+
+export const makeSelectField = (entityAlias: string, fieldName: string) => {
+	return `${makeEnumField(entityAlias, fieldName)} AS ${makeFormatedField(entityAlias, fieldName)}`;
+}
+
+export const makeFormatedField = (entityAlias: string, fieldName: string) => {
+	return `${entityAlias}_${fieldName}`;
+}
+
+export const makeEnumField = (entityAlias: string, fieldName: string) => {
+	return `"${entityAlias}"."${fieldName}"`;
+}
+
+export interface EnumKeys {
+    [key: string]: string
+}
+
+export const makeEnum = (keys: EnumKeys): any => {
+    enum E {}
+
+    Object.entries(keys).map((entry) => {
+        const [ key, val ] = entry;
+        E[key] = val;
+    });
+
+    return E;
 }
 
 export default Paginator;

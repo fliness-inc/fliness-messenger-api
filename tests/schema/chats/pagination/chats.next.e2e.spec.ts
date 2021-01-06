@@ -11,12 +11,12 @@ import { MemberRoleEnum } from '@schema/resolvers/members/members.dto';
 import UsersService from '@schema/resolvers/users/users.service';
 import { Tokens } from '@schema/resolvers/tokens/tokens.service';
 import { ChatTypeSeeder, ChatTypeFactory } from '@database/seeds/chat-type.seeder';
-import { MemberRoleSeeder, MemberRoleFactory } from '@/src/database/seeds/member-role.seeder';
+import { MemberRoleSeeder, MemberRoleFactory } from '@database/seeds/member-role.seeder';
 import UserEntity from '@database/entities/user';
 import ChatEntity from '@database/entities/chat';
 import { CursorCoder } from '@src/pagination/cursor';
 import ChatsService from '@schema/resolvers/chats/chats.service';
-import { ChatPaginationField } from '@schema/models/chats.pagination';
+import { ChatPaginationField } from '@schema/models/chats/chats.model.pagination';
 
 setupDotEnv();
 
@@ -38,7 +38,6 @@ describe('[E2E] [ChatsResolver] ...', () => {
         connection = getConnection();
 
         await connection.synchronize(true);
-        await connection.query('TRUNCATE chats, members CASCADE');
 
         const chatTypeSeeder = new ChatTypeSeeder(new ChatTypeFactory());
         await chatTypeSeeder.run(1, { name: ChatTypeEnum.DIALOG });
@@ -51,11 +50,7 @@ describe('[E2E] [ChatsResolver] ...', () => {
         await memberPriviliegeSeeder.run(1, { name: MemberRoleEnum.MEMBER, weight: 0.1 });
     });
 
-    afterEach(async () => {
-    });
-
     afterAll(async () => {
-        await connection.query('TRUNCATE chats, members CASCADE');
         await app.close();
         await connection.close();
     }); 
@@ -88,9 +83,8 @@ describe('[E2E] [ChatsResolver] ...', () => {
             const res = await request(app.getHttpServer())
                 .post('/graphql')
                 .send({
-                    operationName: 'Login',
                     query: `
-                        mutation Login($payload: AuthLoginDTO!) {
+                        mutation($payload: AuthLoginDTO!) {
                             auth {
                                 login(payload: $payload) {
                                     accessToken
@@ -127,9 +121,8 @@ describe('[E2E] [ChatsResolver] ...', () => {
                     .post('/graphql')
                     .set('Authorization', `Bearer ${tokens.accessToken}`)
                     .send({
-                        operationName: 'GetChats',
                         query: `
-                            query GetChats($pagination: ChatPaginationInput) {
+                            query($pagination: ChatPaginationInput) {
                                 me {
                                     chats(pagination: $pagination) {
                                         edges {
@@ -186,7 +179,6 @@ describe('[E2E] [ChatsResolver] ...', () => {
                         }
                     }
                 });
-                expect(res.body.data.me.chats.edges).toHaveLength(first);
             });
 
             // start ... [] [] [] [] [] ... end

@@ -1,9 +1,9 @@
 import { UseGuards } from '@nestjs/common';
 import { Resolver, ResolveField, Parent, Info, Context } from '@nestjs/graphql';
 import AuthGuard from '@schema/resolvers/auth/auth.guard';
-import Chat from '@schema/models/chats.model';
-import User from '@schema/models/users.model';
-import MemberModel from '@schema/models/members.model';
+import Chat from '@schema/models/chats/chats.model';
+import User from '@schema/models/users/users.model';
+import MemberModel from '@schema/models/members/members.model';
 import { Context as AppContext } from '@src/schema/utils';
 import DataLoader from 'dataloader';
 import UsersService from '@schema/resolvers/users/users.service';

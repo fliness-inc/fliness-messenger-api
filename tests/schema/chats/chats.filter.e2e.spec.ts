@@ -14,7 +14,7 @@ import { Tokens } from '@schema/resolvers/tokens/tokens.service';
 import { ChatTypeSeeder, ChatTypeFactory } from '@database/seeds/chat-type.seeder';
 import { MemberRoleSeeder, MemberRoleFactory } from '@database/seeds/member-role.seeder';
 import ChatsService from '@schema/resolvers/chats/chats.service';
-import { ChatPaginationField } from '@schema/models/chats.pagination';
+import { ChatPaginationField } from '@schema/models/chats/chats.model.pagination';
 import { CursorCoder } from '@src/pagination/cursor';
 
 setupDotEnv();
@@ -49,10 +49,6 @@ describe('[E2E] [ChatResolver] ...', () => {
         await memberPriviliegeSeeder.run(1, { name: MemberRoleEnum.MEMBER, weight: 0.1 });
     });
 
-    afterEach(async () => {
-        //await connection.query('TRUNCATE chats, members CASCADE');
-    });
-
     afterAll(async () => {
         await app.close();
         await connection.close();
@@ -78,9 +74,8 @@ describe('[E2E] [ChatResolver] ...', () => {
                 const res = await request(app.getHttpServer())
                     .post('/graphql')
                     .send({
-                        operationName: 'Login',
                         query: `
-                            mutation Login($payload: AuthLoginDTO!) {
+                            mutation($payload: AuthLoginDTO!) {
                                 auth {
                                     login(payload: $payload) {
                                         accessToken
@@ -127,9 +122,8 @@ describe('[E2E] [ChatResolver] ...', () => {
                     .post('/graphql')
                     .set('Authorization', `Bearer ${creator.tokens.accessToken}`)
                     .send({
-                        operationName: 'GetChats',
                         query: `
-                            query GetChats($filter: ChatsFilter) {
+                            query($filter: ChatsFilter) {
                                 me {
                                     chats(filter: $filter) {
                                         edges {
@@ -194,9 +188,8 @@ describe('[E2E] [ChatResolver] ...', () => {
                     .post('/graphql')
                     .set('Authorization', `Bearer ${creator.tokens.accessToken}`)
                     .send({
-                        operationName: 'GetChats',
                         query: `
-                            query GetChats($filter: ChatsFilter) {
+                            query($filter: ChatsFilter) {
                                 me {
                                     chats(filter: $filter) {
                                         edges {

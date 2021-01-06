@@ -16,7 +16,7 @@ import { MemberRoleSeeder, MemberRoleFactory } from '@database/seeds/member-role
 import MembersService from '@schema/resolvers/members/members.service';
 import Chat from '@database/entities/chat';
 import ChatsService from '@schema/resolvers/chats/chats.service';
-import { MemberPaginationField } from '@schema/models/members.pagination';
+import { MemberPaginationField } from '@schema/models/members/members.model.pagination';
 import { CursorCoder } from '@src/pagination/cursor';
 import Member from '@database/entities/member';
 

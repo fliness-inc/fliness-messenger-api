@@ -1,10 +1,10 @@
 import { Resolver, Query, ResolveField } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
-import MeQuery from '@schema/models/me.query';
+import MeQuery from '@schema/models/me/me.query';
 import UsersService from '@schema/resolvers/users/users.service';
 import AuthGuard from '@schema/resolvers/auth/auth.guard';
 import CurrentUser from '@schema/resolvers/auth/current-user';
-import InvitationsQuery from '@schema/models/invitations.query';
+import InvitationsQuery from '@schema/models/invitations/invitations.query';
 
 @UseGuards(AuthGuard)
 @Resolver(() => MeQuery)

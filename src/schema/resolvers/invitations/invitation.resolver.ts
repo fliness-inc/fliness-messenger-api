@@ -2,8 +2,8 @@ import { ResolveField, Parent, Context, Info, Resolver } from '@nestjs/graphql';
 import { Context as AppContext } from '@schema/utils';
 import DataLoader from 'dataloader';
 import UsersService from '@schema/resolvers/users/users.service';
-import User from '@schema/models/users.model';
-import Invitation from '@schema/models/invitation';
+import User from '@schema/models/users/users.model';
+import Invitation from '@schema/models/invitations/invitation.model';
 
 @Resolver(() => Invitation)
 export class InvitationResolver {

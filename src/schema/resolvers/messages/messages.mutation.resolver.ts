@@ -4,10 +4,10 @@ import MessagesService from '@schema/resolvers/messages/messages.service';
 import { MessageCreateDTO } from '@schema/resolvers/messages/messages.dto';
 import { ChatRoles, MemberRoleEnum } from '@schema/resolvers/chats/chats.guard';
 import AuthGuard from '@schema/resolvers/auth/auth.guard';
-import Message from '@schema/models/messages.model';
-import MessagesMutation from '@schema/models/messages.mutation';
+import Message from '@schema/models/messages/messages.model';
+import MessagesMutation from '@schema/models/messages/messages.mutation';
 import CurrentUser from '@schema/resolvers/auth/current-user';
-import User from '@schema/models/users.model';
+import User from '@schema/models/users/users.model';
 import UUID from '@schema/types/uuid';
 
 @UseGuards(AuthGuard)
