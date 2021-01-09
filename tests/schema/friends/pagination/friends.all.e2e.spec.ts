@@ -49,6 +49,10 @@ describe('[E2E] [FriendsResolver] ...', () => {
         await memberPriviliegeSeeder.run(1, { name: MemberRoleEnum.MEMBER, weight: 0.1 });
     });
 
+    afterEach(async () => {
+        await connection.query('TRUNCATE friends CASCADE');
+    });
+
     afterAll(async () => {
         await app.close();
         await connection.close();
@@ -153,6 +157,57 @@ describe('[E2E] [FriendsResolver] ...', () => {
                                 pageInfo: {
                                     startCursor: CursorCoder.encode({ [key]: friends[0].friendId }),
                                     endCursor: CursorCoder.encode({ [key]: friends[friends.length - 1].friendId }),
+                                    hasNextPage: false,
+                                    hasPreviousPage: false
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+
+            it('should return empty friends list of the user', async () => {
+
+                let friends = [];
+
+                const res = await request(app.getHttpServer())
+                    .post('/graphql')
+                    .set('Authorization', `Bearer ${users[0].tokens.accessToken}`)
+                    .send({
+                        query: `
+                            query {
+                                me {
+                                    friends {
+                                        edges {
+                                            cursor
+                                            node {
+                                                id
+                                                name
+                                            }
+                                        }
+                                        totalCount
+                                        pageInfo {
+                                            startCursor
+                                            endCursor
+                                            hasNextPage
+                                            hasPreviousPage
+                                        }
+                                    }
+                                }
+                            }
+                        `
+                    });
+            
+                expect(res.status).toEqual(200);
+                expect(res.body).toStrictEqual({
+                    data: {
+                        me: {
+                            friends: {
+                                edges: [],
+                                totalCount: 0,
+                                pageInfo: {
+                                    startCursor: null,
+                                    endCursor: null,
                                     hasNextPage: false,
                                     hasPreviousPage: false
                                 }

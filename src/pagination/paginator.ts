@@ -91,32 +91,37 @@ export class Paginator<Entity> {
     		edges,
     		totalCount,
     		pageInfo: {
-    			startCursor: CursorCoder.encode(this.preparePaginationFilters(firstEntity)),
-    			endCursor: CursorCoder.encode(this.preparePaginationFilters(lastEntity)),
+    			startCursor: entities.length ? CursorCoder.encode(this.preparePaginationFilters(firstEntity)) : null,
+    			endCursor: entities.length ? CursorCoder.encode(this.preparePaginationFilters(lastEntity)) : null,
     			hasNextPage: this.hasNextEntity(entities, lastEntity),
     			hasPreviousPage: this.hasPreviousEntity(entities, firstEntity)
     		}
     	};
-    }
-
-    public hasNextEntity(entities: Entity[], lastEntity: Entity): boolean {
-    	const fullFetchedData = entities.length === this.limit || !this.hasAfterCursor();
+	}
+	
+	public hasEntity(entities, hasCursorFn: () => boolean, fn: (key: string) => boolean) {
+		const fullFetchedData = entities.length && (entities.length === this.limit || !hasCursorFn());
 
 		const [ table, col ] = this.uniqueKey.replace(/"/g, '').split('.');
 		const key = makeFormatedField(table, col);
 
-    	return fullFetchedData &&
-            entities[entities.length - 1][key] !== lastEntity[key];
+		return fullFetchedData && fn(key);
+	}
+
+    public hasNextEntity(entities: Entity[], lastEntity: Entity): boolean {
+    	return this.hasEntity(
+			entities, 
+			this.hasAfterCursor.bind(this),
+			key => entities[entities.length - 1][key] !== lastEntity[key]
+		);
     }
 
     public hasPreviousEntity(entities: Entity[], firstEntity: Entity): boolean {
-    	const fullFetchedData = entities.length === this.limit || !this.hasBeforeCursor();
-
-    	const [ table, col ] = this.uniqueKey.replace(/"/g, '').split('.');
-		const key = makeFormatedField(table, col);
-        
-    	return fullFetchedData && 
-            entities[0][key] !== firstEntity[key];
+		return this.hasEntity(
+			entities, 
+			this.hasBeforeCursor.bind(this),
+			key => entities[0][key] !== firstEntity[key]
+		);
     }
 
     public async getFirstEntity(): Promise<Entity> {

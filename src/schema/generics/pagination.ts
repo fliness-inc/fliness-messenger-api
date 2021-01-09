@@ -10,10 +10,10 @@ export class PageInfo {
     @Field(() => Boolean)
     public hasPreviousPage : boolean;
 
-    @Field(() => Cursor)
+    @Field(() => Cursor, { nullable: true })
     public startCursor: string;
         
-    @Field(() => Cursor)
+    @Field(() => Cursor, { nullable: true })
     public endCursor: string;
 }
 
