@@ -186,6 +186,7 @@ describe('[E2E] [MessagesResolver] ...', () => {
                     });
 
                 expect(res.status).toEqual(200);
+                expect(res.body.errors).toBeUndefined();
 
                 const chat = res.body.data.me.chats.edges[0].node;
                 const msgs = chat.messages;

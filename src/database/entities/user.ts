@@ -13,6 +13,9 @@ export class User extends IEntity {
   @Column({ length: 2048 })
   public password: string;
 
+  @Column({ length: 2048, nullable: true })
+  public avatarURL: string
+
   @BeforeInsert()
   private encodePassword() {
   	const salt = bcrypt.genSaltSync();

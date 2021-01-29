@@ -2,7 +2,7 @@ import {ObjectType, InputType, registerEnumType} from '@nestjs/graphql';
 import User from '@schema/models/users/users.model';
 import { Connection } from '@schema/generics/pagination';
 import PaginationInput from '@schema/input/pagination';
-import * as Pagination from '@src/pagination/paginator';
+import Pagination from '@src/pagination/pagination';
 
 export const UserPaginationField = Pagination.makeEnum({
     ID: Pagination.makeEnumField('user', 'id'),

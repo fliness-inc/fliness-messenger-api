@@ -12,7 +12,11 @@ import AuthResolver from '@schema/resolvers/auth/auth.resolver';
 		UsersModule,
 		PassportModule,
 	],
-	providers: [JwtStrategy, AuthService, AuthResolver],
+	providers: [
+		JwtStrategy, 
+		AuthService, 
+		AuthResolver
+	],
 	exports: [JwtStrategy, AuthService],
 })
 export class AuthModule {}

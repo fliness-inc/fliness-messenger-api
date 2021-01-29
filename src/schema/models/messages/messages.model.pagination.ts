@@ -2,7 +2,7 @@ import { ObjectType, InputType, registerEnumType } from '@nestjs/graphql';
 import Message from '@schema/models/messages/messages.model';
 import { Connection } from '@schema/generics/pagination';
 import PaginationInput from '@schema/input/pagination';
-import * as Pagination from '@src/pagination/paginator';
+import Pagination from '@src/pagination/pagination';
 
 export const MessagePaginationField = Pagination.makeEnum({
     ID: Pagination.makeEnumField('message', 'id'),

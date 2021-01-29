@@ -6,7 +6,7 @@ import FriendConnection, { FriendPaginationInput, FriendPaginationField } from '
 import Sort from '@schema/types/sort';
 import { Direction, Order } from '@src/pagination/enums';
 import { getRepository } from 'typeorm';
-import * as Pagination from '@src/pagination/paginator';
+import Pagination from '@src/pagination/pagination';
 import MeQuery from '@schema/models/me/me.query';
 import FriendEntity from '@database/entities/friend';
 
@@ -23,13 +23,16 @@ export class FriendsResolver {
 
 		const { after, before, first, last, fields = [] } = pagination;
         
-		const builder = getRepository(FriendEntity).createQueryBuilder('t')
-			.select('friend.id')
-			.addSelect('friend.name')
-			.addSelect('friend.email')
-			.leftJoin('t.user', 'user', 'user.id = :userId', { userId: user.id })
-			.leftJoin('t.friend', 'friend')
-			.andWhere('t.is_deleted = :isDeleted', { isDeleted: false });
+		const builder = getRepository(FriendEntity)
+			.createQueryBuilder('friends')
+			.select(Pagination.makeSelectField('friend', 'id'))
+			.addSelect(Pagination.makeSelectField('friend', 'name'))
+			.addSelect(Pagination.makeSelectField('friend', 'email'))
+			.addSelect(Pagination.makeSelectField('friend', 'avatarURL'))
+			.leftJoin('friends.user', 'user')
+			.leftJoin('friends.friend', 'friend')
+			.where('"user"."id" = :userId', { userId: user.id })
+			.andWhere('"friends"."is_deleted" = :isDeleted', { isDeleted: false });
 
 		if (!fields.includes(FriendPaginationField.ID))
 			fields.push(FriendPaginationField.ID);
@@ -46,9 +49,10 @@ export class FriendsResolver {
 		});
 
 		return paginator.paginate((entity: any) => ({
-				id: entity.friend_id,
-				name: entity.friend_name,
-				email: entity.friend_email
+				id: entity[Pagination.makeFormatedField('friend', 'id')],
+				name: entity[Pagination.makeFormatedField('friend', 'name')],
+				email: entity[Pagination.makeFormatedField('friend', 'email')],
+				avatarURL: entity[Pagination.makeFormatedField('friend', 'avatarURL')],
 			})
 		);
 	}

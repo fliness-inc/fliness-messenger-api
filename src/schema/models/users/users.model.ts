@@ -10,7 +10,7 @@ export class User extends Entity {
     public readonly email: string;
 
     @Field(() => String, { nullable: true })
-    public readonly avatar?: string;
+    public readonly avatarURL?: string;
 }
 
 export default User;

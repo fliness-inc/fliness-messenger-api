@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GraphQLModule } from '@nestjs/graphql';
 import SchemaModule from '@schema/schema.module';
+import FileModule from '@src/controllers/file/file.module';
  
 @Module({
 	imports: [
@@ -26,7 +27,8 @@ import SchemaModule from '@schema/schema.module';
 				return ctx; 
 			}
 		}),
-		SchemaModule
+		SchemaModule,
+		FileModule
 	]
 })
 export class AppModule {}

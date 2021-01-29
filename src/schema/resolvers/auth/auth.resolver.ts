@@ -6,7 +6,7 @@ import { Context as AppContext } from '@schema/utils';
 import { AuthLoginDTO, AuthRegisterDTO } from '@schema/resolvers/auth/auth.dto';
 import Token from '@schema/models/tokens/tokens.model';
 import AuthGuard from '@schema/resolvers/auth/auth.guard';
-import Auth from '@schema/models/auth/auth';
+import Auth from '@schema/models/auth/auth.model';
 
 @Resolver(() => Auth)
 export class AuthResolver {

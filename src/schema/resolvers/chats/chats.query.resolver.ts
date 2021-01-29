@@ -9,7 +9,7 @@ import Sort from '@schema/types/sort';
 import { Direction, Order } from '@src/pagination/enums';
 import ChatEntity from '@database/entities/chat';
 import { getRepository } from 'typeorm';
-import * as Pagination from '@src/pagination/paginator';
+import Pagination from '@src/pagination/pagination';
 import { ChatsFilter } from '@schema/resolvers/chats/chats.dto';
 import Filter from '@src/filter/filter';
 
@@ -30,7 +30,8 @@ export class ChatsModelResolver {
 
     	const { after, before, first, last, fields = [] } = pagination;
         
-    	const builder = getRepository(ChatEntity).createQueryBuilder('chat')
+		const builder = getRepository(ChatEntity)
+			.createQueryBuilder('chat')
     		.select(Pagination.makeSelectField('chat', 'id'))
     		.addSelect(Pagination.makeSelectField('chat', 'title'))
     		.addSelect(Pagination.makeSelectField('chat', 'description'))
@@ -59,11 +60,11 @@ export class ChatsModelResolver {
     	});
 
     	return paginator.paginate((entity: any) => ({
-				id: entity.chat_id,
-				title: entity.chat_title,
-				description: entity.chat_description,
-				createdAt: entity.chat_created_at,
-				type: entity.type_name
+				id: entity[Pagination.makeFormatedField('chat', 'id')],
+				title: entity[Pagination.makeFormatedField('chat', 'title')],
+				description: entity[Pagination.makeFormatedField('chat', 'description')],
+				createdAt: entity[Pagination.makeFormatedField('chat', 'created_at')],
+				type: entity[Pagination.makeFormatedField('type', 'name')]
 			})
     	);
     }

@@ -2,7 +2,7 @@ import {ObjectType, InputType, registerEnumType} from '@nestjs/graphql';
 import Friend from '@schema/models/friends/friends.model';
 import { Connection } from '@schema/generics/pagination';
 import PaginationInput from '@schema/input/pagination';
-import * as Pagination from '@src/pagination/paginator';
+import Pagination from '@src/pagination/pagination';
 
 export const FriendPaginationField = Pagination.makeEnum({
     ID: Pagination.makeEnumField('friend', 'id'),

@@ -9,7 +9,7 @@ import MemberConnection, { MemberPaginationField, MemberPaginationInput } from '
 import { InjectRepository } from '@nestjs/typeorm';
 import Member from '@database/entities/member';
 import { Repository } from 'typeorm';
-import * as Pagination from '@src/pagination/paginator';
+import Pagination from '@src/pagination/pagination';
 import Filter from '@src/filter/filter';
 
 @UseGuards(AuthGuard)
@@ -34,16 +34,17 @@ export class MembersQueryResolver {
 
     	const { after, before, first, last, fields = [] } = pagination;
         
-    	const builder = this.membersRespository.createQueryBuilder('member')
-    		.select('member.id')
-    		.addSelect('member.chat_id')
-    		.addSelect('member.user_id')
-    		.addSelect('member.updated_at')
-    		.addSelect('member.created_at')
-    		.addSelect('role.name')
+		const builder = this.membersRespository
+			.createQueryBuilder('member')
+    		.select(Pagination.makeSelectField('member', 'id'))
+    		.addSelect(Pagination.makeSelectField('member', 'chat_id'))
+    		.addSelect(Pagination.makeSelectField('member', 'user_id'))
+    		.addSelect(Pagination.makeSelectField('member', 'updated_at'))
+    		.addSelect(Pagination.makeSelectField('member', 'created_at'))
+    		.addSelect(Pagination.makeSelectField('role', 'name'))
     		.leftJoin('member.role', 'role')
-    		.where('member.is_deleted = :isDeleted', { isDeleted: false })
-    		.andWhere('member.chat_id = :chatId', { chatId: chat.id });
+    		.where('"member"."is_deleted" = :isDeleted', { isDeleted: false })
+    		.andWhere('"member"."chat_id" = :chatId', { chatId: chat.id });
 
     	const filterManager = new Filter(builder);
     	filterManager.make(filter);
@@ -63,12 +64,12 @@ export class MembersQueryResolver {
     	});
 
     	return paginator.paginate((entity: any) => ({
-    		id: entity.member_id,
-    		chatId: entity.chat_id,
-    		userId: entity.user_id,
-    		updatedAt: entity.updated_at,
-    		createdAt: entity.created_at,
-    		role: entity.role_name
+    		id: entity[Pagination.makeFormatedField('member', 'id')],
+    		chatId: entity[Pagination.makeFormatedField('member', 'chat_id')],
+    		userId: entity[Pagination.makeFormatedField('member', 'user_id')],
+    		updatedAt: entity[Pagination.makeFormatedField('member', 'updated_at')],
+    		createdAt: entity[Pagination.makeFormatedField('member', 'created_at')],
+    		role: entity[Pagination.makeFormatedField('role', 'name')]
     	}));
     }
 }

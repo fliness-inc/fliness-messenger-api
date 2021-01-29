@@ -8,8 +8,16 @@ import Message from '@database/entities/message';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
-	imports: [MembersModule, ChatModule, TypeOrmModule.forFeature([Message])],
-	providers: [MessagesService, MessagesModelResolver, MessagesMutationResolver],
+	imports: [
+		MembersModule, 
+		ChatModule, 
+		TypeOrmModule.forFeature([Message])
+	],
+	providers: [
+		MessagesService, 
+		MessagesModelResolver, 
+		MessagesMutationResolver
+	],
 	exports: [MessagesService]
 })
 export class MessagesModule {}

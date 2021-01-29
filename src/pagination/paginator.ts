@@ -3,6 +3,7 @@ import { Cursor, CursorCoder, PaginationFilters } from '@src/pagination/cursor';
 import { PaginationQuery } from '@src/pagination/query';
 import { Order, Operator, Direction } from '@src/pagination/enums';
 import { PaginationResult, PaginationEdge } from '@src/pagination/result';
+import Fields from '@src/pagination/fields';
 
 export class PaginatorConfig<Entity> {
     public readonly builder: SelectQueryBuilder<Entity>;
@@ -103,7 +104,7 @@ export class Paginator<Entity> {
 		const fullFetchedData = entities.length && (entities.length === this.limit || !hasCursorFn());
 
 		const [ table, col ] = this.uniqueKey.replace(/"/g, '').split('.');
-		const key = makeFormatedField(table, col);
+		const key = Fields.makeFormatedField(table, col);
 
 		return fullFetchedData && fn(key);
 	}
@@ -220,38 +221,11 @@ export class Paginator<Entity> {
 
     	keys.forEach(key => {
 			const [ table, col ] = key.replace(/"/g, '').split('.');
-			paginationFilters[key] = entity[makeFormatedField(table, col)];
+			paginationFilters[key] = entity[Fields.makeFormatedField(table, col)];
     	});
 
     	return paginationFilters;
     }
-}
-
-export const makeSelectField = (entityAlias: string, fieldName: string) => {
-	return `${makeEnumField(entityAlias, fieldName)} AS ${makeFormatedField(entityAlias, fieldName)}`;
-}
-
-export const makeFormatedField = (entityAlias: string, fieldName: string) => {
-	return `${entityAlias}_${fieldName}`;
-}
-
-export const makeEnumField = (entityAlias: string, fieldName: string) => {
-	return `"${entityAlias}"."${fieldName}"`;
-}
-
-export interface EnumKeys {
-    [key: string]: string
-}
-
-export const makeEnum = (keys: EnumKeys): any => {
-    enum E {}
-
-    Object.entries(keys).map((entry) => {
-        const [ key, val ] = entry;
-        E[key] = val;
-    });
-
-    return E;
 }
 
 export default Paginator;

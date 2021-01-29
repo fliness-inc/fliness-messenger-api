@@ -7,7 +7,7 @@ import { MessageConnection, MessagePaginationInput, MessagePaginationField } fro
 import { Direction, Order } from '@src/pagination/enums';
 import Sort from '@schema/types/sort';
 import { getRepository } from 'typeorm';
-import * as Pagination from '@src/pagination/paginator';
+import Pagination from '@src/pagination/pagination';
 import { MessagesFilter } from '@schema/resolvers/messages/messages.dto';
 import Filter from '@src/filter/filter';
 
@@ -30,11 +30,11 @@ export class MessagesModelResolver {
     	const { after, before, first, last, fields = [] } = pagination;
         
     	const builder = getRepository(MessageEntity).createQueryBuilder('message')
-    		.select('message.id')
-    		.addSelect('message.text')
-    		.addSelect('message.member_id')
-    		.addSelect('message.updated_at')
-    		.addSelect('message.created_at')
+    		.select(Pagination.makeSelectField('message', 'id'))
+    		.addSelect(Pagination.makeSelectField('message', 'text'))
+    		.addSelect(Pagination.makeSelectField('message', 'member_id'))
+    		.addSelect(Pagination.makeSelectField('message', 'updated_at'))
+    		.addSelect(Pagination.makeSelectField('message', 'created_at'))
     		.leftJoin('message.member', 'member')
     		.where('member.chat_id = :chatId', { chatId: chat.id })
     		.andWhere('message.is_deleted = :isDeleted', { isDeleted: false });
@@ -57,12 +57,12 @@ export class MessagesModelResolver {
     	});
 
     	return paginator.paginate((entity: any) => ({
-    		id: entity.message_id,
-    		text: entity.message_text,
-    		memberId: entity.member_id,
-    		updatedAt: entity.updated_at,
-    		createdAt: entity.created_at,
-    	})
+				id: entity[Pagination.makeFormatedField('message', 'id')],
+				text: entity[Pagination.makeFormatedField('message', 'text')],
+				memberId: entity[Pagination.makeFormatedField('message', 'member_id')],
+				updatedAt: entity[Pagination.makeFormatedField('message', 'updated_at')],
+				createdAt: entity[Pagination.makeFormatedField('message', 'created_at')],
+			})
     	);
     }
 }

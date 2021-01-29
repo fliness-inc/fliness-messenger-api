@@ -1,29 +1,32 @@
 import { Injectable } from '@nestjs/common';
-import { getRepository, FindManyOptions, DeepPartial, FindOneOptions } from 'typeorm';
-import Friend from '@database/entities/friend';
-import UsersService from '@schema/resolvers/users/users.service';
+import { FindManyOptions, DeepPartial, FindOneOptions } from 'typeorm';
+import FriendEntity from '@database/entities/friend';
 import { FindManyOptionsFunc, FindOneOptionsFunc } from '@schema/utils';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class FriendsService {
 
-	public constructor(private readonly usersService: UsersService) {}
+	public constructor(
+		@InjectRepository(FriendEntity)
+		private readonly friendRepository: Repository<FriendEntity>
+	) {}
 
-	public async find(options?: FindManyOptions<Friend> | FindManyOptionsFunc<Friend>): Promise<Friend[]> {
+	public async find(options?: FindManyOptions<FriendEntity> | FindManyOptionsFunc<FriendEntity>): Promise<FriendEntity[]> {
 		const alias = 'friends';
 		const op = typeof options === 'function' ? options(alias) : options;
-		return getRepository(Friend).find(op);
+		return this.friendRepository.find(op);
 	}
 
-	public async findOne(options: FindOneOptions<Friend> | FindOneOptionsFunc<Friend>): Promise<Friend | undefined> {
+	public async findOne(options: FindOneOptions<FriendEntity> | FindOneOptionsFunc<FriendEntity>): Promise<FriendEntity | undefined> {
 		const alias = 'friends';
 		const op = typeof options === 'function' ? options(alias) : options;
-		return getRepository(Friend).findOne(op);
+		return this.friendRepository.findOne(op);
 	}
 
-	public async create(options: DeepPartial<Friend>): Promise<Friend> {
-		const friends = getRepository(Friend);
-		return friends.save(friends.create(options));
+	public async create(options: DeepPartial<FriendEntity>): Promise<FriendEntity> {
+		return this.friendRepository.save(this.friendRepository.create(options));
 	}
 }
 

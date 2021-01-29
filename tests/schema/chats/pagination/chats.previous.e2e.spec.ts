@@ -2,10 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { config as setupDotEnv } from 'dotenv';
 import cookieParser from 'cookie-parser';
-import { getConnection, Connection, getRepository } from 'typeorm';
+import { getConnection, Connection } from 'typeorm';
 import { AppModule } from '@src/app.module';
 import request from 'supertest';
-import * as uuid from 'uuid';
 import Faker from 'faker';
 import { ChatTypeEnum } from '@schema/resolvers/chats/chats.dto';
 import { MemberRoleEnum } from '@schema/resolvers/members/members.dto';
@@ -17,7 +16,7 @@ import UserEntity from '@database/entities/user';
 import ChatEntity from '@database/entities/chat';
 import { CursorCoder } from '@src/pagination/cursor';
 import ChatsService from '@schema/resolvers/chats/chats.service';
-import { ChatPaginationField } from '@schema/models/chats/chats.model.pagination';
+import { ChatPaginationField,  } from '@schema/models/chats/chats.model.pagination';
 
 setupDotEnv();
 
@@ -61,6 +60,42 @@ describe('[E2E] [ChatsResolver] ...', () => {
         const user: UserEntity = <any>{};
         const tokens: Tokens = <any>{}
         let chats: ChatEntity[] = [];
+
+        const makeRequest = async (pagination) => {
+            return await request(app.getHttpServer())
+            .post('/graphql')
+            .set('Authorization', `Bearer ${tokens.accessToken}`)
+            .send({
+                query: `
+                    query($pagination: ChatPaginationInput) {
+                        me {
+                            chats(pagination: $pagination) {
+                                edges {
+                                    cursor
+                                    node {
+                                        id
+                                        title
+                                        description
+                                        type
+                                        createdAt
+                                    }
+                                }
+                                totalCount
+                                pageInfo {
+                                    startCursor
+                                    endCursor
+                                    hasNextPage
+                                    hasPreviousPage
+                                }
+                            }
+                        }
+                    }
+                `,
+                variables: {
+                    pagination
+                }
+            });
+        }
     
         beforeAll(async () => {
             const usersService = app.get<UsersService>(UsersService);
@@ -118,41 +153,7 @@ describe('[E2E] [ChatsResolver] ...', () => {
             it('should return the last 5 chats of the user', async () => {
                 const last = 5;
                 const key = ChatPaginationField.ID;
-                const res = await request(app.getHttpServer())
-                    .post('/graphql')
-                    .set('Authorization', `Bearer ${tokens.accessToken}`)
-                    .send({
-                        query: `
-                            query($pagination: ChatPaginationInput) {
-                                me {
-                                    chats(pagination: $pagination) {
-                                        edges {
-                                            cursor
-                                            node {
-                                                id
-                                                title
-                                                description
-                                                type
-                                                createdAt
-                                            }
-                                        }
-                                        totalCount
-                                        pageInfo {
-                                            startCursor
-                                            endCursor
-                                            hasNextPage
-                                            hasPreviousPage
-                                        }
-                                    }
-                                }
-                            }
-                        `,
-                        variables: {
-                            pagination: {
-                                last
-                            }
-                        }
-                    });
+                const res = await makeRequest({ last });
 
                 expect(res.status).toEqual(200);
                 expect(res.body).toStrictEqual({
@@ -186,42 +187,10 @@ describe('[E2E] [ChatsResolver] ...', () => {
             it('should return the last 5 chats after the second (8) chats of the end', async () => {
                 const last = 5;
                 const key = ChatPaginationField.ID;
-                const res = await request(app.getHttpServer())
-                    .post('/graphql')
-                    .set('Authorization', `Bearer ${tokens.accessToken}`)
-                    .send({
-                        query: `
-                            query($pagination: ChatPaginationInput) {
-                                me {
-                                    chats(pagination: $pagination) {
-                                        edges {
-                                            cursor
-                                            node {
-                                                id
-                                                title
-                                                description
-                                                type
-                                                createdAt
-                                            }
-                                        }
-                                        totalCount
-                                        pageInfo {
-                                            startCursor
-                                            endCursor
-                                            hasNextPage
-                                            hasPreviousPage
-                                        }
-                                    }
-                                }
-                            }
-                        `,
-                        variables: {
-                            pagination: {
-                                last,
-                                before: CursorCoder.encode({ [key]: chats[chats.length-2].id })
-                            }
-                        }
-                    });
+                const res = await makeRequest({ 
+                    last,
+                    before: CursorCoder.encode({ [key]: chats[chats.length-2].id })
+                });
 
                 expect(res.status).toEqual(200);
                 expect(res.body).toStrictEqual({
@@ -255,42 +224,10 @@ describe('[E2E] [ChatsResolver] ...', () => {
             it('should return the last 5 chats of the user', async () => {
                 const last = 5;
                 const key = ChatPaginationField.ID;
-                const res = await request(app.getHttpServer())
-                    .post('/graphql')
-                    .set('Authorization', `Bearer ${tokens.accessToken}`)
-                    .send({
-                        query: `
-                            query($pagination: ChatPaginationInput) {
-                                me {
-                                    chats(pagination: $pagination) {
-                                        edges {
-                                            cursor
-                                            node {
-                                                id
-                                                title
-                                                description
-                                                type
-                                                createdAt
-                                            }
-                                        }
-                                        totalCount
-                                        pageInfo {
-                                            startCursor
-                                            endCursor
-                                            hasNextPage
-                                            hasPreviousPage
-                                        }
-                                    }
-                                }
-                            }
-                        `,
-                        variables: {
-                            pagination: {
-                                last,
-                                before: CursorCoder.encode({ [key]: chats[5].id })
-                            }
-                        }
-                    });
+                const res = await makeRequest({ 
+                    last,
+                    before: CursorCoder.encode({ [key]: chats[5].id })
+                });
 
                 expect(res.status).toEqual(200);
                 expect(res.body).toStrictEqual({
@@ -324,42 +261,10 @@ describe('[E2E] [ChatsResolver] ...', () => {
             it('should return the last 5 chats of the user after the third of the end', async () => {
                 const last = 5;
                 const key = ChatPaginationField.ID;
-                const res = await request(app.getHttpServer())
-                    .post('/graphql')
-                    .set('Authorization', `Bearer ${tokens.accessToken}`)
-                    .send({
-                        query: `
-                            query($pagination: ChatPaginationInput) {
-                                me {
-                                    chats(pagination: $pagination) {
-                                        edges {
-                                            cursor
-                                            node {
-                                                id
-                                                title
-                                                description
-                                                type
-                                                createdAt
-                                            }
-                                        }
-                                        totalCount
-                                        pageInfo {
-                                            startCursor
-                                            endCursor
-                                            hasNextPage
-                                            hasPreviousPage
-                                        }
-                                    }
-                                }
-                            }
-                        `,
-                        variables: {
-                            pagination: {
-                                last,
-                                before: CursorCoder.encode({ [key]: chats[2].id })
-                            }
-                        }
-                    });
+                const res = await makeRequest({ 
+                    last,
+                    before: CursorCoder.encode({ [key]: chats[2].id })
+                });
 
                 expect(res.status).toEqual(200);
                 expect(res.body).toStrictEqual({
