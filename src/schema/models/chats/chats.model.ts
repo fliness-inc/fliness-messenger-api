@@ -1,25 +1,25 @@
 import { ObjectType, Field, registerEnumType } from '@nestjs/graphql';
-import Entity from '@schema/models/entity.interface';
-import { ChatTypeEnum } from '@schema/resolvers/chats/chats.dto';
-import DateTime from '@schema/types/datetime';
+import IEntity from '@schema/models/entity.interface';
+import { ChatTypeEnum } from '@schema/models/chats/chats.dto';
+import DateTime from '@schema/types/datetime.type';
 
 registerEnumType(ChatTypeEnum, {
-	name: 'ChatType'
-})
+  name: 'ChatType'
+});
 
 @ObjectType()
-export class Chat extends Entity {
-    @Field({ nullable: true })
-    public readonly title?: string;
+export class Chat extends IEntity {
+  @Field({ nullable: true })
+  public readonly title?: string;
 
-    @Field({ nullable: true })
-    public readonly description?: string;
+  @Field({ nullable: true })
+  public readonly description?: string;
 
-    @Field(() => ChatTypeEnum)
-    public readonly type: ChatTypeEnum;
+  @Field(() => ChatTypeEnum)
+  public readonly type: ChatTypeEnum;
 
-    @Field(() => DateTime)
-    public readonly createdAt: Date;
+  @Field(() => DateTime)
+  public readonly createdAt: Date;
 }
 
 export default Chat;

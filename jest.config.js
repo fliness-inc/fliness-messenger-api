@@ -1,21 +1,17 @@
-module.exports = { 
-    moduleFileExtensions: [
-        "js",
-        "json",
-        "ts"
-    ],
-    rootDir: ".",
-    testRegex: ".spec.ts$",
-    transform: {
-        "^.+\\.ts$": "ts-jest"
-    },
-    coverageDirectory: "coverage",
-    testEnvironment: "node",
-    moduleNameMapper: {
-        "^@/(.*)$": "<rootDir>/$1",
-        "^@src/(.*)$": "<rootDir>/src/$1",
-        "^@database/(.*)$": "<rootDir>/src/database/$1",
-        "^@modules/(.*)$": "<rootDir>/src/modules/$1",
-        "^@schema/(.*)$": "<rootDir>/src/schema/$1"
-    }
+module.exports = {
+  moduleFileExtensions: ['js', 'json', 'ts'],
+  rootDir: '.',
+  testRegex: '.spec.ts$',
+  transform: {
+    '^.+\\.ts$': 'ts-jest'
+  },
+  coverageDirectory: 'coverage',
+  testEnvironment: 'node',
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/$1',
+    '^@src/(.*)$': '<rootDir>/src/$1',
+    '^@db/(.*)$': '<rootDir>/src/db/$1',
+    '^@schema/(.*)$': '<rootDir>/src/schema/$1',
+    '^@lib/(.*)$': '<rootDir>/src/lib/$1'
+  }
 };

@@ -1,21 +1,24 @@
-import {ObjectType, InputType, registerEnumType} from '@nestjs/graphql';
+import { ObjectType, InputType, registerEnumType } from '@nestjs/graphql';
 import User from '@schema/models/users/users.model';
-import { Connection } from '@schema/generics/pagination';
-import PaginationInput from '@schema/input/pagination';
-import Pagination from '@src/pagination/pagination';
+import {
+  makeEnum,
+  makeEnumField,
+  makeDTO,
+  makeConnection
+} from '@lib/pagination/pagination';
 
-export const UserPaginationField = Pagination.makeEnum({
-    ID: Pagination.makeEnumField('user', 'id'),
-    NAME: Pagination.makeEnumField('user', 'name'),
-    EMAIL: Pagination.makeEnumField('user', 'email'),
+export const UserPaginationField = makeEnum({
+  ID: makeEnumField('users', 'id'),
+  NAME: makeEnumField('users', 'name'),
+  EMAIL: makeEnumField('users', 'email')
 });
 
 registerEnumType(UserPaginationField, { name: 'UserPaginationField' });
 
 @InputType()
-export class UserPaginationInput extends PaginationInput(UserPaginationField) {}
+export class UserPaginationInput extends makeDTO(UserPaginationField) {}
 
 @ObjectType()
-export class UserConnection extends Connection(User) {}
+export class UserConnection extends makeConnection(User) {}
 
 export default UserConnection;

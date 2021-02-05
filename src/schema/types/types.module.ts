@@ -1,16 +1,9 @@
 import { Module } from '@nestjs/common';
-import UUID from '@schema/types/uuid';
-import DateTime from '@schema/types/datetime';
-import Cursor from '@schema/types/cursor';
-import Sort from '@schema/types/sort';
+import UUID from '@schema/types/uuid.type';
+import DateTime from '@schema/types/datetime.type';
 
 @Module({
-	providers: [
-		UUID,
-		DateTime,
-		Cursor,
-		Sort
-	]
+  providers: [UUID, DateTime]
 })
 export class TypesModule {}
 

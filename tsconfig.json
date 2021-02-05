@@ -19,9 +19,9 @@
     "paths": {
       "@/*": ["*"],
       "@src/*": ["src/*"],
-      "@database/*": ["src/database/*"],
-      "@modules/*": ["src/modules/*"],
-      "@schema/*": ["src/schema/*"]
+      "@db/*": ["src/db/*"],
+      "@schema/*": ["src/schema/*"],
+      "@lib/*": ["src/lib/*"]
     }
   }
 }

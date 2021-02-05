@@ -1,24 +1,27 @@
 import { ObjectType, InputType, registerEnumType } from '@nestjs/graphql';
 import Message from '@schema/models/messages/messages.model';
-import { Connection } from '@schema/generics/pagination';
-import PaginationInput from '@schema/input/pagination';
-import Pagination from '@src/pagination/pagination';
+import {
+  makeEnumField,
+  makeConnection,
+  makeDTO,
+  makeEnum
+} from '@lib/pagination/pagination';
 
-export const MessagePaginationField = Pagination.makeEnum({
-    ID: Pagination.makeEnumField('message', 'id'),
-    TEXT: Pagination.makeEnumField('message', 'text'),
-    UPDATED_AT: Pagination.makeEnumField('message', 'updated_at'),
-    CREATED_AT: Pagination.makeEnumField('message', 'created_at'),
+export const MessagePaginationField = makeEnum({
+  ID: makeEnumField('messages', 'id'),
+  TEXT: makeEnumField('messages', 'text'),
+  UPDATED_AT: makeEnumField('messages', 'updated_at'),
+  CREATED_AT: makeEnumField('messages', 'created_at')
 });
 
 registerEnumType(MessagePaginationField, {
-	name: 'MessagePaginationField'
+  name: 'MessagePaginationField'
 });
 
 @InputType()
-export class MessagePaginationInput extends PaginationInput(MessagePaginationField) {}
+export class MessagePaginationInput extends makeDTO(MessagePaginationField) {}
 
 @ObjectType()
-export class MessageConnection extends Connection(Message) {}
+export class MessageConnection extends makeConnection(Message) {}
 
 export default MessageConnection;

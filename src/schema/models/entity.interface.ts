@@ -1,10 +1,10 @@
 import { ObjectType, Field } from '@nestjs/graphql';
-import UUID from '@schema/types/uuid';
+import UUID from '@schema/types/uuid.type';
 
 @ObjectType()
-export class Entity {
-    @Field(() => UUID)
-    public readonly id: string;
+export abstract class IEntity {
+  @Field(() => UUID)
+  public readonly id: string;
 }
 
-export default Entity;
+export default IEntity;

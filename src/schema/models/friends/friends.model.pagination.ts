@@ -1,23 +1,26 @@
-import {ObjectType, InputType, registerEnumType} from '@nestjs/graphql';
+import { ObjectType, InputType, registerEnumType } from '@nestjs/graphql';
 import Friend from '@schema/models/friends/friends.model';
-import { Connection } from '@schema/generics/pagination';
-import PaginationInput from '@schema/input/pagination';
-import Pagination from '@src/pagination/pagination';
+import {
+  makeDTO,
+  makeEnum,
+  makeConnection,
+  makeEnumField
+} from '@lib/pagination/pagination';
 
-export const FriendPaginationField = Pagination.makeEnum({
-    ID: Pagination.makeEnumField('friend', 'id'),
-    NAME: Pagination.makeEnumField('friend', 'name'),
-    EMAIL: Pagination.makeEnumField('friend', 'email'),
+export const FriendPaginationField = makeEnum({
+  ID: makeEnumField('friend', 'id'),
+  NAME: makeEnumField('friend', 'name'),
+  EMAIL: makeEnumField('friend', 'email')
 });
 
 registerEnumType(FriendPaginationField, {
-	name: 'FriendPaginationField'
+  name: 'FriendPaginationField'
 });
 
 @InputType()
-export class FriendPaginationInput extends PaginationInput(FriendPaginationField) {}
+export class FriendPaginationInput extends makeDTO(FriendPaginationField) {}
 
 @ObjectType()
-export class FriendConnection extends Connection(Friend) {}
+export class FriendConnection extends makeConnection(Friend) {}
 
 export default FriendConnection;

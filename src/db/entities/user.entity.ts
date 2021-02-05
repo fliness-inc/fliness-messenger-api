@@ -1,0 +1,26 @@
+import { Column, Entity, BeforeInsert } from 'typeorm';
+import IEntity from './entity.interface';
+import bcrypt from 'bcryptjs';
+
+@Entity({ name: 'users' })
+export class User extends IEntity {
+  @Column({ length: 255 })
+  public name: string;
+
+  @Column({ unique: true })
+  public email: string;
+
+  @Column({ length: 2048 })
+  public password: string;
+
+  @Column({ length: 2048, nullable: true })
+  public avatarURL: string;
+
+  @BeforeInsert()
+  private encodePassword() {
+    const salt = bcrypt.genSaltSync();
+    this.password = bcrypt.hashSync(this.password, salt);
+  }
+}
+
+export default User;

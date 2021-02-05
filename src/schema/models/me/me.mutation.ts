@@ -4,11 +4,11 @@ import ChatMutation from '@schema/models/chats/chats.mutation';
 
 @ObjectType()
 export class MeMutation {
-    @Field()
-    public readonly invitations?: InvitationsMutation;
+  @Field()
+  public readonly invitations?: InvitationsMutation;
 
-    @Field()
-    public readonly chats?: ChatMutation;
+  @Field()
+  public readonly chats?: ChatMutation;
 }
 
 export default MeMutation;

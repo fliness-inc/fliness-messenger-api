@@ -1,24 +1,27 @@
 import { ObjectType, InputType, registerEnumType } from '@nestjs/graphql';
 import Chat from '@schema/models/chats/chats.model';
-import { Connection } from '@schema/generics/pagination';
-import PaginationInput from '@schema/input/pagination';
-import Pagination from '@src/pagination/pagination';
+import {
+  makeDTO,
+  makeConnection,
+  makeEnum,
+  makeEnumField
+} from '@lib/pagination/pagination';
 
-export const ChatPaginationField = Pagination.makeEnum({
-    ID: Pagination.makeEnumField('chat', 'id'),
-    TITLE: Pagination.makeEnumField('chat', 'title'),
-    DESCRIPTION: Pagination.makeEnumField('chat', 'description'),
-    TYPE: Pagination.makeEnumField('type', 'name'),
+export const ChatPaginationField = makeEnum({
+  ID: makeEnumField('chats', 'id'),
+  TITLE: makeEnumField('chats', 'title'),
+  DESCRIPTION: makeEnumField('chats', 'description'),
+  TYPE: makeEnumField('type', 'name')
 });
 
 registerEnumType(ChatPaginationField, {
-	name: 'ChatPaginationField'
+  name: 'ChatPaginationField'
 });
 
 @InputType()
-export class ChatPaginationInput extends PaginationInput(ChatPaginationField) {}
+export class ChatPaginationInput extends makeDTO(ChatPaginationField) {}
 
 @ObjectType()
-export class ChatConnection extends Connection(Chat) {}
+export class ChatConnection extends makeConnection(Chat) {}
 
 export default ChatConnection;
