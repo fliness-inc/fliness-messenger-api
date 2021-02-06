@@ -4,7 +4,7 @@ import AuthGuard from '@schema/models/auth/auth.guard';
 import Chat from '@schema/models/chats/chats.model';
 import MemberConnection, {
   MemberPaginationInput
-} from '@/src/schema/models/members/members.model.pagination';
+} from '@schema/models/members/members.model.pagination';
 import { InjectRepository } from '@nestjs/typeorm';
 import Member from '@db/entities/member.entity';
 import { Repository } from 'typeorm';

@@ -8,7 +8,7 @@ import { AppModule } from '@src/app.module';
 import request from 'supertest';
 import Faker from 'faker';
 import { ChatTypeEnum } from '@schema/models/chats/chats.dto';
-import { MemberRoleEnum } from '@/src/schema/models/members/members.dto';
+import { MemberRoleEnum } from '@schema/models/members/members.dto';
 import UsersService from '@schema/models/users/users.service';
 import { Tokens } from '@schema/models/tokens/tokens.service';
 import { ChatTypeSeeder, ChatTypeFactory } from '@db/seeds/chat-type.seeder';

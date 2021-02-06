@@ -8,7 +8,7 @@ import {
   OperationInvalidError
 } from '@src/errors';
 import MemberRole from '@db/entities/member-role.entity';
-import { MemberRoleEnum } from '@/src/schema/models/members/members.dto';
+import { MemberRoleEnum } from '@schema/models/members/members.dto';
 import { FindManyOptions, FindOneOptions, getRepository } from 'typeorm';
 import { FindManyOptionsFunc, FindOneOptionsFunc } from '@schema/utils';
 import { InjectRepository } from '@nestjs/typeorm';

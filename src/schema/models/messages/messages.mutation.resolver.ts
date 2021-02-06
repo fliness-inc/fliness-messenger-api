@@ -1,7 +1,7 @@
 import { UseGuards } from '@nestjs/common';
 import { ResolveField, Resolver, Args } from '@nestjs/graphql';
 import MessagesService from '@schema/models/messages/messages.service';
-import { MessageCreateDTO } from '@/src/schema/models/messages/messages.dto';
+import { MessageCreateDTO } from '@schema/models/messages/messages.dto';
 import { ChatRoles, MemberRoleEnum } from '@schema/models/chats/chats.guard';
 import AuthGuard from '@schema/models/auth/auth.guard';
 import Message from '@schema/models/messages/messages.model';

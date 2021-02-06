@@ -11,7 +11,7 @@ import {
   makeSelectField,
   OperatorTypeEnum
 } from '@lib/filter/filter';
-import { MessagesFieldArgumentEnum } from '@/src/schema/models/messages/messages.dto';
+import { MessagesFieldArgumentEnum } from '@schema/models/messages/messages.dto';
 import * as uuid from 'uuid';
 
 setupDotEnv();

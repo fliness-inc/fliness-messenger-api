@@ -6,7 +6,7 @@ export const makeUniqueField = makeBaseField;
 export const makeEnumField = makeBaseField;
 
 export const makeFormatedField = (table: string, column: string) => {
-  return `${table}_${column}`;
+  return `${table.toLowerCase()}_${column.toLowerCase()}`;
 };
 
 export const makeSelectField = (table: string, column: string) => {

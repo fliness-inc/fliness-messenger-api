@@ -8,10 +8,10 @@ import { InvalidPropertyError, NotFoundError } from '@src/errors';
 import MembersService from '@schema/models/members/members.service';
 import IChat, {
   CreateChatOptions
-} from '@/src/schema/models/chats/types/chat.interface';
-import Dialog from '@/src/schema/models/chats/types/dialogs';
-import Group from '@/src/schema/models/chats/types/groups';
-import Channel from '@/src/schema/models/chats/types/channel';
+} from '@schema/models/chats/types/chat.interface';
+import Dialog from '@schema/models/chats/types/dialogs';
+import Group from '@schema/models/chats/types/groups';
+import Channel from '@schema/models/chats/types/channel';
 
 @Injectable()
 export class ChatsService {

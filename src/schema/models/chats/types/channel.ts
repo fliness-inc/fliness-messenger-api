@@ -3,11 +3,11 @@ import Chat from '@db/entities/chat.entity';
 import MembersService from '@schema/models/members/members.service';
 import IChat, {
   CreateChatOptions
-} from '@/src/schema/models/chats/types/chat.interface';
+} from '@schema/models/chats/types/chat.interface';
 import { InvalidPropertyError } from '@src/errors';
 import ChatType from '@db/entities/chat-type.entity';
 import { ChatTypeEnum } from '@schema/models/chats/chats.dto';
-import { MemberRoleEnum } from '@/src/schema/models/members/members.dto';
+import { MemberRoleEnum } from '@schema/models/members/members.dto';
 
 export class Channel implements IChat {
   public constructor(

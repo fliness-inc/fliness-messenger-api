@@ -17,7 +17,7 @@ export class UserFactory implements Factory<User> {
     user.email = email || Faker.internet.email();
     user.name = name || `${Faker.name.lastName()} ${Faker.name.firstName()}`;
     user.password = password || Faker.random.word();
-    user.avatarURL = Faker.random.arrayElement(this.avatars);
+    user.avatarURL = `${Faker.random.arrayElement(this.avatars)}`;
     return user;
   }
 }

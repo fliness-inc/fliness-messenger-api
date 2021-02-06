@@ -13,7 +13,7 @@ import { Type, Status } from '@schema/models/invitations/invitations.dto';
 import { ChatTypeSeeder, ChatTypeFactory } from './chat-type.seeder';
 import { ChatTypeEnum } from '@schema/models/chats/chats.dto';
 import { MemberRoleSeeder, MemberRoleFactory } from './member-role.seeder';
-import { MemberRoleEnum } from '@/src/schema/models/members/members.dto';
+import { MemberRoleEnum } from '@schema/models/members/members.dto';
 
 setupDotEnv();
 

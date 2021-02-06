@@ -15,7 +15,7 @@ import { NotFoundError } from '@src/errors';
 import { getRepository, In } from 'typeorm';
 import MemberRoleEntity from '@db/entities/member-role.entity';
 
-export { MemberRoleEnum } from '@/src/schema/models/members/members.dto';
+export { MemberRoleEnum } from '@schema/models/members/members.dto';
 export const ChatRoles = (...roles: string[]) => SetMetadata('roles', roles);
 
 @Injectable()

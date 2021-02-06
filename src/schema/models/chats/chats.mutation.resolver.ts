@@ -4,7 +4,7 @@ import { ChatsService } from '@schema/models/chats/chats.service';
 import AuthGuard from '@schema/models/auth/auth.guard';
 import { ChatTypeEnum, ChatCreateDTO } from '@schema/models/chats/chats.dto';
 import { ChatGruard, ChatRoles } from '@schema/models/chats/chats.guard';
-import { MemberRoleEnum } from '@/src/schema/models/members/members.dto';
+import { MemberRoleEnum } from '@schema/models/members/members.dto';
 import ChatsMutation from '@schema/models/chats/chats.mutation';
 import Chat from '@schema/models/chats/chats.model';
 import CurrentUser from '@schema/models/auth/current-user';
