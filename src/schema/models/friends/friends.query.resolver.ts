@@ -16,10 +16,13 @@ import {
   makeSelectField,
   makeUniqueField
 } from '@lib/pagination/pagination';
+import { GraphqlFilter, GraphqlFilterArg } from '@lib/filter/filter';
+import { FriendsFilter } from './friends.dto';
 
 @UseGuards(AuthGuard)
 @Resolver(() => MeQuery)
 export class FriendsResolver {
+  @GraphqlFilter()
   @GraphqlCursorPagination({
     uniqueKey: makeUniqueField('friend', 'id'),
     formatter: node => ({
@@ -33,7 +36,8 @@ export class FriendsResolver {
   public async getFriends(
     @Parent() user: User,
     @GraphqlPaginationArg(() => FriendPaginationInput) pagination,
-    @GraphqlPaginationSortArg() sort
+    @GraphqlPaginationSortArg() sort,
+    @GraphqlFilterArg(() => FriendsFilter) filter
   ): Promise<FriendConnection> {
     const builder = getRepository(FriendEntity)
       .createQueryBuilder('friends')

@@ -7,15 +7,8 @@ import { User } from '@db/entities/user.entity';
 import { AppModule } from '@src/app.module';
 import request from 'supertest';
 import Faker from 'faker';
-import { ChatTypeEnum } from '@schema/models/chats/chats.dto';
-import { MemberRoleEnum } from '@schema/models/members/members.dto';
 import UsersService from '@schema/models/users/users.service';
 import { Tokens } from '@schema/models/tokens/tokens.service';
-import { ChatTypeSeeder, ChatTypeFactory } from '@db/seeds/chat-type.seeder';
-import {
-  MemberRoleSeeder,
-  MemberRoleFactory
-} from '@db/seeds/member-role.seeder';
 import { FriendSeeder, FriendFactory } from '@db/seeds/friends.seeder';
 import { CursorCoder } from '@lib/pagination/cursor';
 import { FriendPaginationField } from '@schema/models/friends/friends.model.pagination';
@@ -40,27 +33,6 @@ describe('[E2E] [FriendsResolver] ...', () => {
     connection = getConnection();
 
     await connection.synchronize(true);
-
-    const chatTypeSeeder = new ChatTypeSeeder(new ChatTypeFactory());
-    await chatTypeSeeder.run(1, { name: ChatTypeEnum.DIALOG });
-    await chatTypeSeeder.run(1, { name: ChatTypeEnum.GROUP });
-    await chatTypeSeeder.run(1, { name: ChatTypeEnum.CHANNEL });
-
-    const memberPriviliegeSeeder = new MemberRoleSeeder(
-      new MemberRoleFactory()
-    );
-    await memberPriviliegeSeeder.run(1, {
-      name: MemberRoleEnum.CREATOR,
-      weight: 1
-    });
-    await memberPriviliegeSeeder.run(1, {
-      name: MemberRoleEnum.ADMIN,
-      weight: 0.5
-    });
-    await memberPriviliegeSeeder.run(1, {
-      name: MemberRoleEnum.MEMBER,
-      weight: 0.1
-    });
   });
 
   afterEach(async () => {
@@ -91,15 +63,15 @@ describe('[E2E] [FriendsResolver] ...', () => {
           .post('/graphql')
           .send({
             query: `
-                            mutation($payload: AuthLoginDTO!) {
-                                auth {
-                                    login(payload: $payload) {
-                                        accessToken
-                                        refreshToken
-                                    }
-                                }
-                            }
-                        `,
+              mutation($payload: AuthLoginDTO!) {
+                auth {
+                  login(payload: $payload) {
+                    accessToken
+                    refreshToken
+                  }
+                }
+              }
+            `,
             variables: {
               payload
             }
@@ -136,27 +108,27 @@ describe('[E2E] [FriendsResolver] ...', () => {
           .set('Authorization', `Bearer ${users[0].tokens.accessToken}`)
           .send({
             query: `
-                            query {
-                                me {
-                                    friends {
-                                        edges {
-                                            cursor
-                                            node {
-                                                id
-                                                name
-                                            }
-                                        }
-                                        totalCount
-                                        pageInfo {
-                                            startCursor
-                                            endCursor
-                                            hasNextPage
-                                            hasPreviousPage
-                                        }
-                                    }
-                                }
-                            }
-                        `
+              query {
+                me {
+                  friends {
+                    edges {
+                      cursor
+                      node {
+                        id
+                        name
+                      }
+                    }
+                    totalCount
+                    pageInfo {
+                      startCursor
+                      endCursor
+                      hasNextPage
+                      hasPreviousPage
+                    }
+                  }
+                }
+              }
+            `
           });
 
         expect(res.status).toEqual(200);
@@ -164,12 +136,11 @@ describe('[E2E] [FriendsResolver] ...', () => {
           data: {
             me: {
               friends: {
-                edges: friends.map(friend => ({
-                  cursor: CursorCoder.encode({ [key]: friend.friendId }),
+                edges: friends.map(({ friendId }) => ({
+                  cursor: CursorCoder.encode({ [key]: friendId }),
                   node: {
-                    id: friend.friendId,
-                    name: users.find(u => u.user.id === friend.friendId).user
-                      .name
+                    id: friendId,
+                    name: users.find(u => u.user.id === friendId).user.name
                   }
                 })),
                 totalCount: friends.length,

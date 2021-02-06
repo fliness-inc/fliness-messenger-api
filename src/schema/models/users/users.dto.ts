@@ -1,6 +1,6 @@
 import { InputType, registerEnumType } from '@nestjs/graphql';
 import { makeFilter, makeEnum, makeEnumField } from '@lib/filter/filter';
-import User from '@db/entities/user.entity';
+import UserEntity from '@db/entities/user.entity';
 
 export const UsersFieldArgumentEnum = makeEnum({
   ID: makeEnumField('users', 'id'),
@@ -13,7 +13,7 @@ registerEnumType(UsersFieldArgumentEnum, {
 });
 
 @InputType()
-export class UsersFilter extends makeFilter<User>(
-  User,
+export class UsersFilter extends makeFilter<UserEntity>(
+  UserEntity,
   UsersFieldArgumentEnum
 ) {}
