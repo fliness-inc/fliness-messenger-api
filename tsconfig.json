@@ -21,7 +21,8 @@
       "@src/*": ["src/*"],
       "@db/*": ["src/db/*"],
       "@schema/*": ["src/schema/*"],
-      "@lib/*": ["src/lib/*"]
+      "@lib/*": ["src/lib/*"],
+      "@tools/*": ["src/tools/*"]
     }
   }
 }

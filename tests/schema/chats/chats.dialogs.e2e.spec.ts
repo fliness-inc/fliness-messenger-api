@@ -5,7 +5,6 @@ import cookieParser from 'cookie-parser';
 import { getConnection, Connection, getRepository } from 'typeorm';
 import User from '@db/entities/user.entity';
 import { AppModule } from '@src/app.module';
-import request from 'supertest';
 import * as uuid from 'uuid';
 import Faker from 'faker';
 import { ChatTypeEnum } from '@schema/models/chats/chats.dto';
@@ -19,6 +18,7 @@ import {
 } from '@db/seeds/member-role.seeder';
 import Member from '@db/entities/member.entity';
 import Chat from '@db/entities/chat.entity';
+import { TestRequest } from '@tools/test-request';
 
 setupDotEnv();
 
@@ -87,26 +87,27 @@ describe('[E2E] [ChatResolver] ...', () => {
           name: Faker.internet.userName(),
           ...payload
         });
-        const res = await request(app.getHttpServer())
-          .post('/graphql')
-          .send({
-            query: `
-                            mutation($payload: AuthLoginDTO!) {
-                                auth {
-                                    login(payload: $payload) {
-                                        accessToken
-                                        refreshToken
-                                    }
-                                }
-                            }
-                        `,
-            variables: {
-              payload
+
+        const { body } = await TestRequest.graphql({
+          app,
+          query: `
+            mutation($payload: AuthLoginDTO!) {
+              auth {
+                login(payload: $payload) {
+                  accessToken
+                  refreshToken
+                }
+              }
             }
-          });
+          `,
+          variables: {
+            payload
+          }
+        });
+
         users.push({
           user,
-          tokens: res.body.data.auth.login
+          tokens: body.data.auth.login
         });
       }
     });
@@ -115,37 +116,39 @@ describe('[E2E] [ChatResolver] ...', () => {
       it('should create the chat', async () => {
         const [creator, companion] = users;
 
-        const res = await request(app.getHttpServer())
-          .post('/graphql')
-          .set('Authorization', `Bearer ${creator.tokens.accessToken}`)
-          .send({
-            query: `
-                            mutation($payload: ChatCreateDTO!) {
-                                me {
-                                    chats {
-                                        create(payload: $payload) {
-                                            id title description type createdAt
-                                        }
-                                    }
-                                }
-                            }
-                        `,
-            variables: {
-              payload: {
-                type: ChatTypeEnum.DIALOG,
-                userIds: [companion.user.id]
+        const { status, body } = await TestRequest.graphql({
+          app,
+          headers: {
+            Authorization: `Bearer ${creator.tokens.accessToken}`
+          },
+          query: `
+            mutation($payload: ChatCreateDTO!) {
+              me {
+                chats {
+                  create(payload: $payload) {
+                    id title description type createdAt
+                  }
+                }
               }
             }
-          });
+          `,
+          variables: {
+            payload: {
+              type: ChatTypeEnum.DIALOG,
+              userIds: [companion.user.id]
+            }
+          }
+        });
 
-        expect(res.status).toEqual(200);
+        expect(status).toEqual(200);
 
-        const data = res.body.data;
+        const data = body.data;
         expect(data).toHaveProperty('me');
         expect(data.me).toHaveProperty('chats');
         expect(data.me.chats).toHaveProperty('create');
 
         const chat = data.me.chats.create;
+
         expect(chat).toStrictEqual({
           id: chat.id,
           title: null,
@@ -166,30 +169,32 @@ describe('[E2E] [ChatResolver] ...', () => {
       it('should create the chat when the userIds property contain the creator id and the id of the second user', async () => {
         const [creator, companion] = users;
 
-        const res = await request(app.getHttpServer())
-          .post('/graphql')
-          .set('Authorization', `Bearer ${creator.tokens.accessToken}`)
-          .send({
-            query: `
-                            mutation($payload: ChatCreateDTO!) {
-                                me {
-                                    chats {
-                                        create(payload: $payload) {
-                                            id title description type createdAt
-                                        }
-                                    }
-                                }
-                            }
-                        `,
-            variables: {
-              payload: {
-                type: ChatTypeEnum.DIALOG,
-                userIds: [creator.user.id, companion.user.id]
+        const { status, body } = await TestRequest.graphql({
+          app,
+          headers: {
+            Authorization: `Bearer ${creator.tokens.accessToken}`
+          },
+          query: `
+            mutation($payload: ChatCreateDTO!) {
+              me {
+                chats {
+                  create(payload: $payload) {
+                    id title description type createdAt
+                  }
+                }
               }
             }
-          });
+          `,
+          variables: {
+            payload: {
+              type: ChatTypeEnum.DIALOG,
+              userIds: [creator.user.id, companion.user.id]
+            }
+          }
+        });
 
-        expect(Array.isArray(res.body.errors)).toBeFalsy();
+        expect(status).toEqual(200);
+        expect(Array.isArray(body.errors)).toBeFalsy();
 
         expect(await getRepository(Member).count()).toEqual(2);
         expect(await getRepository(Chat).count()).toEqual(1);
@@ -198,136 +203,256 @@ describe('[E2E] [ChatResolver] ...', () => {
       it('should return 400 when the type property was not specified', async () => {
         const [creator, companion] = users;
 
-        const res = await request(app.getHttpServer())
-          .post('/graphql')
-          .set('Authorization', `Bearer ${creator.tokens.accessToken}`)
-          .send({
-            operationName: 'CreateChat',
-            query: `
-                            mutation CreateChat($payload: ChatCreateDTO!) {
-                                me {
-                                    chats {
-                                        create(payload: $payload) {
-                                            id title description type createdAt
-                                        }
-                                    }
-                                }
-                            }
-                        `,
-            variables: {
-              payload: {
-                userIds: [companion.user.id]
+        const { status, body } = await TestRequest.graphql({
+          app,
+          headers: {
+            Authorization: `Bearer ${creator.tokens.accessToken}`
+          },
+          query: `
+            mutation($payload: ChatCreateDTO!) {
+              me {
+                chats {
+                  create(payload: $payload) {
+                    id title description type createdAt
+                  }
+                }
               }
             }
-          });
+          `,
+          variables: {
+            payload: {
+              userIds: [companion.user.id]
+            }
+          }
+        });
 
-        expect(Array.isArray(res.body.errors)).toBeTruthy();
-        expect(res.body.errors).toHaveLength(1);
+        expect(status).toEqual(400);
+        expect(Array.isArray(body.errors)).toBeTruthy();
+        expect(body.errors).toHaveLength(1);
 
         expect(await getRepository(Member).count()).toEqual(0);
         expect(await getRepository(Chat).count()).toEqual(0);
       });
 
+      it('should return 400 when the creator tries to create a dialog that has already been created', async () => {
+        const [creator, companion] = users;
+
+        const {} = await TestRequest.graphql({
+          app,
+          headers: {
+            Authorization: `Bearer ${creator.tokens.accessToken}`
+          },
+          query: `
+            mutation($payload: ChatCreateDTO!) {
+              me {
+                chats {
+                  create(payload: $payload) {
+                    id title description type createdAt
+                  }
+                }
+              }
+            }
+          `,
+          variables: {
+            payload: {
+              type: ChatTypeEnum.DIALOG,
+              userIds: [companion.user.id]
+            }
+          }
+        });
+
+        const { status, body } = await TestRequest.graphql({
+          app,
+          headers: {
+            Authorization: `Bearer ${creator.tokens.accessToken}`
+          },
+          query: `
+            mutation($payload: ChatCreateDTO!) {
+              me {
+                chats {
+                  create(payload: $payload) {
+                    id title description type createdAt
+                  }
+                }
+              }
+            }
+          `,
+          variables: {
+            payload: {
+              type: ChatTypeEnum.DIALOG,
+              userIds: [companion.user.id]
+            }
+          }
+        });
+
+        expect(status).toEqual(200);
+
+        const { errors, data } = body;
+
+        expect(Array.isArray(errors)).toBeTruthy();
+        expect(data).toBeNull();
+      });
+
+      it('should return 400 when the companion tries to create a dialog that has already been created', async () => {
+        const [creator, companion] = users;
+
+        const {} = await TestRequest.graphql({
+          app,
+          headers: {
+            Authorization: `Bearer ${creator.tokens.accessToken}`
+          },
+          query: `
+            mutation($payload: ChatCreateDTO!) {
+              me {
+                chats {
+                  create(payload: $payload) {
+                    id title description type createdAt
+                  }
+                }
+              }
+            }
+          `,
+          variables: {
+            payload: {
+              type: ChatTypeEnum.DIALOG,
+              userIds: [companion.user.id]
+            }
+          }
+        });
+
+        const { status, body } = await TestRequest.graphql({
+          app,
+          headers: {
+            Authorization: `Bearer ${companion.tokens.accessToken}`
+          },
+          query: `
+            mutation($payload: ChatCreateDTO!) {
+              me {
+                chats {
+                  create(payload: $payload) {
+                    id title description type createdAt
+                  }
+                }
+              }
+            }
+          `,
+          variables: {
+            payload: {
+              type: ChatTypeEnum.DIALOG,
+              userIds: [creator.user.id]
+            }
+          }
+        });
+
+        expect(status).toEqual(200);
+
+        const { errors, data } = body;
+
+        expect(Array.isArray(errors)).toBeTruthy();
+        expect(data).toBeNull();
+      });
+
       it('should return 400 when the type property contain invalid value', async () => {
         const [creator, companion] = users;
 
-        const res = await request(app.getHttpServer())
-          .post('/graphql')
-          .set('Authorization', `Bearer ${creator.tokens.accessToken}`)
-          .send({
-            operationName: 'CreateChat',
-            query: `
-                            mutation CreateChat($payload: ChatCreateDTO!) {
-                                me {
-                                    chats {
-                                        create(payload: $payload) {
-                                            id title description type createdAt
-                                        }
-                                    }
-                                }
-                            }
-                        `,
-            variables: {
-              payload: {
-                type: Faker.random.word(),
-                userIds: [companion.user.id]
+        const { status, body } = await TestRequest.graphql({
+          app,
+          headers: {
+            Authorization: `Bearer ${creator.tokens.accessToken}`
+          },
+          query: `
+            mutation($payload: ChatCreateDTO!) {
+              me {
+                chats {
+                  create(payload: $payload) {
+                    id title description type createdAt
+                  }
+                }
               }
             }
-          });
+            `,
+          variables: {
+            payload: {
+              type: Faker.random.word(),
+              userIds: [companion.user.id]
+            }
+          }
+        });
 
-        expect(Array.isArray(res.body.errors)).toBeTruthy();
-        expect(res.body.errors).toHaveLength(1);
+        expect(status).toEqual(400);
+        expect(Array.isArray(body.errors)).toBeTruthy();
+        expect(body.errors).toHaveLength(1);
 
         expect(await getRepository(Member).count()).toEqual(0);
         expect(await getRepository(Chat).count()).toEqual(0);
       });
 
       it('should return 400 when the userIds property not contain the second user', async () => {
-        const [creator, companion] = users;
+        const [creator] = users;
 
-        const res = await request(app.getHttpServer())
-          .post('/graphql')
-          .set('Authorization', `Bearer ${creator.tokens.accessToken}`)
-          .send({
-            operationName: 'CreateChat',
-            query: `
-                            mutation CreateChat($payload: ChatCreateDTO!) {
-                                me {
-                                    chats {
-                                        create(payload: $payload) {
-                                            id title description type createdAt
-                                        }
-                                    }
-                                }
-                            }
-                        `,
-            variables: {
-              payload: {
-                type: ChatTypeEnum.DIALOG,
-                userIds: []
+        const { status, body } = await TestRequest.graphql({
+          app,
+          headers: {
+            Authorization: `Bearer ${creator.tokens.accessToken}`
+          },
+          query: `
+            mutation($payload: ChatCreateDTO!) {
+              me {
+                chats {
+                  create(payload: $payload) {
+                    id title description type createdAt
+                  }
+                }
               }
             }
-          });
+            `,
+          variables: {
+            payload: {
+              type: ChatTypeEnum.DIALOG,
+              userIds: []
+            }
+          }
+        });
 
-        expect(Array.isArray(res.body.errors)).toBeTruthy();
-        expect(res.body.errors).toHaveLength(1);
-        expect(res.body.errors[0].extensions.exception.status).toStrictEqual(
-          400
-        );
+        expect(status).toEqual(200);
+        expect(Array.isArray(body.errors)).toBeTruthy();
+        expect(body.errors).toHaveLength(1);
+        expect(body.errors[0].extensions.exception.status).toStrictEqual(400);
 
         expect(await getRepository(Member).count()).toEqual(0);
         expect(await getRepository(Chat).count()).toEqual(0);
       });
 
       it('should return 400 when the userIds property contain invalid value', async () => {
-        const [creator, companion] = users;
+        const [creator] = users;
 
-        const res = await request(app.getHttpServer())
-          .post('/graphql')
-          .set('Authorization', `Bearer ${creator.tokens.accessToken}`)
-          .send({
-            operationName: 'CreateChat',
-            query: `
-                            mutation CreateChat($payload: ChatCreateDTO!) {
-                                me {
-                                    chats {
-                                        create(payload: $payload) {
-                                            id title description type createdAt
-                                        }
-                                    }
-                                }
-                            }
-                        `,
-            variables: {
-              payload: {
-                type: ChatTypeEnum.DIALOG,
-                userIds: null
+        const { status, body } = await TestRequest.graphql({
+          app,
+          headers: {
+            Authorization: `Bearer ${creator.tokens.accessToken}`
+          },
+          query: `
+            mutation($payload: ChatCreateDTO!) {
+              me {
+                chats {
+                  create(payload: $payload) {
+                    id title description type createdAt
+                  }
+                }
               }
             }
-          });
+          `,
+          variables: {
+            payload: {
+              type: ChatTypeEnum.DIALOG,
+              userIds: null
+            }
+          }
+        });
 
-        expect(Array.isArray(res.body.errors)).toBeTruthy();
-        expect(res.body.errors).toHaveLength(1);
+        expect(status).toEqual(400);
+        expect(Array.isArray(body.errors)).toBeTruthy();
+        expect(body.errors).toHaveLength(1);
 
         expect(await getRepository(Member).count()).toEqual(0);
         expect(await getRepository(Chat).count()).toEqual(0);
@@ -336,71 +461,67 @@ describe('[E2E] [ChatResolver] ...', () => {
       it('should return 400 when the userIds property contain more one member id and not contain  the creator id', async () => {
         const [creator, companion, otherUser] = users;
 
-        const res = await request(app.getHttpServer())
-          .post('/graphql')
-          .set('Authorization', `Bearer ${creator.tokens.accessToken}`)
-          .send({
-            operationName: 'CreateChat',
-            query: `
-                            mutation CreateChat($payload: ChatCreateDTO!) {
-                                me {
-                                    chats {
-                                        create(payload: $payload) {
-                                            id title description type createdAt
-                                        }
-                                    }
-                                }
-                            }
-                        `,
-            variables: {
-              payload: {
-                type: ChatTypeEnum.DIALOG,
-                userIds: [companion.user.id, otherUser.user.id]
+        const { status, body } = await TestRequest.graphql({
+          app,
+          headers: {
+            Authorization: `Bearer ${creator.tokens.accessToken}`
+          },
+          query: `
+            mutation($payload: ChatCreateDTO!) {
+              me {
+                chats {
+                  create(payload: $payload) {
+                    id title description type createdAt
+                  }
+                }
               }
             }
-          });
+          `,
+          variables: {
+            payload: {
+              type: ChatTypeEnum.DIALOG,
+              userIds: [companion.user.id, otherUser.user.id]
+            }
+          }
+        });
 
-        expect(Array.isArray(res.body.errors)).toBeTruthy();
-        expect(res.body.errors).toHaveLength(1);
-        expect(res.body.errors[0].extensions.exception.status).toStrictEqual(
-          400
-        );
+        expect(status).toEqual(200);
+        expect(Array.isArray(body.errors)).toBeTruthy();
+        expect(body.errors).toHaveLength(1);
+        expect(body.errors[0].extensions.exception.status).toStrictEqual(400);
 
         expect(await getRepository(Member).count()).toEqual(0);
         expect(await getRepository(Chat).count()).toEqual(0);
       });
 
       it('should return 401 when the unauthorized user trying to create new dialog', async () => {
-        const [creator, companion] = users;
+        const [companion] = users;
 
-        const res = await request(app.getHttpServer())
-          .post('/graphql')
-          .send({
-            operationName: 'CreateChat',
-            query: `
-                            mutation CreateChat($payload: ChatCreateDTO!) {
-                                me {
-                                    chats {
-                                        create(payload: $payload) {
-                                            id title description type createdAt
-                                        }
-                                    }
-                                }
-                            }
-                        `,
-            variables: {
-              payload: {
-                type: ChatTypeEnum.DIALOG,
-                userIds: [companion.user.id]
+        const { status, body } = await TestRequest.graphql({
+          app,
+          query: `
+            mutation($payload: ChatCreateDTO!) {
+              me {
+                chats {
+                  create(payload: $payload) {
+                    id title description type createdAt
+                  }
+                }
               }
             }
-          });
+          `,
+          variables: {
+            payload: {
+              type: ChatTypeEnum.DIALOG,
+              userIds: [companion.user.id]
+            }
+          }
+        });
 
-        expect(Array.isArray(res.body.errors)).toBeTruthy();
-        expect(res.body.errors).toHaveLength(1);
-        expect(res.body.errors[0].extensions.exception.status).toStrictEqual(
-          401
-        );
+        expect(status).toEqual(200);
+        expect(Array.isArray(body.errors)).toBeTruthy();
+        expect(body.errors).toHaveLength(1);
+        expect(body.errors[0].extensions.exception.status).toStrictEqual(401);
 
         expect(await getRepository(Member).count()).toEqual(0);
         expect(await getRepository(Chat).count()).toEqual(0);
@@ -410,53 +531,60 @@ describe('[E2E] [ChatResolver] ...', () => {
       it('should delete the chat', async () => {
         const [creator, companion] = users;
 
-        const { body } = await request(app.getHttpServer())
-          .post('/graphql')
-          .set('Authorization', `Bearer ${creator.tokens.accessToken}`)
-          .send({
-            operationName: 'CreateChat',
-            query: `
-                            mutation CreateChat($payload: ChatCreateDTO!) {
-                                me {
-                                    chats {
-                                        create(payload: $payload) {
-                                            id title description type createdAt
-                                        }
-                                    }
-                                }
-                            }
-                        `,
-            variables: {
-              payload: {
-                type: ChatTypeEnum.DIALOG,
-                userIds: [companion.user.id]
+        const {
+          body: {
+            data: {
+              me: {
+                chats: { create: chat }
               }
             }
-          });
-
-        const chat = body.data.me.chats.create;
-        const res = await request(app.getHttpServer())
-          .post('/graphql')
-          .set('Authorization', `Bearer ${creator.tokens.accessToken}`)
-          .send({
-            operationName: 'RemoveChat',
-            query: `
-                            mutation RemoveChat($chatId: UUID!) {
-                                me {
-                                    chats {
-                                        remove(chatId: $chatId) {
-                                            id
-                                        }
-                                    }
-                                }
-                            }
-                        `,
-            variables: {
-              chatId: chat.id
+          }
+        } = await TestRequest.graphql({
+          app,
+          headers: {
+            Authorization: `Bearer ${creator.tokens.accessToken}`
+          },
+          query: `
+            mutation($payload: ChatCreateDTO!) {
+              me {
+                chats {
+                  create(payload: $payload) {
+                    id title description type createdAt
+                  }
+                }
+              }
             }
-          });
+          `,
+          variables: {
+            payload: {
+              type: ChatTypeEnum.DIALOG,
+              userIds: [companion.user.id]
+            }
+          }
+        });
 
-        expect(res.status).toEqual(200);
+        const { status } = await TestRequest.graphql({
+          app,
+          headers: {
+            Authorization: `Bearer ${creator.tokens.accessToken}`
+          },
+          query: `
+            mutation($chatId: UUID!) {
+              me {
+                chats {
+                  remove(chatId: $chatId) {
+                    id
+                  }
+                }
+              }
+            }
+          `,
+          variables: {
+            chatId: chat.id
+          }
+        });
+
+        expect(status).toEqual(200);
         expect(await getRepository(Chat).count()).toEqual(1);
         expect(
           await getRepository(Chat).count({ where: { isDeleted: true } })
@@ -466,57 +594,63 @@ describe('[E2E] [ChatResolver] ...', () => {
       it('should return the 403 status when a non-Creator user tries to delete the chat', async () => {
         const [creator, companion] = users;
 
-        const { body } = await request(app.getHttpServer())
-          .post('/graphql')
-          .set('Authorization', `Bearer ${creator.tokens.accessToken}`)
-          .send({
-            operationName: 'CreateChat',
-            query: `
-                            mutation CreateChat($payload: ChatCreateDTO!) {
-                                me {
-                                    chats {
-                                        create(payload: $payload) {
-                                            id title description type createdAt
-                                        }
-                                    }
-                                }
-                            }
-                        `,
-            variables: {
-              payload: {
-                type: ChatTypeEnum.DIALOG,
-                userIds: [companion.user.id]
+        const {
+          body: {
+            data: {
+              me: {
+                chats: { create: chat }
               }
             }
-          });
-
-        const chat = body.data.me.chats.create;
-        const res = await request(app.getHttpServer())
-          .post('/graphql')
-          .set('Authorization', `Bearer ${companion.tokens.accessToken}`)
-          .send({
-            operationName: 'RemoveChat',
-            query: `
-                            mutation RemoveChat($chatId: UUID!) {
-                                me {
-                                    chats {
-                                        remove(chatId: $chatId) {
-                                            id
-                                        }
-                                    }
-                                }
-                            }
-                        `,
-            variables: {
-              chatId: chat.id
+          }
+        } = await TestRequest.graphql({
+          app,
+          headers: {
+            Authorization: `Bearer ${creator.tokens.accessToken}`
+          },
+          query: `
+            mutation($payload: ChatCreateDTO!) {
+              me {
+                chats {
+                  create(payload: $payload) {
+                    id title description type createdAt
+                  }
+                }
+              }
             }
-          });
+          `,
+          variables: {
+            payload: {
+              type: ChatTypeEnum.DIALOG,
+              userIds: [companion.user.id]
+            }
+          }
+        });
 
-        expect(Array.isArray(res.body.errors)).toBeTruthy();
-        expect(res.body.errors).toHaveLength(1);
-        expect(res.body.errors[0].extensions.exception.status).toStrictEqual(
-          403
-        );
+        const { status, body } = await TestRequest.graphql({
+          app,
+          headers: {
+            Authorization: `Bearer ${companion.tokens.accessToken}`
+          },
+          query: `
+            mutation($chatId: UUID!) {
+              me {
+                chats {
+                  remove(chatId: $chatId) {
+                    id
+                  }
+                }
+              }
+            }
+          `,
+          variables: {
+            chatId: chat.id
+          }
+        });
+
+        expect(status).toEqual(200);
+        expect(Array.isArray(body.errors)).toBeTruthy();
+        expect(body.errors).toHaveLength(1);
+        expect(body.errors[0].extensions.exception.status).toStrictEqual(403);
 
         expect(
           await getRepository(Chat).count({ where: { isDeleted: false } })

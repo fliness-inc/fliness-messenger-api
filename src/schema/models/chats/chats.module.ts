@@ -6,12 +6,13 @@ import ChatsMutationResolver from '@schema/models/chats/chats.mutation.resolver'
 import ChatsService from '@schema/models/chats/chats.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import ChatEntity from '@db/entities/chat.entity';
+import ChatTypeEntity from '@db/entities/chat-type.entity';
 
 @Module({
   imports: [
     UsersModule,
     forwardRef(() => MembersModule),
-    TypeOrmModule.forFeature([ChatEntity])
+    TypeOrmModule.forFeature([ChatEntity, ChatTypeEntity])
   ],
   providers: [ChatsModelResolver, ChatsMutationResolver, ChatsService],
   exports: [ChatsService]

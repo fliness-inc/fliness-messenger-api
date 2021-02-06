@@ -1,7 +1,8 @@
 import { Injectable, forwardRef, Inject } from '@nestjs/common';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import Chat from '@db/entities/chat.entity';
+import ChatEntity from '@db/entities/chat.entity';
+import ChatTypeEntity from '@db/entities/chat-type.entity';
 import { ChatTypeEnum } from '@schema/models/chats/chats.dto';
 import UsersService from '@schema/models/users/users.service';
 import { InvalidPropertyError, NotFoundError } from '@src/errors';
@@ -18,15 +19,17 @@ export class ChatsService {
   private readonly chatsmodels = new Map<ChatTypeEnum, IChat>();
 
   public constructor(
-    @InjectRepository(Chat)
-    private readonly chatsRepository: Repository<Chat>,
+    @InjectRepository(ChatEntity)
+    private readonly chatsRepository: Repository<ChatEntity>,
+    @InjectRepository(ChatTypeEntity)
+    private readonly chatTypesRepository: Repository<ChatTypeEntity>,
     private readonly usersService: UsersService,
     @Inject(forwardRef(() => MembersService))
     private readonly membersService: MembersService
   ) {
     this.chatsmodels.set(
       ChatTypeEnum.DIALOG,
-      new Dialog(this.chatsRepository, membersService)
+      new Dialog(this.chatsRepository, this.chatTypesRepository, membersService)
     );
     this.chatsmodels.set(
       ChatTypeEnum.GROUP,
@@ -42,7 +45,7 @@ export class ChatsService {
     userId: string,
     type: ChatTypeEnum,
     options: CreateChatOptions = {}
-  ): Promise<Chat> {
+  ): Promise<ChatEntity> {
     const user = await this.usersService.findOne({ where: { id: userId } });
 
     if (!user)
@@ -58,15 +61,19 @@ export class ChatsService {
     return resolver.create(userId, options);
   }
 
-  public async find(options?: FindManyOptions<Chat>): Promise<Chat[]> {
+  public async find(
+    options?: FindManyOptions<ChatEntity>
+  ): Promise<ChatEntity[]> {
     return this.chatsRepository.find(options);
   }
 
-  public async findOne(options?: FindOneOptions<Chat>): Promise<Chat> {
+  public async findOne(
+    options?: FindOneOptions<ChatEntity>
+  ): Promise<ChatEntity> {
     return this.chatsRepository.findOne(options);
   }
 
-  public async remove(chatId: string): Promise<Chat> {
+  public async remove(chatId: string): Promise<ChatEntity> {
     const chat = await this.findOne({
       where: { id: chatId },
       join: {
@@ -90,8 +97,8 @@ export class ChatsService {
 
   public async findByIds(
     ids: string[],
-    options?: FindManyOptions<Chat>
-  ): Promise<Chat[]> {
+    options?: FindManyOptions<ChatEntity>
+  ): Promise<ChatEntity[]> {
     const chats = await this.chatsRepository.findByIds(ids, options);
     return ids.map(id => chats.find(u => u.id === id));
   }

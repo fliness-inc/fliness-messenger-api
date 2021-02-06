@@ -18,7 +18,7 @@ import { Repository } from 'typeorm';
 export class MembersService {
   public constructor(
     @InjectRepository(MemberEntity)
-    private readonly membersRespository: Repository<MemberEntity>,
+    public readonly membersRespository: Repository<MemberEntity>,
     private readonly usersService: UsersService,
     @Inject(forwardRef(() => ChatsService))
     private readonly chatsService: ChatsService
