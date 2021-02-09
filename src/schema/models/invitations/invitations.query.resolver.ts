@@ -4,11 +4,9 @@ import User from '@schema/models/users/users.model';
 import Invitation from '@schema/models/invitations/invitation.model';
 import { Type, Status } from '@schema/models/invitations/invitations.dto';
 import { InvitationsService } from '@schema/models/invitations/invitations.service';
-import AuthGuard from '@schema/models/auth/auth.guard';
 import InvitationsQuery from '@schema/models/invitations/invitations.query';
 import CurrentUser from '@schema/models/auth/current-user';
 
-@UseGuards(AuthGuard)
 @Resolver(() => InvitationsQuery)
 export class InvitationsQueryResolver {
   public constructor(private readonly invitationsService: InvitationsService) {}

@@ -1,6 +1,5 @@
 import { UseGuards } from '@nestjs/common';
 import { Resolver, ResolveField, Parent } from '@nestjs/graphql';
-import AuthGuard from '@schema/models/auth/auth.guard';
 import User from '@schema/models/users/users.model';
 import FriendConnection, {
   FriendPaginationInput
@@ -19,7 +18,6 @@ import {
 import { GraphqlFilter, GraphqlFilterArg } from '@lib/filter/filter';
 import { FriendsFilter } from './friends.dto';
 
-@UseGuards(AuthGuard)
 @Resolver(() => MeQuery)
 export class FriendsResolver {
   @GraphqlFilter()

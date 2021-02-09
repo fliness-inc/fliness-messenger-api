@@ -1,6 +1,4 @@
-import { UseGuards } from '@nestjs/common';
 import { Resolver, ResolveField, Field, Parent } from '@nestjs/graphql';
-import AuthGuard from '@schema/models/auth/auth.guard';
 import Chat from '@schema/models/chats/chats.model';
 import MemberConnection, {
   MemberPaginationInput
@@ -19,7 +17,6 @@ import {
   makeUniqueField
 } from '@lib/pagination/pagination';
 
-@UseGuards(AuthGuard)
 @Resolver(() => Chat)
 export class MembersQueryResolver {
   public constructor(

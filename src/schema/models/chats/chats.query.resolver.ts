@@ -1,6 +1,4 @@
-import { UseGuards } from '@nestjs/common';
 import { Resolver, ResolveField, Field } from '@nestjs/graphql';
-import AuthGuard from '@schema/models/auth/auth.guard';
 import CurrentUser from '@schema/models/auth/current-user';
 import User from '@schema/models/users/users.model';
 import MeQuery from '@schema/models/me/me.query';
@@ -20,7 +18,6 @@ import {
 import { ChatsFilter } from '@schema/models/chats/chats.dto';
 import { GraphqlFilter, GraphqlFilterArg } from '@lib/filter/filter';
 
-@UseGuards(AuthGuard)
 @Resolver(() => MeQuery)
 export class ChatsModelResolver {
   @Field(() => ChatsConnection)

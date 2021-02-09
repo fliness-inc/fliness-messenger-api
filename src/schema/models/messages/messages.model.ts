@@ -1,11 +1,11 @@
 import { ObjectType, Field } from '@nestjs/graphql';
-import IEntity from '@schema/models/entity.interface';
+import IModel from '@schema/models/model.interface';
 import DateTime from '@schema/types/datetime.type';
 import Member from '@schema/models/members/members.model';
 import UUID from '@schema/types/uuid.type';
 
 @ObjectType()
-export class Message extends IEntity {
+export class Message extends IModel {
   @Field(() => String)
   public readonly text: string;
 

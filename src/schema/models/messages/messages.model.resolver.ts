@@ -1,6 +1,4 @@
-import { UseGuards } from '@nestjs/common';
 import { Resolver, Field, ResolveField, Parent } from '@nestjs/graphql';
-import AuthGuard from '@schema/models/auth/auth.guard';
 import Chat from '@schema/models/chats/chats.model';
 import MessageEntity from '@db/entities/message.entity';
 import {
@@ -19,7 +17,6 @@ import { getRepository } from 'typeorm';
 import { MessagesFilter } from './messages.dto';
 import { GraphqlFilterArg, GraphqlFilter } from '@lib/filter/filter';
 
-@UseGuards(AuthGuard /*, ChatGruard */)
 @Resolver(() => Chat)
 export class MessagesModelResolver {
   @Field(() => MessageConnection)

@@ -1,5 +1,5 @@
 import { ObjectType, Field, registerEnumType } from '@nestjs/graphql';
-import IEntity from '@schema/models/entity.interface';
+import IModel from '@schema/models/model.interface';
 import User from '@schema/models/users/users.model';
 import Datetime from '@schema/types/datetime.type';
 import { Status, Type } from '@schema/models/invitations/invitations.dto';
@@ -9,7 +9,7 @@ registerEnumType(Status, { name: 'InvitationsStatus' });
 registerEnumType(Type, { name: 'InvitationsType' });
 
 @ObjectType()
-export class Invitation extends IEntity {
+export class Invitation extends IModel {
   @Field(() => User)
   public sender?: User;
 

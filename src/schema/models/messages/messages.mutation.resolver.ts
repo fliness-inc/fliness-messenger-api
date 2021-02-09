@@ -3,14 +3,12 @@ import { ResolveField, Resolver, Args } from '@nestjs/graphql';
 import MessagesService from '@schema/models/messages/messages.service';
 import { MessageCreateDTO } from '@schema/models/messages/messages.dto';
 import { ChatRoles, MemberRoleEnum } from '@schema/models/chats/chats.guard';
-import AuthGuard from '@schema/models/auth/auth.guard';
 import Message from '@schema/models/messages/messages.model';
 import MessagesMutation from '@schema/models/messages/messages.mutation';
 import CurrentUser from '@schema/models/auth/current-user';
 import User from '@schema/models/users/users.model';
 import UUID from '@schema/types/uuid.type';
 
-@UseGuards(AuthGuard)
 @ChatRoles(MemberRoleEnum.MEMBER)
 @Resolver(() => MessagesMutation)
 export class MessagesMutationResolver {

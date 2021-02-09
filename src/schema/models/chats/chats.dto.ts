@@ -55,3 +55,8 @@ export class ChatsFilter extends makeFilter<Chats>(
   Chats,
   ChatsFieldArgumentEnum
 ) {}
+
+export enum ChatsEvents {
+  ADDED_EVENT = 'chatAdded',
+  REMOVED_EVENT = 'chatRemoved'
+}

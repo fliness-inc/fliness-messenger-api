@@ -1,8 +1,8 @@
 import { Field, ObjectType, Directive } from '@nestjs/graphql';
-import IEntity from '@schema/models/entity.interface';
+import IModel from '@schema/models/model.interface';
 
 @ObjectType()
-export class User extends IEntity {
+export class User extends IModel {
   @Field(() => String)
   public readonly name: string;
 

@@ -8,12 +8,10 @@ import {
   CreateInvitationDTO
 } from '@schema/models/invitations/invitations.dto';
 import { InvitationsService } from '@schema/models/invitations/invitations.service';
-import AuthGuard from '@schema/models/auth/auth.guard';
 import InvitationsMutation from '@schema/models/invitations/invitations.mutation';
 import CurrentUser from '@schema/models/auth/current-user';
 import UUID from '@schema/types/uuid.type';
 
-@UseGuards(AuthGuard)
 @Resolver(() => InvitationsMutation)
 export class InvitationsMutationResolver {
   public constructor(private readonly invitationsService: InvitationsService) {}

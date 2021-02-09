@@ -1,5 +1,5 @@
 import { ObjectType, Field, registerEnumType } from '@nestjs/graphql';
-import IEntity from '@schema/models/entity.interface';
+import IModel from '@schema/models/model.interface';
 import Chat from '@schema/models/chats/chats.model';
 import User from '@schema/models/users/users.model';
 import DateTime from '@schema/types/datetime.type';
@@ -11,7 +11,7 @@ registerEnumType(MemberRoleEnum, {
 });
 
 @ObjectType()
-export class Member extends IEntity {
+export class Member extends IModel {
   @Field(() => UUID)
   public readonly chatId: string;
 

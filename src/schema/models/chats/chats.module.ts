@@ -7,14 +7,22 @@ import ChatsService from '@schema/models/chats/chats.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import ChatEntity from '@db/entities/chat.entity';
 import ChatTypeEntity from '@db/entities/chat-type.entity';
+import ChatsSubsResolver from './chats.subs.resolver';
+import PubSubModule from '@schema/pub-sub/pub-sub.module';
 
 @Module({
   imports: [
     UsersModule,
     forwardRef(() => MembersModule),
-    TypeOrmModule.forFeature([ChatEntity, ChatTypeEntity])
+    TypeOrmModule.forFeature([ChatEntity, ChatTypeEntity]),
+    PubSubModule
   ],
-  providers: [ChatsModelResolver, ChatsMutationResolver, ChatsService],
+  providers: [
+    ChatsModelResolver,
+    ChatsMutationResolver,
+    ChatsSubsResolver,
+    ChatsService
+  ],
   exports: [ChatsService]
 })
 export class ChatsModule {}
