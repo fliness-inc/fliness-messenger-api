@@ -6,14 +6,15 @@ import { GlobalExceptionFilter } from '@schema/utils';
 
 setupDotEnv();
 
-const { PORT = 8080 } = process.env;
+const { PORT = 8080, NODE_ENV = 'production' } = process.env;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
   app.useGlobalFilters(new GlobalExceptionFilter());
 
-  await app.listen(PORT);
+  const server = await app.listen(PORT);
+  server.requestTimeout = NODE_ENV === 'production' ? 0 : 60 * 1000; // 60 secs delay
 }
 
 bootstrap();

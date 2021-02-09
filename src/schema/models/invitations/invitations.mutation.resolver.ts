@@ -16,6 +16,11 @@ import UUID from '@schema/types/uuid.type';
 export class InvitationsMutationResolver {
   public constructor(private readonly invitationsService: InvitationsService) {}
 
+  @ResolveField(() => UUID, { name: 'id' })
+  public staticId(): string {
+    return '90bda5f6-ee53-4748-99c8-f001c5d6b82c';
+  }
+
   @ResolveField(() => Invitation)
   public async create(
     @CurrentUser() user: User,

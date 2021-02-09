@@ -1,6 +1,6 @@
-import { Entity, Column, OneToOne } from 'typeorm';
+import { Entity, Column, OneToOne, ManyToOne, JoinColumn } from 'typeorm';
 import IEntity from './entity.interface';
-import User from './user.entity';
+import UserEntity from './user.entity';
 
 @Entity({ name: 'tokens' })
 export class Token extends IEntity {
@@ -16,11 +16,12 @@ export class Token extends IEntity {
   @Column({ name: 'expires_at', default: () => 'NOW()' })
   public expiresAt: Date;
 
-  @OneToOne(
-    () => User,
-    u => u.id
-  )
-  public user: User;
+  @OneToOne(type => UserEntity)
+  @JoinColumn({
+    name: 'user_id',
+    referencedColumnName: 'id'
+  })
+  public user: UserEntity;
 }
 
 export default Token;

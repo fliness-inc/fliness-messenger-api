@@ -6,13 +6,14 @@ import {
   ResolveField
 } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
-import AuthService from '@schema/models/auth/auth.service';
+import AuthService from './auth.service';
 import TokensService from '@schema/models/tokens/tokens.service';
 import { Context as AppContext } from '@schema/utils';
-import { AuthLoginDTO, AuthRegisterDTO } from '@schema/models/auth/auth.dto';
+import { AuthSignInDTO, AuthSignUpDTO } from './auth.dto';
 import Token from '@schema/models/tokens/tokens.model';
-import AuthGuard from '@schema/models/auth/auth.guard';
-import Auth from '@schema/models/auth/auth.model';
+import AuthGuard from './auth.guard';
+import Auth from './auth.model';
+import UUID from '@schema/types/uuid.type';
 
 @Resolver(() => Auth)
 export class AuthResolver {
@@ -26,15 +27,20 @@ export class AuthResolver {
     return <Auth>{};
   }
 
+  @ResolveField(() => UUID, { name: 'id' })
+  public staticId(): string {
+    return '9b31c940-a925-49dc-bba3-b59890849529';
+  }
+
   @ResolveField(() => Token)
-  public async login(
-    @Args('payload') payload: AuthLoginDTO,
+  public async signIn(
+    @Args('payload') payload: AuthSignInDTO,
     @Context() ctx: AppContext
   ): Promise<Token> {
     const { email, password } = payload;
     const userAgent = ctx.req.headers['user-agent'];
 
-    const user = await this.authService.login(email, password);
+    const user = await this.authService.signIn(email, password);
     const tokens = await this.tokensService.create(user.id, userAgent);
 
     ctx.res.cookie('jwt-token', tokens.refreshToken, {
@@ -46,14 +52,14 @@ export class AuthResolver {
   }
 
   @ResolveField(() => Token)
-  public async register(
-    @Args('payload') payload: AuthRegisterDTO,
+  public async signUp(
+    @Args('payload') payload: AuthSignUpDTO,
     @Context() ctx: AppContext
   ): Promise<Token> {
     const { name, email, password } = payload;
     const userAgent = ctx.req.headers['user-agent'];
 
-    const user = await this.authService.register(name, email, password);
+    const user = await this.authService.signUp(name, email, password);
     const tokens = await this.tokensService.create(user.id, userAgent);
 
     ctx.res.cookie('jwt-token', tokens.refreshToken, {
@@ -81,7 +87,7 @@ export class AuthResolver {
 
   @UseGuards(AuthGuard)
   @ResolveField(() => Boolean)
-  public async logout(@Context() ctx: AppContext): Promise<boolean> {
+  public async signOut(@Context() ctx: AppContext): Promise<boolean> {
     const refreshToken = ctx.req.cookies['jwt-token'];
     const userAgent = ctx.req.headers['user-agent'];
 

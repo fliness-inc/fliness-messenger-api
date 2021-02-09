@@ -7,7 +7,7 @@ import bcrypt from 'bcryptjs';
 export class AuthService {
   public constructor(private readonly usersService: UsersService) {}
 
-  public async login(email: string, password: string): Promise<User> {
+  public async signIn(email: string, password: string): Promise<User> {
     const user = await this.usersService.findOne({ where: { email } });
 
     if (!user)
@@ -21,7 +21,7 @@ export class AuthService {
     return user;
   }
 
-  public async register(
+  public async signUp(
     name: string,
     email: string,
     password: string

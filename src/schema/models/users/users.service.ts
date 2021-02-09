@@ -1,10 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  getRepository,
-  FindManyOptions,
-  FindOneOptions,
-  DeepPartial
-} from 'typeorm';
+import { FindManyOptions, FindOneOptions, DeepPartial } from 'typeorm';
 import { User } from '@db/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -35,8 +30,10 @@ export class UsersService {
   }
 
   public async create(entity: DeepPartial<User>): Promise<User> {
-    const users = getRepository(User);
-    return users.save(users.create(entity));
+    if (await this.userRepository.findOne({ email: entity.email }))
+      throw new Error(`The user with that email address already signed up`);
+
+    return this.userRepository.save(this.userRepository.create(entity));
   }
 }
 

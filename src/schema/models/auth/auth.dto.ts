@@ -1,7 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql';
 
 @InputType()
-export class AuthLoginDTO {
+export class AuthSignInDTO {
   @Field(() => String)
   public readonly email: string;
 
@@ -10,7 +10,7 @@ export class AuthLoginDTO {
 }
 
 @InputType()
-export class AuthRegisterDTO {
+export class AuthSignUpDTO {
   @Field(() => String)
   public readonly name: string;
 

@@ -1,15 +1,11 @@
 import { UseGuards, Inject } from '@nestjs/common';
 import { Resolver, ResolveField, Args } from '@nestjs/graphql';
-import { ChatsService } from '@schema/models/chats/chats.service';
-import {
-  ChatTypeEnum,
-  ChatCreateDTO,
-  ChatsEvents
-} from '@schema/models/chats/chats.dto';
-import { ChatGruard, ChatRoles } from '@schema/models/chats/chats.guard';
+import { ChatsService } from './chats.service';
+import { ChatTypeEnum, ChatCreateDTO, ChatEvents } from './chats.dto';
+import { ChatGruard, ChatRoles } from './chats.guard';
 import { MemberRoleEnum } from '@schema/models/members/members.dto';
-import ChatsMutation from '@schema/models/chats/chats.mutation';
-import Chat from '@schema/models/chats/chats.model';
+import ChatsMutation from './chats.mutation';
+import Chat from './chats.model';
 import CurrentUser from '@schema/models/auth/current-user';
 import User from '@schema/models/users/users.model';
 import UUID from '@schema/types/uuid.type';
@@ -42,8 +38,8 @@ export class ChatsMutationResolver {
       createdAt: entity.createdAt
     };
 
-    this.pubSub.publish(ChatsEvents.ADDED_EVENT, {
-      [ChatsEvents.ADDED_EVENT]: chat
+    this.pubSub.publish(ChatEvents.CREATED_EVENT, {
+      [ChatEvents.CREATED_EVENT]: chat
     });
 
     return chat;

@@ -6,10 +6,16 @@ import { Type, Status } from '@schema/models/invitations/invitations.dto';
 import { InvitationsService } from '@schema/models/invitations/invitations.service';
 import InvitationsQuery from '@schema/models/invitations/invitations.query';
 import CurrentUser from '@schema/models/auth/current-user';
+import UUID from '@schema/types/uuid.type';
 
 @Resolver(() => InvitationsQuery)
 export class InvitationsQueryResolver {
   public constructor(private readonly invitationsService: InvitationsService) {}
+
+  @ResolveField(() => UUID, { name: 'id' })
+  public staticId(): string {
+    return 'a863795a-bfad-44df-b872-338d919f65f0';
+  }
 
   @ResolveField('fromMe', () => [Invitation])
   public async getInvitationsFromMe(

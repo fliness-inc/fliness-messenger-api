@@ -4,7 +4,7 @@ import JwtStrategy from './jwt.strategy';
 import UsersModule from '@schema/models/users/users.module';
 import TokensModule from '@schema/models/tokens/tokens.module';
 import AuthService from './auth.service';
-import AuthResolver from './auth.resolver';
+import AuthResolver from './auth.mutation.resolver';
 
 @Module({
   imports: [TokensModule, UsersModule, PassportModule],

@@ -14,6 +14,11 @@ import UUID from '@schema/types/uuid.type';
 export class MessagesMutationResolver {
   public constructor(private readonly messagesService: MessagesService) {}
 
+  @ResolveField(() => UUID, { name: 'id' })
+  public staticId(): string {
+    return '7471d679-75d7-41f5-84b6-4379379e7f60';
+  }
+
   @ResolveField(() => Message, { name: 'create' })
   public async create(
     @CurrentUser() user: User,

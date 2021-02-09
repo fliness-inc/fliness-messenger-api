@@ -1,9 +1,7 @@
 import { Resolver, Query, Context } from '@nestjs/graphql';
 import CurrentUser from '@schema/models/auth/current-user';
-import User from '@schema/models/users/users.model';
-import UserConnection, {
-  UserPaginationInput
-} from '@schema/models/users/users.model.pagination';
+import User from './users.model';
+import UserConnection, { UserPaginationInput } from './users.model.pagination';
 import { getRepository } from 'typeorm';
 import UserEntity from '@db/entities/user.entity';
 import {
@@ -14,7 +12,7 @@ import {
   makeSelectField,
   makeUniqueField
 } from '@lib/pagination/pagination';
-import { UsersFilter } from '@schema/models/users/users.dto';
+import { UsersFilter } from './users.dto';
 import { GraphqlFilter, GraphqlFilterArg } from '@lib/filter/filter';
 
 @Resolver(of => User)

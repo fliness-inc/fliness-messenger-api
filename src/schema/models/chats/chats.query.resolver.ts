@@ -2,9 +2,7 @@ import { Resolver, ResolveField, Field } from '@nestjs/graphql';
 import CurrentUser from '@schema/models/auth/current-user';
 import User from '@schema/models/users/users.model';
 import MeQuery from '@schema/models/me/me.query';
-import ChatsConnection, {
-  ChatPaginationInput
-} from '@schema/models/chats/chats.model.pagination';
+import ChatsConnection, { ChatPaginationInput } from './chats.model.pagination';
 import ChatEntity from '@db/entities/chat.entity';
 import { getRepository } from 'typeorm';
 import {
@@ -15,7 +13,7 @@ import {
   makeSelectField,
   makeUniqueField
 } from '@lib/pagination/pagination';
-import { ChatsFilter } from '@schema/models/chats/chats.dto';
+import { ChatsFilter } from './chats.filtering';
 import { GraphqlFilter, GraphqlFilterArg } from '@lib/filter/filter';
 
 @Resolver(() => MeQuery)

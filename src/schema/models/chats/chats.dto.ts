@@ -1,11 +1,14 @@
-import { Field, InputType, registerEnumType } from '@nestjs/graphql';
-import { makeFilter } from '@lib/filter/filter';
-import Chats from '@db/entities/chat.entity';
+import { Field, InputType } from '@nestjs/graphql';
 
 export enum ChatTypeEnum {
   DIALOG = 'DIALOG',
   GROUP = 'GROUP',
   CHANNEL = 'CHANNEL'
+}
+
+export enum ChatEvents {
+  CREATED_EVENT = 'CHAT_CREATED_EVENT',
+  REMOVED_EVENT = 'CHAT_REMOVED_EVENT'
 }
 
 @InputType()
@@ -36,27 +39,4 @@ export class ChatCreateDTO {
             a second member.`
   })
   public readonly userIds?: string[];
-}
-
-export enum ChatsFieldArgumentEnum {
-  ID = '"chats"."id"',
-  TITLE = '"chats"."title"',
-  DESCRIPTION = '"chats"."description"',
-  CREATED_AT = '"chats"."created_at"',
-  TYPE_NAME = '"type"."name"'
-}
-
-registerEnumType(ChatsFieldArgumentEnum, {
-  name: 'ChatsFieldName'
-});
-
-@InputType()
-export class ChatsFilter extends makeFilter<Chats>(
-  Chats,
-  ChatsFieldArgumentEnum
-) {}
-
-export enum ChatsEvents {
-  ADDED_EVENT = 'chatAdded',
-  REMOVED_EVENT = 'chatRemoved'
 }

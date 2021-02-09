@@ -1,8 +1,9 @@
 import { ObjectType, Field } from '@nestjs/graphql';
-import Invitation from '@schema/models/invitations/invitation.model';
+import Invitation from './invitation.model';
+import IModel from '@schema/models/model.interface';
 
 @ObjectType()
-export class InvitationsMutaion {
+export class InvitationsMutaion extends IModel {
   @Field(() => Invitation)
   public readonly create: Invitation;
 
