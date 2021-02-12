@@ -16,7 +16,7 @@ export class Token extends IEntity {
   @Column({ name: 'expires_at', default: () => 'NOW()' })
   public expiresAt: Date;
 
-  @OneToOne(type => UserEntity)
+  @ManyToOne(type => UserEntity)
   @JoinColumn({
     name: 'user_id',
     referencedColumnName: 'id'

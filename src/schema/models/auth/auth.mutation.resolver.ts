@@ -16,7 +16,7 @@ import Auth from './auth.model';
 import UUID from '@schema/types/uuid.type';
 
 @Resolver(() => Auth)
-export class AuthResolver {
+export class AuthMutationResolver {
   public constructor(
     private readonly authService: AuthService,
     private readonly tokensService: TokensService
@@ -102,4 +102,4 @@ export class AuthResolver {
   }
 }
 
-export default AuthResolver;
+export default AuthMutationResolver;

@@ -50,7 +50,7 @@ export class Dialog implements IChat {
       .orderBy('count', 'DESC')
       .getRawOne();
 
-    if (members?.count === '2')
+    if (parseInt(members?.count) === 2)
       throw new InvalidPropertyError(`The dialog was already created`);
 
     const newChat = await this.chatsRepository.save(

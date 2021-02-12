@@ -14,7 +14,7 @@ async function bootstrap() {
   app.useGlobalFilters(new GlobalExceptionFilter());
 
   const server = await app.listen(PORT);
-  server.requestTimeout = NODE_ENV === 'production' ? 0 : 60 * 1000; // 60 secs delay
+  server.requestTimeout = NODE_ENV === 'production' ? 0 : 60 * 1000; // 60 sec delay
 }
 
 bootstrap();

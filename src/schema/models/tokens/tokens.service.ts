@@ -1,8 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { getConnection, getRepository } from 'typeorm';
-import Token from '@db/entities/token.entity';
+import { Token as TokenEntity } from '@db/entities/token.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 import * as uuid from 'uuid';
+import { Repository } from 'typeorm';
 
 export class Tokens {
   public accessToken: string;
@@ -13,16 +14,19 @@ export class Tokens {
 export class TokensService {
   private readonly numMaxAge: number = 1000 * 60 * 60 * 24 * 60;
 
-  public constructor(private readonly jwtService: JwtService) {}
+  public constructor(
+    @InjectRepository(TokenEntity)
+    private readonly tokensRespository: Repository<TokenEntity>,
+    private readonly jwtService: JwtService
+  ) {}
 
   public async create(userId: string, userAgent: string): Promise<Tokens> {
-    const users = getRepository(Token);
     const tokens = this.generate(userId);
 
     await this.expireToken(userId, userAgent);
 
-    await users.save(
-      users.create({
+    await this.tokensRespository.save(
+      this.tokensRespository.create({
         userId,
         token: tokens.refreshToken,
         userAgent,
@@ -35,9 +39,9 @@ export class TokensService {
 
   private async expireToken(userId: string, userAgent: string): Promise<void> {
     const now = new Date(Date.now());
-    await getConnection()
+    await this.tokensRespository
       .createQueryBuilder()
-      .update(Token)
+      .update(TokenEntity)
       .set({ expiresAt: now })
       .where('userId = :userId', { userId })
       .andWhere('user_agent = :userAgent', { userAgent })
@@ -56,7 +60,7 @@ export class TokensService {
     refreshToken: string,
     userAgent: string
   ): Promise<Tokens> {
-    const token = await getRepository(Token)
+    const token = await this.tokensRespository
       .createQueryBuilder('t')
       .where('t.token = :token', { token: refreshToken })
       .andWhere('t.user_agent = :userAgent', { userAgent })
@@ -72,7 +76,7 @@ export class TokensService {
 
     await this.expireToken(token.userId, token.userAgent);
 
-    await getRepository(Token).save({
+    await this.tokensRespository.save({
       ...token,
       token: newTokens.refreshToken,
       expiresAt: new Date(Date.now() + this.maxAge)
@@ -82,7 +86,7 @@ export class TokensService {
   }
 
   public async delete(refreshToken: string, userAgent: string): Promise<void> {
-    const token = await getRepository(Token)
+    const token = await this.tokensRespository
       .createQueryBuilder('t')
       .where('t.token = :token', { token: refreshToken })
       .andWhere('t.user_agent = :userAgent', { userAgent })

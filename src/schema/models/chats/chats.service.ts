@@ -16,7 +16,7 @@ import Channel from '@schema/models/chats/types/channel';
 
 @Injectable()
 export class ChatsService {
-  private readonly chatsmodels = new Map<ChatTypeEnum, IChat>();
+  public readonly chatsModels = new Map<ChatTypeEnum, IChat>();
 
   public constructor(
     @InjectRepository(ChatEntity)
@@ -27,17 +27,21 @@ export class ChatsService {
     @Inject(forwardRef(() => MembersService))
     private readonly membersService: MembersService
   ) {
-    this.chatsmodels.set(
+    this.chatsModels.set(
       ChatTypeEnum.DIALOG,
-      new Dialog(this.chatsRepository, this.chatTypesRepository, membersService)
+      new Dialog(
+        this.chatsRepository,
+        this.chatTypesRepository,
+        this.membersService
+      )
     );
-    this.chatsmodels.set(
+    this.chatsModels.set(
       ChatTypeEnum.GROUP,
-      new Group(this.chatsRepository, membersService)
+      new Group(this.chatsRepository, this.membersService)
     );
-    this.chatsmodels.set(
+    this.chatsModels.set(
       ChatTypeEnum.CHANNEL,
-      new Channel(this.chatsRepository, membersService)
+      new Channel(this.chatsRepository, this.membersService)
     );
   }
 
@@ -53,7 +57,7 @@ export class ChatsService {
         `The user was not found with the id: ${userId}`
       );
 
-    const resolver = this.chatsmodels.get(type);
+    const resolver = this.chatsModels.get(type);
 
     if (!resolver)
       throw new InvalidPropertyError(`The chat type was not found: ${type}`);
@@ -74,25 +78,30 @@ export class ChatsService {
   }
 
   public async remove(chatId: string): Promise<ChatEntity> {
-    const chat = await this.findOne({
-      where: { id: chatId },
-      join: {
-        alias: 'chats',
-        leftJoinAndSelect: {
-          type: 'chats.type'
-        }
-      }
-    });
-
-    if (!chat)
+    if (!chatId)
       throw new NotFoundError(`The chat was not find with the id: ${chatId}`);
 
-    return this.chatsRepository.save(
-      this.chatsRepository.create({
-        ...chat,
-        isDeleted: true
-      })
-    );
+    const chat = await this.chatsRepository
+      .createQueryBuilder('chats')
+      .select('chats.id', 'id')
+      .where('chats.id = :id', { id: chatId })
+      .getRawOne();
+
+    if (!chat?.id)
+      throw new NotFoundError(`The chat was not find with the id: ${chatId}`);
+
+    await this.chatsRepository
+      .createQueryBuilder('chats')
+      .update(ChatEntity)
+      .set({ isDeleted: true })
+      .where('chats.id = :id', { id: chatId })
+      .execute();
+
+    return this.chatsRepository
+      .createQueryBuilder('chats')
+      .leftJoinAndSelect('chats.type', 'type')
+      .where('chats.id = :id', { id: chatId })
+      .getOne();
   }
 
   public async findByIds(

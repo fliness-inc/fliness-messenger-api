@@ -27,12 +27,14 @@ export class TestRequest {
       request.set(key, val);
     });
   }
+}
 
+export class GraphQLTestRequest extends TestRequest {
   static graphql<T>(options: GraphqlTestRequestOptions<T>): request.Test {
     const { app, headers, query, variables } = options;
 
     const request = TestRequest.build(app).post('/graphql');
-    TestRequest.setHeaders(request, headers);
+    GraphQLTestRequest.setHeaders(request, headers);
 
     return request.send({
       query,
