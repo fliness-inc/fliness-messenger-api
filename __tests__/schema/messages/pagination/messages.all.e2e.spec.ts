@@ -24,6 +24,7 @@ import MessagesService from '@schema/models/messages/messages.service';
 import Message from '@db/entities/message.entity';
 import { MessagePaginationField } from '@schema/models/messages/messages.model.pagination';
 import { CursorCoder } from '@lib/pagination/pagination';
+import { GraphQLTestRequest } from '@tools/test-request';
 
 setupDotEnv();
 
@@ -98,23 +99,22 @@ describe('[E2E] [MessagesResolver] ...', () => {
           name: Faker.internet.userName(),
           ...payload
         });
-        const res = await request(app.getHttpServer())
-          .post('/graphql')
-          .send({
-            query: `
-                            mutation SignIn($payload: AuthSignInDTO!) {
-                                auth {
-                                  signIn(payload: $payload) {
-                                        accessToken
-                                        refreshToken
-                                    }
-                                }
-                            }
-                        `,
-            variables: {
-              payload
+        const res = await GraphQLTestRequest.graphql({
+          app,
+          query: `
+            mutation SignIn($payload: AuthSignInDTO!) {
+              auth {
+                signIn(payload: $payload) {
+                  accessToken
+                  refreshToken
+                }
+              }
             }
-          });
+          `,
+          variables: {
+            payload
+          }
+        });
 
         users.push({
           user,
@@ -151,52 +151,52 @@ describe('[E2E] [MessagesResolver] ...', () => {
         const [user1, user2] = users;
 
         const key = MessagePaginationField.ID;
-        const res = await request(app.getHttpServer())
-          .post('/graphql')
-          .set('Authorization', `Bearer ${user1.tokens.accessToken}`)
-          .send({
-            operationName: 'GetMessages',
-            query: `
-                            query GetMessages($chatsFilter: ChatsFilter) {
-                                me {
-                                    chats(filter: $chatsFilter) {
-                                        edges {
-                                            node {
-                                                messages {
-                                                    edges {
-                                                        cursor
-                                                        node {
-                                                            id
-                                                            text
-                                                            memberId
-                                                            createdAt
-                                                            updatedAt
-                                                        }
-                                                    }
-                                                    totalCount
-                                                    pageInfo {
-                                                        startCursor
-                                                        endCursor
-                                                        hasNextPage
-                                                        hasPreviousPage
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        `,
-            variables: {
-              chatsFilter: {
-                field: {
-                  name: 'ID',
-                  op: 'EQUALS',
-                  val: dialog.id
+        const res = await GraphQLTestRequest.graphql({
+          app,
+          headers: {
+            Authorization: `Bearer ${user1.tokens.accessToken}`
+          },
+          query: `
+            query GetMessages($chatsFilter: ChatsFilter) {
+              me {
+                chats(filter: $chatsFilter) {
+                  edges {
+                    node {
+                      messages {
+                        edges {
+                          cursor
+                          node {
+                            id
+                            text
+                            memberId
+                            createdAt
+                            updatedAt
+                          }
+                        }
+                        totalCount
+                        pageInfo {
+                          startCursor
+                          endCursor
+                          hasNextPage
+                          hasPreviousPage
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
-          });
+          `,
+          variables: {
+            chatsFilter: {
+              field: {
+                name: 'ID',
+                op: 'EQUALS',
+                val: dialog.id
+              }
+            }
+          }
+        });
 
         expect(res.status).toEqual(200);
 
@@ -214,6 +214,90 @@ describe('[E2E] [MessagesResolver] ...', () => {
               updatedAt: m.updatedAt.toISOString()
             }
           })),
+          totalCount: messages.length,
+          pageInfo: {
+            startCursor: CursorCoder.encode({ [key]: messages[0].id }),
+            endCursor: CursorCoder.encode({
+              [key]: messages[messages.length - 1].id
+            }),
+            hasNextPage: false,
+            hasPreviousPage: false
+          }
+        });
+      });
+
+      it('should return all messages of the chat in reverse order', async () => {
+        const [user1] = users;
+
+        const key = MessagePaginationField.ID;
+        const res = await GraphQLTestRequest.graphql({
+          app,
+          headers: {
+            Authorization: `Bearer ${user1.tokens.accessToken}`
+          },
+          query: `
+            query GetMessages($chatsFilter: ChatsFilter!, sort: Sort!) {
+              me {
+                chats(filter: $chatsFilter) {
+                  edges {
+                    node {
+                      messages(sort: $sort) {
+                        edges {
+                          cursor
+                          node {
+                            id
+                            text
+                            memberId
+                            createdAt
+                            updatedAt
+                          }
+                        }
+                        totalCount
+                        pageInfo {
+                          startCursor
+                          endCursor
+                          hasNextPage
+                          hasPreviousPage
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          `,
+          variables: {
+            chatsFilter: {
+              field: {
+                name: 'ID',
+                op: 'EQUALS',
+                val: dialog.id
+              }
+            },
+            sort: {
+              by: 'DESC'
+            }
+          }
+        });
+
+        expect(res.status).toEqual(200);
+
+        const chat = res.body.data.me.chats.edges[0].node;
+        const msgs = chat.messages;
+
+        expect(msgs).toStrictEqual({
+          edges: messages
+            .sort((m, m2) => (m.id > m2.id ? -1 : m.id < m2.id ? 1 : 0))
+            .map(m => ({
+              cursor: CursorCoder.encode({ [key]: m.id }),
+              node: {
+                id: m.id,
+                text: m.text,
+                memberId: m.memberId,
+                createdAt: m.createdAt.toISOString(),
+                updatedAt: m.updatedAt.toISOString()
+              }
+            })),
           totalCount: messages.length,
           pageInfo: {
             startCursor: CursorCoder.encode({ [key]: messages[0].id }),

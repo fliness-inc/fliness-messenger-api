@@ -1,10 +1,18 @@
-import { Resolver, ResolveField, Field, Parent } from '@nestjs/graphql';
-import Chat from '@schema/models/chats/chats.model';
+import {
+  Resolver,
+  ResolveField,
+  Field,
+  Parent,
+  Context,
+  Info
+} from '@nestjs/graphql';
+import ChatModel from '@schema/models/chats/chats.model';
 import MemberConnection, {
   MemberPaginationInput
 } from '@schema/models/members/members.model.pagination';
 import { InjectRepository } from '@nestjs/typeorm';
-import Member from '@db/entities/member.entity';
+import MemberEntity from '@db/entities/member.entity';
+import MemberModel from './members.model';
 import { Repository } from 'typeorm';
 import { GraphqlFilter, GraphqlFilterArg } from '@lib/filter/filter';
 import { MembersFilter } from '@schema/models/members/members.dto';
@@ -16,12 +24,15 @@ import {
   makeSelectField,
   makeUniqueField
 } from '@lib/pagination/pagination';
+import MessageModel from '@schema/models/messages/messages.model';
+import DataLoader from 'dataloader';
+import { Context as AppContext } from '@schema/utils';
 
-@Resolver(() => Chat)
-export class MembersQueryResolver {
+@Resolver(() => ChatModel)
+export class ChatQueryResolver {
   public constructor(
-    @InjectRepository(Member)
-    private readonly membersRespository: Repository<Member>
+    @InjectRepository(MemberEntity)
+    private readonly membersRespository: Repository<MemberEntity>
   ) {}
 
   @Field(() => MemberConnection, { name: 'members' })
@@ -41,7 +52,7 @@ export class MembersQueryResolver {
   })
   @ResolveField(() => MemberConnection, { name: 'members' })
   public async getMembers(
-    @Parent() chat: Chat,
+    @Parent() chat: ChatModel,
     @GraphqlPaginationArg(() => MemberPaginationInput) pagination,
     @GraphqlPaginationSortArg() sort,
     @GraphqlFilterArg(() => MembersFilter) filter
@@ -61,4 +72,40 @@ export class MembersQueryResolver {
   }
 }
 
-export default MembersQueryResolver;
+@Resolver(() => MessageModel)
+export class MessageQueryResolver {
+  public constructor(
+    @InjectRepository(MemberEntity)
+    private readonly membersRespository: Repository<MemberEntity>
+  ) {}
+
+  @ResolveField(() => MemberModel, { name: 'member' })
+  public async getMember(
+    @Parent() message: MessageModel,
+    @Context() ctx: AppContext,
+    @Info() info
+  ): Promise<MemberModel> {
+    const { dataloaders } = ctx;
+    let dataloader = dataloaders.get(info.fieldNodes);
+
+    if (!dataloader) {
+      dataloader = new DataLoader(async (ids: readonly string[]) => {
+        const entities = await this.membersRespository
+          .createQueryBuilder('members')
+          .select('members.id', 'id')
+          .addSelect('members.chat_id', 'chatId')
+          .addSelect('members.user_id', 'userId')
+          .addSelect('members.updated_at', 'updatedAt')
+          .addSelect('members.created_at', 'createdAt')
+          .addSelect('role.name', 'type')
+          .leftJoin('members.role', 'role')
+          .whereInIds(ids)
+          .getRawMany();
+        return ids.map(id => entities.find(e => e.id === id));
+      });
+
+      dataloaders.set(info.fieldNodes, dataloader);
+    }
+    return dataloader.load(message.memberId);
+  }
+}

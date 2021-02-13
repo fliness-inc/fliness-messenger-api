@@ -41,7 +41,7 @@ export class GraphqlCursorPaginationInterceptor<T> implements NestInterceptor {
       map(async builder => {
         const paginator = new Paginator({
           uniqueKey,
-          keys,
+          keys: pagination?.fields || keys,
           afterCursor: pagination?.after,
           beforeCursor: pagination?.before,
           limit: pagination?.first || pagination?.last || limit,

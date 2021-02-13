@@ -3,6 +3,11 @@ import UUID from '@schema/types/uuid.type';
 import { makeFilter, makeEnum, makeEnumField } from '@lib/filter/filter';
 import Messages from '@db/entities/message.entity';
 
+export enum MessageEvents {
+  CREATED_EVENT = 'MESSAGE_CREATED_EVENT',
+  REMOVED_EVENT = 'MESSAGE_REMOVED_EVENT'
+}
+
 @InputType()
 export class MessageCreateDTO {
   @Field(() => String, { description: 'The content of your message.' })

@@ -5,7 +5,6 @@ import MemberEntity from '@db/entities/member.entity';
 import { ChatEvents } from './chats.dto';
 import { PubSubEngine } from 'graphql-subscriptions';
 import { getRepository } from 'typeorm';
-import { count } from 'rxjs/operators';
 
 @Resolver(of => ChatModel)
 export class ChatsSubsResolver {

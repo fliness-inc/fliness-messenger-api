@@ -52,14 +52,21 @@ export class ChatsMutationResolver {
     @CurrentUser() user: User,
     @Args('chatId', { type: () => UUID }) chatId: string
   ): Promise<Chat> {
-    const chat = await this.chatService.remove(chatId);
-    return {
-      id: chat.id,
-      title: chat.title,
-      description: chat.description,
-      type: <ChatTypeEnum>chat.type.name,
-      createdAt: chat.createdAt
+    const entity = await this.chatService.remove(chatId);
+
+    const chat = {
+      id: entity.id,
+      title: entity.title,
+      description: entity.description,
+      type: <ChatTypeEnum>entity.type.name,
+      createdAt: entity.createdAt
     };
+
+    this.pubSub.publish(ChatEvents.REMOVED_EVENT, {
+      [ChatEvents.REMOVED_EVENT]: chat
+    });
+
+    return chat;
   }
 
   @ResolveField(() => MessagesMutation, { name: 'messages' })
