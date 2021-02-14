@@ -1,4 +1,3 @@
-import { UseGuards } from '@nestjs/common';
 import { Resolver, ResolveField, Parent } from '@nestjs/graphql';
 import User from '@schema/models/users/users.model';
 import FriendConnection, {

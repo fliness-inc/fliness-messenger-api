@@ -10,7 +10,6 @@ import { User as UserEntity } from '@db/entities/user.entity';
 import { Member as MemberEntity } from '@db/entities/member.entity';
 import { ChatTypeEnum } from '../chats.dto';
 import { Repository } from 'typeorm';
-import { rejects } from 'assert';
 
 describe('[Chats Module] ...', () => {
   let chatsService: ChatsService;

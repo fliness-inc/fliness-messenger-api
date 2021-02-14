@@ -1,4 +1,3 @@
-import { Type } from '@nestjs/common';
 import { Args } from '@nestjs/graphql';
 import * as Filtering from './filtering';
 import * as Interceptor from './interceptor';

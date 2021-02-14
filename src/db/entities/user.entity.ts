@@ -1,11 +1,4 @@
-import {
-  Column,
-  Entity,
-  BeforeInsert,
-  OneToMany,
-  JoinColumn,
-  OneToOne
-} from 'typeorm';
+import { Column, Entity, BeforeInsert, OneToMany } from 'typeorm';
 import IEntity from './entity.interface';
 import bcrypt from 'bcryptjs';
 import TokenEnity from './token.entity';

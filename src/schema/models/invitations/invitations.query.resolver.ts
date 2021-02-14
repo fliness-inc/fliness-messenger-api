@@ -1,4 +1,3 @@
-import { UseGuards } from '@nestjs/common';
 import { Resolver, ResolveField } from '@nestjs/graphql';
 import User from '@schema/models/users/users.model';
 import Invitation from '@schema/models/invitations/invitation.model';

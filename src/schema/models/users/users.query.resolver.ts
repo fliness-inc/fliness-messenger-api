@@ -1,5 +1,4 @@
-import { Resolver, Query, Context } from '@nestjs/graphql';
-import CurrentUser from '@schema/models/auth/current-user';
+import { Resolver, Query } from '@nestjs/graphql';
 import User from './users.model';
 import UserConnection, { UserPaginationInput } from './users.model.pagination';
 import { getRepository } from 'typeorm';
@@ -29,8 +28,6 @@ export class UsersQueryResolver {
   })
   @Query(() => UserConnection, { name: 'users' })
   public async getUsers(
-    @CurrentUser() user: User,
-    @Context() ctx,
     @GraphqlPaginationArg(() => UserPaginationInput) pagination,
     @GraphqlPaginationSortArg() sort,
     @GraphqlFilterArg(() => UsersFilter) filter

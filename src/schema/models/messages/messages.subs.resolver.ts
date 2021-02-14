@@ -31,7 +31,7 @@ export class MessagesSubsResolver {
         })
         .getCount()
         .then(count => count > 0)
-        .catch(e => false);
+        .catch(() => false);
     }
   })
   public messageCreated(@Args('chatId', { type: () => UUID }) chatId: string) {
