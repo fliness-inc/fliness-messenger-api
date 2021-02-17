@@ -2,7 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import IEntity from './entity.interface';
 import Member from './member.entity';
 
-@Entity({ name: 'messages' })
+@Entity('messages')
 export class Message extends IEntity {
   @Column({ length: 4096 })
   public text: string;

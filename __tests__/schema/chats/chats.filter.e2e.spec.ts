@@ -5,7 +5,6 @@ import cookieParser from 'cookie-parser';
 import { getConnection, Connection } from 'typeorm';
 import User from '@db/entities/user.entity';
 import { AppModule } from '@src/app.module';
-import request from 'supertest';
 import Faker from 'faker';
 import { ChatTypeEnum } from '@schema/models/chats/chats.dto';
 import { MemberRoleEnum } from '@schema/models/members/members.dto';

@@ -3,7 +3,7 @@ import IEntity from './entity.interface';
 import ChatType from './chat-type.entity';
 import Member from './member.entity';
 
-@Entity({ name: 'chats' })
+@Entity('chats')
 export class Chat extends IEntity {
   @Column({ length: 255, nullable: true })
   public title: string;

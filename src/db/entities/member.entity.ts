@@ -4,7 +4,7 @@ import User from './user.entity';
 import Chat from './chat.entity';
 import MemberRole from './member-role.entity';
 
-@Entity({ name: 'members' })
+@Entity('members')
 export class Member extends IEntity {
   @Column({ name: 'chat_id', type: 'uuid' })
   public chatId: string;
