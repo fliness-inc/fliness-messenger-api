@@ -11,6 +11,7 @@ services:
       POSTGRES_DB: ${TYPEORM_DATABASE}
     container_name: fliness_messenger_database_test
   api:
+    user: api
     build:
       context: .
       dockerfile: Dockerfile.test
