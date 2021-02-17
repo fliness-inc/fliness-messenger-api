@@ -101,15 +101,15 @@ describe('[E2E] [MessagesResolver] ...', () => {
           .post('/graphql')
           .send({
             query: `
-                            mutation($payload: AuthSignInDTO!) {
-                                auth {
-                                  signIn(payload: $payload) {
-                                        accessToken
-                                        refreshToken
-                                    }
-                                }
-                            }
-                        `,
+              mutation($payload: AuthSignInDTO!) {
+                auth {
+                  signIn(payload: $payload) {
+                    accessToken
+                    refreshToken
+                  }
+                }
+              }
+            `,
             variables: {
               payload
             }
@@ -127,14 +127,22 @@ describe('[E2E] [MessagesResolver] ...', () => {
         { userIds: [users[1].user.id] }
       );
 
+      const member1 = await membersService.findOne({
+        where: { chatId: dialog.id, userId: users[0].user.id }
+      });
+
+      const member2 = await membersService.findOne({
+        where: { chatId: dialog.id, userId: users[1].user.id }
+      });
+
       for (let i = 0; i < 10; ++i) {
         messages.push(
-          await messagesService.create(users[0].user.id, dialog.id, {
+          await messagesService.create(member1.id, {
             text: Faker.random.words()
           })
         );
         messages.push(
-          await messagesService.create(users[1].user.id, dialog.id, {
+          await messagesService.create(member2.id, {
             text: Faker.random.words()
           })
         );
@@ -147,7 +155,7 @@ describe('[E2E] [MessagesResolver] ...', () => {
 
     describe('[Getting] [Filtering] ...', () => {
       it('should return the message of the specific id of the chat', async () => {
-        const [user1, user2] = users;
+        const [user1] = users;
 
         const message = messages[3];
         const key = MessagePaginationField.ID;

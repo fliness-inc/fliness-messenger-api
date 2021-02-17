@@ -131,7 +131,7 @@ describe('[E2E] [MessagesResolver] ...', () => {
 
     describe('[Creating] ...', () => {
       it('should create the message', async () => {
-        const [user1, user2] = users;
+        const [user1] = users;
         const payload = {
           text: 'Hi!',
           chatId: dialog.id
@@ -193,27 +193,26 @@ describe('[E2E] [MessagesResolver] ...', () => {
       });
 
       it('should return 404 status when the message was send to non-exists chat', async () => {
-        const [user1, user2] = users;
+        const [user1] = users;
         const payload = { text: 'Hi', chatId: uuid.v4() };
 
         const res = await request(app.getHttpServer())
           .post('/graphql')
           .set('Authorization', `Bearer ${user1.tokens.accessToken}`)
           .send({
-            operationName: 'CreateMessage',
             query: `
-                            mutation CreateMessage($payload: MessageCreateDTO!) {
-                                me {
-                                    chats {
-                                        messages {
-                                            create(payload: $payload) {
-                                                id text memberId createdAt updatedAt
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        `,
+              mutation($payload: MessageCreateDTO!) {
+                me {
+                  chats {
+                    messages {
+                      create(payload: $payload) {
+                        id text memberId createdAt updatedAt
+                      }
+                    }
+                  }
+                }
+              }
+            `,
             variables: {
               payload
             }
@@ -229,27 +228,26 @@ describe('[E2E] [MessagesResolver] ...', () => {
 
     describe('[Deleting] ...', () => {
       it('should delete the message', async () => {
-        const [user1, user2] = users;
+        const [user1] = users;
         const payload = { text: 'Hi', chatId: dialog.id };
 
         const resCreation = await request(app.getHttpServer())
           .post('/graphql')
           .set('Authorization', `Bearer ${user1.tokens.accessToken}`)
           .send({
-            operationName: 'CreateMessage',
             query: `
-                            mutation CreateMessage($payload: MessageCreateDTO!) {
-                                me {
-                                    chats {
-                                        messages {
-                                            create(payload: $payload) {
-                                                id text memberId createdAt updatedAt
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        `,
+              mutation($payload: MessageCreateDTO!) {
+                me {
+                  chats {
+                    messages {
+                      create(payload: $payload) {
+                        id text memberId createdAt updatedAt
+                      }
+                    }
+                  }
+                }
+              }
+            `,
             variables: {
               payload
             }
@@ -259,20 +257,19 @@ describe('[E2E] [MessagesResolver] ...', () => {
           .post('/graphql')
           .set('Authorization', `Bearer ${user1.tokens.accessToken}`)
           .send({
-            operationName: 'RemoveMessage',
             query: `
-                            mutation RemoveMessage($messageId: UUID!) {
-                                me {
-                                    chats {
-                                        messages {
-                                            remove(messageId: $messageId) {
-                                                id text memberId createdAt updatedAt
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        `,
+              mutation($messageId: UUID!) {
+                me {
+                  chats {
+                    messages {
+                      remove(messageId: $messageId) {
+                        id text memberId createdAt updatedAt
+                      }
+                    }
+                  }
+                }
+              }
+            `,
             variables: {
               messageId: resCreation.body.data.me.chats.messages.create.id
             }

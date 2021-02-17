@@ -13,4 +13,4 @@ COPY . .
 
 EXPOSE ${PORT}
 
-CMD npm run test:coveralls ./tests/
+CMD npm run test:coveralls 

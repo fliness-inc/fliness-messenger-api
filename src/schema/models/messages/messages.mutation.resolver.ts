@@ -10,13 +10,16 @@ import User from '@schema/models/users/users.model';
 import UUID from '@schema/types/uuid.type';
 import { PubSubEngine } from 'graphql-subscriptions';
 import { MessageEvents } from './messages.dto';
+import { MembersService } from '@schema/models/members/members.service';
+import { NotFoundError } from '@src/errors';
 
 @ChatRoles(MemberRoleEnum.MEMBER)
 @Resolver(() => MessagesMutation)
 export class MessagesMutationResolver {
   public constructor(
     @Inject('PUB_SUB') private pubSub: PubSubEngine,
-    private readonly messagesService: MessagesService
+    private readonly messagesService: MessagesService,
+    private readonly membersService: MembersService
   ) {}
 
   @ResolveField(() => UUID, { name: 'id' })
@@ -29,11 +32,16 @@ export class MessagesMutationResolver {
     @CurrentUser() user: User,
     @Args('payload') payload: MessageCreateDTO
   ): Promise<Message> {
-    const entity = await this.messagesService.create(
-      user.id,
-      payload.chatId,
-      payload
-    );
+    const member = await this.membersService.findOne({
+      where: {
+        userId: user.id,
+        chatId: payload.chatId
+      }
+    });
+
+    if (!member) throw new NotFoundError(`The member was not found`);
+
+    const entity = await this.messagesService.create(member.id, payload);
 
     const message = {
       id: entity.id,
@@ -83,7 +91,7 @@ export class MessagesMutationResolver {
           join: {
             alias: 'messages',
             leftJoinAndSelect: {
-              'messages.member': 'member'
+              member: 'messages.member'
             }
           }
         })

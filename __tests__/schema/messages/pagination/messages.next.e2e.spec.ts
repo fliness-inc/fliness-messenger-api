@@ -127,14 +127,22 @@ describe('[E2E] [MessagesResolver] ...', () => {
         { userIds: [users[1].user.id] }
       );
 
+      const member1 = await membersService.findOne({
+        where: { chatId: dialog.id, userId: users[0].user.id }
+      });
+
+      const member2 = await membersService.findOne({
+        where: { chatId: dialog.id, userId: users[1].user.id }
+      });
+
       for (let i = 0; i < 5; ++i) {
         messages.push(
-          await messagesService.create(users[0].user.id, dialog.id, {
+          await messagesService.create(member1.id, {
             text: Faker.random.words()
           })
         );
         messages.push(
-          await messagesService.create(users[1].user.id, dialog.id, {
+          await messagesService.create(member2.id, {
             text: Faker.random.words()
           })
         );

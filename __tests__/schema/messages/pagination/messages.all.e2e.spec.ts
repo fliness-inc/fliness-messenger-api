@@ -5,9 +5,7 @@ import cookieParser from 'cookie-parser';
 import { getConnection, Connection } from 'typeorm';
 import User from '@db/entities/user.entity';
 import { AppModule } from '@src/app.module';
-import request from 'supertest';
-import * as uuid from 'uuid';
-import Faker from 'faker';
+import faker from 'faker';
 import { ChatTypeEnum } from '@schema/models/chats/chats.dto';
 import { MemberRoleEnum } from '@schema/models/members/members.dto';
 import UsersService from '@schema/models/users/users.service';
@@ -17,7 +15,7 @@ import {
   MemberRoleSeeder,
   MemberRoleFactory
 } from '@db/seeds/member-role.seeder';
-import MembersService from '@schema/models/members/members.service';
+import { MembersService } from '@schema/models/members/members.service';
 import Chat from '@db/entities/chat.entity';
 import ChatsService from '@schema/models/chats/chats.service';
 import MessagesService from '@schema/models/messages/messages.service';
@@ -77,8 +75,8 @@ describe('[E2E] [MessagesResolver] ...', () => {
   describe('[Text messages] ...', () => {
     let usersService: UsersService;
     let chatsService: ChatsService;
-    let membersService: MembersService;
     let messagesService: MessagesService;
+    let membersService: MembersService;
 
     const users: { user: User; tokens: Tokens }[] = [];
     let dialog: Chat;
@@ -87,16 +85,16 @@ describe('[E2E] [MessagesResolver] ...', () => {
     beforeAll(async () => {
       usersService = app.get<UsersService>(UsersService);
       chatsService = app.get<ChatsService>(ChatsService);
-      membersService = app.get<MembersService>(MembersService);
       messagesService = app.get<MessagesService>(MessagesService);
+      membersService = app.get<MembersService>(MembersService);
 
       for (let i = 0; i < 3; ++i) {
         const payload = {
-          email: Faker.internet.email(),
-          password: Faker.random.word()
+          email: faker.internet.email(),
+          password: faker.random.word()
         };
         const user = await usersService.create({
-          name: Faker.internet.userName(),
+          name: faker.internet.userName(),
           ...payload
         });
         const res = await GraphQLTestRequest.graphql({
@@ -128,15 +126,23 @@ describe('[E2E] [MessagesResolver] ...', () => {
         { userIds: [users[1].user.id] }
       );
 
+      const member1 = await membersService.findOne({
+        where: { chatId: dialog.id, userId: users[0].user.id }
+      });
+
+      const member2 = await membersService.findOne({
+        where: { chatId: dialog.id, userId: users[1].user.id }
+      });
+
       for (let i = 0; i < 10; ++i) {
         messages.push(
-          await messagesService.create(users[0].user.id, dialog.id, {
-            text: Faker.random.words()
+          await messagesService.create(member1.id, {
+            text: faker.random.words()
           })
         );
         messages.push(
-          await messagesService.create(users[1].user.id, dialog.id, {
-            text: Faker.random.words()
+          await messagesService.create(member2.id, {
+            text: faker.random.words()
           })
         );
       }
@@ -148,7 +154,7 @@ describe('[E2E] [MessagesResolver] ...', () => {
 
     describe('[Getting] [Pagination] [All] ...', () => {
       it('should return all messages of the chat', async () => {
-        const [user1, user2] = users;
+        const [user1] = users;
 
         const key = MessagePaginationField.ID;
         const res = await GraphQLTestRequest.graphql({
@@ -236,7 +242,7 @@ describe('[E2E] [MessagesResolver] ...', () => {
             Authorization: `Bearer ${user1.tokens.accessToken}`
           },
           query: `
-            query GetMessages($chatsFilter: ChatsFilter!, sort: Sort!) {
+            query($chatsFilter: ChatsFilter!, $sort: Sort!) {
               me {
                 chats(filter: $chatsFilter) {
                   edges {
