@@ -20,6 +20,9 @@ export class Message extends IModel {
 
   @Field(() => DateTime)
   public readonly updatedAt: Date;
+
+  @Field(() => Boolean)
+  public readonly unreaded?: boolean;
 }
 
 export default Message;

@@ -166,7 +166,30 @@ export class MessagesService {
     );
   }
 
-  public async getViews(memberId: string): Promise<number> {
+  public async getView(messageId: string, memberId: string) {
+    const member = await this.membersService.findOne({
+      select: ['id'],
+      where: { id: memberId }
+    });
+
+    if (!member) throw new Error('The member was not found');
+
+    const message = await this.findOne({
+      select: ['id'],
+      where: { id: messageId }
+    });
+
+    if (!message) throw new Error('The message was not found');
+
+    return this.viewMessagesRepository.findOne({
+      where: {
+        memberId: member.id,
+        messageId: message.id
+      }
+    });
+  }
+
+  public async getNumberViews(memberId: string): Promise<number> {
     const member = await this.membersService.findOne({
       where: { id: memberId },
       join: {

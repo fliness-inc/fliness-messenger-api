@@ -9,17 +9,19 @@ import { ViewMessage as ViewMessageEntity } from '@db/entities/views-messages.en
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PubSubModule } from '@schema/pub-sub/pub-sub.module';
 import { MessagesSubsResolver } from './messages.subs.resolver';
+import { MessagesQueryResolver } from './messages.query.resolver';
 
 @Module({
   imports: [
     MembersModule,
-    ChatsModule,
+    forwardRef(() => ChatsModule),
     TypeOrmModule.forFeature([MessageEntity, ViewMessageEntity]),
     PubSubModule
   ],
   providers: [
     MessagesService,
     MessagesModelResolver,
+    MessagesQueryResolver,
     MessagesMutationResolver,
     MessagesSubsResolver
   ],

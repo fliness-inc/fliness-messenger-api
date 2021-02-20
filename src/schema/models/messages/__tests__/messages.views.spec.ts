@@ -6,8 +6,11 @@ import UsersService from '@schema/models/users/users.service';
 import ChatsService from '@schema/models/chats/chats.service';
 import { Member as MemberEntity } from '@db/entities/member.entity';
 import { ChatTypeEnum } from '@schema/models/chats/chats.dto';
-import { initTestDatabase } from '@tools/test-db-connection';
-import { Connection, getConnection } from 'typeorm';
+import {
+  initTestDatabase,
+  createTestDatabase
+} from '@tools/test-db-connection';
+import { Connection } from 'typeorm';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Message as MessageEntity } from '@db/entities/message.entity';
 import { ViewMessage as ViewMessageEntity } from '@db/entities/views-messages.entity';
@@ -41,8 +44,7 @@ describe('[Message Views Module] ...', () => {
       providers: [MessagesService, MembersService, UsersService, ChatsService]
     }).compile();
 
-    connection = getConnection();
-    await connection.synchronize(true);
+    connection = await createTestDatabase();
     await initTestDatabase();
 
     usersService = moduleRef.get<UsersService>(UsersService);
@@ -105,7 +107,7 @@ describe('[Message Views Module] ...', () => {
         text: facker.random.words()
       });
 
-      expect(await messagesService.getViews(member1.id)).toEqual(3);
+      expect(await messagesService.getNumberViews(member1.id)).toEqual(3);
     });
 
     it('should return views with viewing some messages', async () => {
@@ -125,7 +127,31 @@ describe('[Message Views Module] ...', () => {
 
       await messagesService.setView(message.id, member1.id);
 
-      expect(await messagesService.getViews(member1.id)).toEqual(2);
+      expect(await messagesService.getNumberViews(member1.id)).toEqual(2);
+    });
+
+    it('should return status "unreaded"', async () => {
+      await messagesService.create(member1.id, {
+        text: facker.random.words()
+      });
+
+      const message = await messagesService.create(member2.id, {
+        text: facker.random.words()
+      });
+
+      expect(
+        await messagesService.getView(message.id, member2.id)
+      ).toBeDefined(); // creator
+
+      expect(
+        await messagesService.getView(message.id, member1.id)
+      ).toBeUndefined(); // companion
+
+      await messagesService.setView(message.id, member1.id);
+
+      expect(
+        await messagesService.getView(message.id, member1.id)
+      ).toBeDefined(); // companion
     });
   });
 });

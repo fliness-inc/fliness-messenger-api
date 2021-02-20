@@ -17,7 +17,7 @@ import { ChatsFilter } from './chats.filtering';
 import { GraphqlFilter, GraphqlFilterArg } from '@lib/filter/filter';
 
 @Resolver(() => MeQuery)
-export class ChatsModelResolver {
+export class ChatsQueryResolver {
   @Field(() => ChatsConnection)
   public readonly chats: ChatsConnection;
 
@@ -54,4 +54,4 @@ export class ChatsModelResolver {
   }
 }
 
-export default ChatsModelResolver;
+export default ChatsQueryResolver;

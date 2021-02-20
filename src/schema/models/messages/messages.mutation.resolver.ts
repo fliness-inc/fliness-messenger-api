@@ -1,5 +1,5 @@
 import { Inject } from '@nestjs/common';
-import { ResolveField, Resolver, Args } from '@nestjs/graphql';
+import { ResolveField, Resolver, Args, Parent } from '@nestjs/graphql';
 import MessagesService from '@schema/models/messages/messages.service';
 import { MessageCreateDTO } from '@schema/models/messages/messages.dto';
 import { ChatRoles, MemberRoleEnum } from '@schema/models/chats/chats.guard';
@@ -12,6 +12,7 @@ import { PubSubEngine } from 'graphql-subscriptions';
 import { MessageEvents } from './messages.dto';
 import { MembersService } from '@schema/models/members/members.service';
 import { NotFoundError } from '@src/errors';
+import { Not } from 'typeorm';
 
 @ChatRoles(MemberRoleEnum.MEMBER)
 @Resolver(() => MessagesMutation)
@@ -100,6 +101,40 @@ export class MessagesMutationResolver {
     });
 
     return message;
+  }
+
+  @ResolveField(() => Boolean, { name: 'setView' })
+  public async setView(
+    @CurrentUser() user,
+    @Args('messageId', { type: () => UUID }) messageId: string
+  ): Promise<boolean> {
+    const message = await this.messagesService.findOne({
+      select: ['id', 'memberId'],
+      where: { id: messageId }
+    });
+
+    if (!message) throw new Error(`The message was not found`);
+
+    const creatorMember = await this.membersService.findOne({
+      select: ['chatId'],
+      where: { id: message.memberId }
+    });
+
+    const currentMember = await this.membersService.findOne({
+      select: ['id'],
+      where: {
+        id: Not(message.memberId),
+        chatId: creatorMember.chatId,
+        userId: user.id
+      }
+    });
+
+    if (!currentMember) throw new Error(`The current member was not found`);
+
+    return (
+      (await this.messagesService.setView(message.id, currentMember.id)) !==
+      undefined
+    );
   }
 }
 

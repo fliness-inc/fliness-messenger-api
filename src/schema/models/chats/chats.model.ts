@@ -20,6 +20,9 @@ export class Chat extends IModel {
 
   @Field(() => DateTime)
   public readonly createdAt: Date;
+
+  @Field(() => Number)
+  public readonly numUnreaded?: number;
 }
 
 export default Chat;
