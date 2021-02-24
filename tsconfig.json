@@ -13,11 +13,7 @@
     "baseUrl": "./",
     "incremental": true,
     "paths": {
-      "@/*": ["*"],
-      "@src/*": ["src/*"],
-      "@db/*": ["src/db/*"],
-      "@modules/*": ["src/modules/*"],
-      "@tools/*": ["src/tools/*"]
+      "~/*": ["src/*"]
     }
   }
 }

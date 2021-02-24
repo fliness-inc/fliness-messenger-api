@@ -3,8 +3,8 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UserEntity } from '@db/entities/user.entity';
-import { UsersService } from '@modules/users/users.service';
+import { UserEntity } from '~/db/entities/user.entity';
+import { UsersService } from '~/modules/users/users.service';
 import * as bcrypt from 'bcryptjs';
 
 @Injectable()
