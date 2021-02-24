@@ -3,7 +3,7 @@ import IEntity from './entity.interface';
 import UserEntity from './user.entity';
 
 @Entity({ name: 'tokens' })
-export class Token extends IEntity {
+export class TokenEntity extends IEntity {
   @Column({ type: 'uuid', name: 'user_id' })
   public userId: string;
 
@@ -19,9 +19,9 @@ export class Token extends IEntity {
   @ManyToOne(type => UserEntity)
   @JoinColumn({
     name: 'user_id',
-    referencedColumnName: 'id'
+    referencedColumnName: 'id',
   })
   public user: UserEntity;
 }
 
-export default Token;
+export default TokenEntity;

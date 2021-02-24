@@ -1,10 +1,10 @@
 import { Column, Entity, BeforeInsert, OneToMany } from 'typeorm';
-import IEntity from './entity.interface';
-import bcrypt from 'bcryptjs';
-import TokenEnity from './token.entity';
+import { IEntity } from './entity.interface';
+import { TokenEntity } from './token.entity';
+import * as bcrypt from 'bcryptjs';
 
 @Entity({ name: 'users' })
-export class User extends IEntity {
+export class UserEntity extends IEntity {
   @Column({ length: 255 })
   public name: string;
 
@@ -17,11 +17,8 @@ export class User extends IEntity {
   @Column({ length: 2048, nullable: true })
   public avatarURL: string;
 
-  @OneToMany(
-    type => TokenEnity,
-    token => token.user
-  )
-  public tokens: TokenEnity[];
+  @OneToMany(type => TokenEntity, token => token.user)
+  public tokens: TokenEntity[];
 
   @BeforeInsert()
   private encodePassword() {
@@ -30,4 +27,4 @@ export class User extends IEntity {
   }
 }
 
-export default User;
+export default UserEntity;

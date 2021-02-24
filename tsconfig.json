@@ -2,17 +2,13 @@
   "compilerOptions": {
     "module": "commonjs",
     "declaration": true,
-    "moduleResolution": "node",
-    "allowJs": true,
     "removeComments": true,
-    "esModuleInterop": true,
-    "types": ["node", "jest"],
-    "typeRoots": ["node_modules/@types"],
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "target": "es2017",
     "sourceMap": true,
+    "allowJs": true,
     "outDir": "./dist",
     "baseUrl": "./",
     "incremental": true,
@@ -20,8 +16,7 @@
       "@/*": ["*"],
       "@src/*": ["src/*"],
       "@db/*": ["src/db/*"],
-      "@schema/*": ["src/schema/*"],
-      "@lib/*": ["src/lib/*"],
+      "@modules/*": ["src/modules/*"],
       "@tools/*": ["src/tools/*"]
     }
   }

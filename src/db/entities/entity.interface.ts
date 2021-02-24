@@ -2,7 +2,7 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-  Column
+  Column,
 } from 'typeorm';
 
 export abstract class IEntity {
