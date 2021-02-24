@@ -1,5 +1,5 @@
 import { Inject } from '@nestjs/common';
-import { ResolveField, Resolver, Args, Parent } from '@nestjs/graphql';
+import { ResolveField, Resolver, Args, Int } from '@nestjs/graphql';
 import MessagesService from '@schema/models/messages/messages.service';
 import { MessageCreateDTO } from '@schema/models/messages/messages.dto';
 import { ChatRoles, MemberRoleEnum } from '@schema/models/chats/chats.guard';
@@ -135,6 +135,24 @@ export class MessagesMutationResolver {
       (await this.messagesService.setView(message.id, currentMember.id)) !==
       undefined
     );
+  }
+
+  @ResolveField(() => Int, { name: 'setAllViews' })
+  public async setAllViews(
+    @CurrentUser() user,
+    @Args('chatId', { type: () => UUID }) chatId: string
+  ): Promise<number> {
+    const member = await this.membersService.findOne({
+      select: ['id'],
+      where: {
+        chatId,
+        userId: user.id
+      }
+    });
+
+    if (!member) throw new Error(`The member was not found`);
+
+    return this.messagesService.setAllViews(member.id);
   }
 }
 

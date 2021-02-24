@@ -27,12 +27,12 @@ describe('[E2E] [AuthModule] ...', () => {
     app.use(cookieParser());
 
     connection = getConnection();
+    await connection.synchronize(true);
 
     await app.init();
-    await connection.synchronize(true);
   });
 
-  afterEach(async () => {
+  beforeEach(async () => {
     await connection.query('TRUNCATE users, tokens CASCADE');
   });
 

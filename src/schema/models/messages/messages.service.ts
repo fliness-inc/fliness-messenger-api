@@ -166,6 +166,51 @@ export class MessagesService {
     );
   }
 
+  public async setAllViews(memberId: string): Promise<number> {
+    const member = await this.membersService.findOne({
+      where: { id: memberId }
+    });
+
+    if (!member) throw new Error('The member was not found');
+
+    const messages = await this.messageRepository
+      .createQueryBuilder('messages')
+      .select('messages.id', 'id')
+      .setParameter('memberId', member.id)
+      .setParameter('chatId', member.chatId)
+      .leftJoin('messages.member', 'member')
+      .leftJoin('member.chat', 'chat')
+      .where(() => {
+        const query = this.viewMessagesRepository
+          .createQueryBuilder('views')
+          .select('views.message_id')
+          .leftJoin('views.member', 'member')
+          .leftJoin('member.chat', 'chat')
+          .where('views.member_id = :memberId')
+          .andWhere('member.chat_id = :chatId')
+          .getQuery();
+
+        return `messages.id NOT IN (${query})`;
+      })
+      .andWhere('member.chat_id = :chatId')
+      .getRawMany();
+
+    const views = [];
+
+    messages.forEach(({ id }) =>
+      views.push({ memberId: member.id, messageId: id })
+    );
+
+    await this.viewMessagesRepository
+      .createQueryBuilder()
+      .insert()
+      .into(ViewMessageEntity)
+      .values(views)
+      .execute();
+
+    return messages.length;
+  }
+
   public async getView(messageId: string, memberId: string) {
     const member = await this.membersService.findOne({
       select: ['id'],
@@ -189,15 +234,9 @@ export class MessagesService {
     });
   }
 
-  public async getNumberViews(memberId: string): Promise<number> {
+  public async getNumberNotViewed(memberId: string): Promise<number> {
     const member = await this.membersService.findOne({
-      where: { id: memberId },
-      join: {
-        alias: 'members',
-        leftJoin: {
-          chat: 'members.chat'
-        }
-      }
+      where: { id: memberId }
     });
 
     if (!member) throw new Error('The member was not found');
@@ -206,18 +245,21 @@ export class MessagesService {
       .createQueryBuilder('messages')
       .setParameter('memberId', member.id)
       .setParameter('chatId', member.chatId)
+      .leftJoin('messages.member', 'member')
+      .leftJoin('member.chat', 'chat')
       .where(() => {
         const query = this.viewMessagesRepository
           .createQueryBuilder('views')
           .select('views.message_id')
           .leftJoin('views.member', 'member')
           .leftJoin('member.chat', 'chat')
-          .where('member.id = :memberId')
+          .where('views.member_id = :memberId')
           .andWhere('member.chat_id = :chatId')
           .getQuery();
 
         return `messages.id NOT IN (${query})`;
       })
+      .andWhere('member.chat_id = :chatId')
       .getCount();
   }
 }

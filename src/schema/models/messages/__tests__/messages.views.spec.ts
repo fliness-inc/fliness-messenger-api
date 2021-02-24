@@ -107,7 +107,7 @@ describe('[Message Views Module] ...', () => {
         text: facker.random.words()
       });
 
-      expect(await messagesService.getNumberViews(member1.id)).toEqual(3);
+      expect(await messagesService.getNumberNotViewed(member1.id)).toEqual(3);
     });
 
     it('should return views with viewing some messages', async () => {
@@ -127,7 +127,7 @@ describe('[Message Views Module] ...', () => {
 
       await messagesService.setView(message.id, member1.id);
 
-      expect(await messagesService.getNumberViews(member1.id)).toEqual(2);
+      expect(await messagesService.getNumberNotViewed(member1.id)).toEqual(2);
     });
 
     it('should return status "unreaded"', async () => {
@@ -152,6 +152,27 @@ describe('[Message Views Module] ...', () => {
       expect(
         await messagesService.getView(message.id, member1.id)
       ).toBeDefined(); // companion
+    });
+
+    it('should set all views', async () => {
+      await messagesService.create(member1.id, {
+        text: facker.random.words()
+      });
+
+      await messagesService.create(member2.id, {
+        text: facker.random.words()
+      });
+      await messagesService.create(member2.id, {
+        text: facker.random.words()
+      });
+      await messagesService.create(member2.id, {
+        text: facker.random.words()
+      });
+
+      expect(await messagesService.viewMessagesRepository.count()).toEqual(4);
+      expect(await messagesService.setAllViews(member1.id)).toEqual(3);
+      expect(await messagesService.viewMessagesRepository.count()).toEqual(7);
+      expect(await messagesService.getNumberNotViewed(member1.id)).toEqual(0);
     });
   });
 });

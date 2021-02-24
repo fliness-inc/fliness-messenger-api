@@ -19,12 +19,13 @@ export class ChatsModelResolver {
     @Parent() chat: ChatModel
   ): Promise<number> {
     const member = await this.membersService.findOne({
+      select: ['id'],
       where: { chatId: chat.id, userId: user.id }
     });
 
     if (!member) throw new Error(`The member was not found`);
 
-    return await this.messagesService.getNumberViews(member.id);
+    return await this.messagesService.getNumberNotViewed(member.id);
   }
 }
 

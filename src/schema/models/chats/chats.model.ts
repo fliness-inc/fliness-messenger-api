@@ -1,4 +1,4 @@
-import { ObjectType, Field, registerEnumType } from '@nestjs/graphql';
+import { ObjectType, Field, registerEnumType, Int } from '@nestjs/graphql';
 import IModel from '@schema/models/model.interface';
 import { ChatTypeEnum } from '@schema/models/chats/chats.dto';
 import DateTime from '@schema/types/datetime.type';
@@ -21,7 +21,7 @@ export class Chat extends IModel {
   @Field(() => DateTime)
   public readonly createdAt: Date;
 
-  @Field(() => Number)
+  @Field(() => Int)
   public readonly numUnreaded?: number;
 }
 
