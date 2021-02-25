@@ -41,6 +41,7 @@
     "@nestjs/platform-express": "^7.5.1",
     "@nestjs/platform-socket.io": "^7.6.13",
     "@nestjs/platform-ws": "^7.6.13",
+    "@nestjs/serve-static": "^2.1.4",
     "@nestjs/typeorm": "^7.1.5",
     "@nestjs/websockets": "^7.6.13",
     "bcryptjs": "^2.4.3",

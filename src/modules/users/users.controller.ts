@@ -9,7 +9,7 @@ export class UsersController {
 
   @AuthGuard()
   @Get('/me')
-  public async me(@CurrentUser() user) {
+  public async getMe(@CurrentUser() user) {
     const userFound = await this.usersService.findOne({
       select: ['id', 'email', 'name', 'createdAt', 'avatarURL'],
       where: { id: user.id },
@@ -18,6 +18,13 @@ export class UsersController {
     if (!userFound) throw new NotFoundException('The user was not found');
 
     return userFound;
+  }
+
+  @Get('/users')
+  public async getUsers() {
+    return this.usersService.find({
+      select: ['id', 'email', 'name', 'createdAt', 'avatarURL'],
+    });
   }
 }
 

@@ -52,7 +52,7 @@ export class AuthController {
   }
 
   @Post('refresh-tokens')
-  public async refresh(@Req() req: Request): Promise<Tokens> {
+  public async refreshTokens(@Req() req: Request): Promise<Tokens> {
     const refreshToken = req.cookies['jwt-token'];
     const userAgent = req.headers['user-agent'];
 

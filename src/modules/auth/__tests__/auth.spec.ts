@@ -1,5 +1,4 @@
 import { Test } from '@nestjs/testing';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { INestApplication } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Connection, getConnection } from 'typeorm';
@@ -8,7 +7,6 @@ import * as request from 'supertest';
 import * as uuid from 'uuid';
 import * as dotenv from 'dotenv';
 import * as faker from 'faker';
-import { AuthModule } from '../auth.module';
 import { SignInDTO, SignUpDTO } from '../auth.dto';
 import { UsersService } from '~/modules/users/users.service';
 import { AppModule } from '~/app.module';
