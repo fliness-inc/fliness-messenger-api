@@ -13,10 +13,13 @@ import { Response } from 'express';
 export class DataFormatInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
-      map(d => ({
-        statusCode: 200,
-        data: d,
-      }))
+      map(data => {
+        const statusCode = context.switchToHttp().getResponse().statusCode;
+        return {
+          statusCode,
+          data,
+        };
+      })
     );
   }
 }

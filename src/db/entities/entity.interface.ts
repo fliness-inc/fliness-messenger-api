@@ -4,6 +4,7 @@ import {
   UpdateDateColumn,
   Column,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 
 export abstract class IEntity {
   @PrimaryGeneratedColumn('uuid')
@@ -15,6 +16,7 @@ export abstract class IEntity {
   @UpdateDateColumn({ name: 'updated_at' })
   public updatedAt: Date;
 
+  @Exclude()
   @Column({ name: 'is_deleted', default: false })
   public isDeleted: boolean;
 }

@@ -16,8 +16,13 @@ export class DialogStrategy implements IChat {
 
   public async create(
     userId: string,
-    { title, description, userIds = [] }: CreateChatOptions
+    options: CreateChatOptions
   ): Promise<ChatEntity> {
+    const { title, description, userIds = [] } = options;
+
+    if (!Array.isArray(userIds))
+      throw new BadRequestException(`The userIds must be an array`);
+
     const memberIds = userIds.filter(id => id !== userId);
 
     if (memberIds.length !== 1)
@@ -28,6 +33,7 @@ export class DialogStrategy implements IChat {
     const memberId = memberIds[0];
 
     const chatType = await this.chatTypesRepository.findOne({
+      select: ['id'],
       where: { name: ChatTypeEnum.DIALOG },
     });
 
@@ -52,7 +58,7 @@ export class DialogStrategy implements IChat {
 
     const newChat = await this.chatsRepository.save(
       this.chatsRepository.create({
-        type: chatType,
+        typeId: chatType.id,
         title,
         description,
         memberLimit: 2,

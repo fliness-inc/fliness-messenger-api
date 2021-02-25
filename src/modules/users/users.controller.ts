@@ -1,30 +1,23 @@
-import {
-  Controller,
-  Get,
-  NotFoundException,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
-import { JwtAuthGuard } from '@modules/auth/auth.guard';
+import { Controller, Get, NotFoundException } from '@nestjs/common';
+import { AuthGuard } from '~/modules/auth/auth.guard';
+import CurrentUser from '../auth/current-user';
 import UsersService from './users.service';
-import { DataFormat } from '@tools/data.interceptor';
 
 @Controller()
 export class UsersController {
   public constructor(private readonly usersService: UsersService) {}
 
-  @UseGuards(JwtAuthGuard)
-  @DataFormat()
+  @AuthGuard()
   @Get('/me')
-  public async me(@Req() req) {
-    const user = await this.usersService.findOne({
+  public async me(@CurrentUser() user) {
+    const userFound = await this.usersService.findOne({
       select: ['id', 'email', 'name', 'createdAt', 'avatarURL'],
-      where: { id: req.user.id },
+      where: { id: user.id },
     });
 
-    if (!user) throw new NotFoundException('The user was not found');
+    if (!userFound) throw new NotFoundException('The user was not found');
 
-    return user;
+    return userFound;
   }
 }
 

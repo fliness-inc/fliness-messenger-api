@@ -20,7 +20,7 @@ import { DialogStrategy } from '~/modules/chats/strategies/dialogs';
 
 @Injectable()
 export class ChatsService {
-  public readonly chatsModels = new Map<ChatTypeEnum, IChat>();
+  private readonly chatStrategies = new Map<ChatTypeEnum, IChat>();
 
   public constructor(
     @InjectRepository(ChatEntity)
@@ -31,7 +31,7 @@ export class ChatsService {
     @Inject(forwardRef(() => MembersService))
     private readonly membersService: MembersService
   ) {
-    this.chatsModels.set(
+    this.chatStrategies.set(
       ChatTypeEnum.DIALOG,
       new DialogStrategy(
         this.chatsRepository,
@@ -54,18 +54,20 @@ export class ChatsService {
     type: ChatTypeEnum,
     options: CreateChatOptions = {}
   ): Promise<ChatEntity> {
-    const user = await this.usersService.findOne({ where: { id: userId } });
+    const user = await this.usersService.findOne({
+      select: ['id'],
+      where: { id: userId },
+    });
 
     if (!user)
-      throw (
-        (new BadRequestException(),
-        `The user was not found with the id: ${userId}`)
+      throw new BadRequestException(
+        `The user was not found with the id: ${userId}`
       );
 
-    const resolver = this.chatsModels.get(type);
+    const resolver = this.chatStrategies.get(type);
 
     if (!resolver)
-      throw (new BadRequestException(), `The chat type was not found: ${type}`);
+      throw new BadRequestException(`The resolver was not found: ${type}`);
 
     return resolver.create(userId, options);
   }
@@ -119,6 +121,15 @@ export class ChatsService {
   ): Promise<ChatEntity[]> {
     const chats = await this.chatsRepository.findByIds(ids, options);
     return ids.map(id => chats.find(u => u.id === id));
+  }
+
+  public async createChatType(name: ChatTypeEnum) {
+    console.warn('Unsafe method');
+    return this.chatTypesRepository.save(
+      this.chatTypesRepository.create({
+        name,
+      })
+    );
   }
 }
 

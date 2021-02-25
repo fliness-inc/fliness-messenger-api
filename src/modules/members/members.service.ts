@@ -10,7 +10,7 @@ import { ChatsService } from '~/modules/chats/chats.service';
 import { MemberEntity } from '~/db/entities/member.entity';
 import { MemberRoleEntity } from '~/db/entities/member-role.entity';
 import { MemberRoleEnum } from '~/modules/members/members.dto';
-import { FindManyOptions, FindOneOptions, getRepository } from 'typeorm';
+import { FindManyOptions, FindOneOptions } from 'typeorm';
 import { FindManyOptionsFunc, FindOneOptionsFunc } from '~/tools/options';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -20,6 +20,8 @@ export class MembersService {
   public constructor(
     @InjectRepository(MemberEntity)
     public readonly membersRespository: Repository<MemberEntity>,
+    @InjectRepository(MemberRoleEntity)
+    public readonly memberRolesRespository: Repository<MemberRoleEntity>,
     private readonly usersService: UsersService,
     @Inject(forwardRef(() => ChatsService))
     private readonly chatsService: ChatsService
@@ -48,7 +50,7 @@ export class MembersService {
         `The chat was not found with the id: ${chatId}`
       );
 
-    const countMember = await getRepository(MemberEntity).count({
+    const countMember = await this.membersRespository.count({
       where: {
         chatId: chat.id,
         isDeleted: false,
@@ -60,7 +62,7 @@ export class MembersService {
         `The chat already has maximum number of members`
       );
 
-    const memberRole = await getRepository(MemberRoleEntity).findOne({
+    const memberRole = await this.memberRolesRespository.findOne({
       where: { name: roleName, isDeleted: false },
     });
 
@@ -143,7 +145,7 @@ export class MembersService {
   ): Promise<MemberEntity[]> {
     const alias = 'members';
     const op = typeof options === 'function' ? options(alias) : options;
-    return getRepository(MemberEntity).find(this.prepareQuery(alias, op));
+    return this.membersRespository.find(this.prepareQuery(alias, op));
   }
 
   public async findOne(
@@ -151,7 +153,17 @@ export class MembersService {
   ): Promise<MemberEntity | undefined> {
     const alias = 'members';
     const op = typeof options === 'function' ? options(alias) : options;
-    return getRepository(MemberEntity).findOne(this.prepareQuery(alias, op));
+    return this.membersRespository.findOne(this.prepareQuery(alias, op));
+  }
+
+  public async createMemberRole(name: MemberRoleEnum, weight: number) {
+    console.warn('Unsafe method');
+    return this.memberRolesRespository.save(
+      this.memberRolesRespository.create({
+        name,
+        weight,
+      })
+    );
   }
 }
 

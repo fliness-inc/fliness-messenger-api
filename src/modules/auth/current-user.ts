@@ -1,10 +1,7 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 
 export const CurrentUser = createParamDecorator(
-  (data: unknown, context: ExecutionContext) => {
-    /* const ctx = GqlExecutionContext.create(context); */
-    return /*  ctx.getContext().req.user */;
-  }
+  (data: unknown, ctx: ExecutionContext) => ctx.getArgByIndex(0).user
 );
 
 export default CurrentUser;

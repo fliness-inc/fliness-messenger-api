@@ -3,14 +3,16 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { INestApplication } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Connection, getConnection } from 'typeorm';
+import * as cookieParser from 'cookie-parser';
 import * as request from 'supertest';
 import * as uuid from 'uuid';
-import * as cookieParser from 'cookie-parser';
 import * as dotenv from 'dotenv';
 import * as faker from 'faker';
 import { AuthModule } from '../auth.module';
 import { SignInDTO, SignUpDTO } from '../auth.dto';
-import { UsersService } from '@modules/users/users.service';
+import { UsersService } from '~/modules/users/users.service';
+import { AppModule } from '~/app.module';
+import { DataFormatInterceptor } from '~/tools/data.interceptor';
 
 dotenv.config();
 
@@ -24,11 +26,12 @@ describe('[IT] [AuthModule] ...', () => {
 
   beforeAll(async () => {
     const moduleFixture = await Test.createTestingModule({
-      imports: [TypeOrmModule.forRoot(), AuthModule],
+      imports: [AppModule],
     }).compile();
 
     app = moduleFixture.createNestApplication();
     app.use(cookieParser());
+    app.useGlobalInterceptors(new DataFormatInterceptor());
     await app.init();
 
     usersService = app.get<UsersService>(UsersService);
@@ -66,7 +69,7 @@ describe('[IT] [AuthModule] ...', () => {
         })
         .send(payload);
 
-      expect(res.status).toEqual(200);
+      expect(res.status).toEqual(201);
 
       expect(res.headers).toHaveProperty('set-cookie');
       expect(res.headers['set-cookie']).toHaveLength(1);
@@ -88,7 +91,7 @@ describe('[IT] [AuthModule] ...', () => {
       expect(httpOnly).toStrictEqual('HttpOnly');
 
       expect(res.body).toStrictEqual({
-        statusCode: 200,
+        statusCode: 201,
         data: {
           accessToken: res.body.data.accessToken,
           refreshToken: jwtToken,
@@ -248,7 +251,7 @@ describe('[IT] [AuthModule] ...', () => {
         })
         .send(payload);
 
-      expect(signUpResponse.status).toEqual(200);
+      expect(signUpResponse.status).toEqual(201);
 
       const meResponse = await request(app.getHttpServer())
         .get('/me')
@@ -302,7 +305,7 @@ describe('[IT] [AuthModule] ...', () => {
         })
         .send(payload);
 
-      expect(resreshResponse.status).toEqual(200);
+      expect(resreshResponse.status).toEqual(201);
       expect(resreshResponse.headers).toHaveProperty('set-cookie');
       expect(resreshResponse.headers['set-cookie']).toHaveLength(1);
 
@@ -325,7 +328,7 @@ describe('[IT] [AuthModule] ...', () => {
       expect(httpOnly).toStrictEqual('HttpOnly');
 
       expect(resreshResponse.body).toStrictEqual({
-        statusCode: 200,
+        statusCode: 201,
         data: {
           accessToken: resreshResponse.body.data.accessToken,
           refreshToken: jwtToken,
@@ -429,9 +432,9 @@ describe('[IT] [AuthModule] ...', () => {
         })
         .send(payload);
 
-      expect(signOutResponse.status).toEqual(200);
+      expect(signOutResponse.status).toEqual(201);
       expect(signOutResponse.body).toStrictEqual({
-        statusCode: 200,
+        statusCode: 201,
       });
 
       const resreshResponse = await request(app.getHttpServer())

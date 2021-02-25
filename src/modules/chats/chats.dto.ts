@@ -3,3 +3,8 @@ export enum ChatTypeEnum {
   GROUP = 'GROUP',
   CHANNEL = 'CHANNEL',
 }
+
+export interface ChatCreateDTO {
+  type: ChatTypeEnum;
+  userIds: string[];
+}

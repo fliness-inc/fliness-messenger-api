@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { TokenEntity } from '@db/entities/token.entity';
+import { TokenEntity } from '~/db/entities/token.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as uuid from 'uuid';
 import { Repository } from 'typeorm';
