@@ -34,6 +34,8 @@ export class UserEntity extends IEntity {
 
   @AfterLoad()
   getAvatarURL() {
+    if (!this.avatarURL) return this.avatarURL;
+    
     this.avatarURL =
       `http://${process.env.HOST}:${process.env.PORT}/img/` + this.avatarURL;
   }
