@@ -1,4 +1,11 @@
-import { Controller, Get, NotFoundException, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Query,
+} from '@nestjs/common';
+import { In } from 'typeorm';
 import UserEntity from '~/db/entities/user.entity';
 import { AuthGuard } from '~/modules/auth/auth.guard';
 import CurrentUser from '../auth/current-user';
@@ -32,8 +39,15 @@ export class UsersController {
   }
 
   @Get('/users')
-  public async getUsers() {
-    return this.usersService.find({});
+  public async getUsers(@Query('ids') ids: string) {
+    if (ids) {
+      const userIds = ids.split(',');
+      return this.usersService.find({
+        where: { id: Array.isArray(userIds) ? In(userIds) : userIds },
+      });
+    }
+
+    return this.usersService.find();
   }
 }
 

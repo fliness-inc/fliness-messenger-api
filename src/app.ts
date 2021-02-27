@@ -23,7 +23,7 @@ export async function initApp(
     new DataFormatInterceptor(),
     new ClassSerializerInterceptor(app.get(Reflector))
   );
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
   if (usePrefix) app.setGlobalPrefix('/v1/api');
 
