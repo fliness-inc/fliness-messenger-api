@@ -6,8 +6,8 @@ import { AuthGuard } from '~/modules/auth/auth.guard';
 import ChatEntity from '~/db/entities/chat.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import ChatTypeEntity from '~/db/entities/chat-type.entity';
 
-@AuthGuard()
 @Controller()
 export class ChatsController {
   public constructor(
@@ -16,6 +16,7 @@ export class ChatsController {
     private readonly chatsService: ChatsService
   ) {}
 
+  @AuthGuard()
   @Get('/me/chats')
   public async getChats(@CurrentUser() user): Promise<ChatEntity[]> {
     return this.chatsRepository
@@ -25,6 +26,12 @@ export class ChatsController {
       .getMany();
   }
 
+  @Get('/chats/types')
+  public async getChatTypes(): Promise<ChatTypeEntity[]> {
+    return this.chatsService.getChatTypes();
+  }
+
+  @AuthGuard()
   @Post('/chats')
   public createChat(@CurrentUser() user, @Body() payload: ChatCreateDTO) {
     const { type, userIds } = payload;
@@ -34,6 +41,7 @@ export class ChatsController {
     });
   }
 
+  @AuthGuard()
   @Delete('/chats/:chatId')
   public async deleteChat(@Param('chatId') chatId: string) {
     await this.chatsService.remove(chatId);

@@ -1,4 +1,5 @@
-import { Controller, Get, NotFoundException } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param } from '@nestjs/common';
+import UserEntity from '~/db/entities/user.entity';
 import { AuthGuard } from '~/modules/auth/auth.guard';
 import CurrentUser from '../auth/current-user';
 import UsersService from './users.service';
@@ -11,7 +12,6 @@ export class UsersController {
   @Get('/me')
   public async getMe(@CurrentUser() user) {
     const userFound = await this.usersService.findOne({
-      select: ['id', 'email', 'name', 'createdAt', 'avatarURL'],
       where: { id: user.id },
     });
 
@@ -20,11 +20,20 @@ export class UsersController {
     return userFound;
   }
 
+  @Get('/users/:userId')
+  public async getUser(@Param('userId') userId: string): Promise<UserEntity> {
+    const user: UserEntity = await this.usersService.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) throw new NotFoundException('The user was not found');
+
+    return user;
+  }
+
   @Get('/users')
   public async getUsers() {
-    return this.usersService.find({
-      select: ['id', 'email', 'name', 'createdAt', 'avatarURL'],
-    });
+    return this.usersService.find({});
   }
 }
 

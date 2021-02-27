@@ -123,6 +123,10 @@ export class ChatsService {
     return ids.map(id => chats.find(u => u.id === id));
   }
 
+  public async getChatTypes(): Promise<ChatTypeEntity[]> {
+    return this.chatTypesRepository.find();
+  }
+
   public async createChatType(name: ChatTypeEnum) {
     console.warn('Unsafe method');
     return this.chatTypesRepository.save(
