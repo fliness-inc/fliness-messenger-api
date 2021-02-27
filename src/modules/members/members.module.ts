@@ -5,6 +5,7 @@ import { UsersModule } from '~/modules/users/users.module';
 import { ChatsModule } from '~/modules/chats/chats.module';
 import { MemberEntity } from '~/db/entities/member.entity';
 import { MemberRoleEntity } from '~/db/entities/member-role.entity';
+import { MembersController } from './members.controller';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { MemberRoleEntity } from '~/db/entities/member-role.entity';
     forwardRef(() => ChatsModule),
     TypeOrmModule.forFeature([MemberEntity, MemberRoleEntity]),
   ],
+  controllers: [MembersController],
   providers: [MembersService],
   exports: [MembersService],
 })

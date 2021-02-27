@@ -113,7 +113,7 @@ export class MembersService {
     );
   }
 
-  private prepareQuery(
+  /* private prepareQuery(
     alias: string,
     options: FindManyOptions<MemberEntity> = {}
   ): FindManyOptions<MemberEntity> {
@@ -138,22 +138,26 @@ export class MembersService {
         },
       },
     };
-  }
+  } */
 
   public async find(
-    options?: FindManyOptions<MemberEntity> | FindManyOptionsFunc<MemberEntity>
+    options?: FindManyOptions<MemberEntity> /*  | FindManyOptionsFunc<MemberEntity> */
   ): Promise<MemberEntity[]> {
-    const alias = 'members';
-    const op = typeof options === 'function' ? options(alias) : options;
-    return this.membersRespository.find(this.prepareQuery(alias, op));
+    /* const alias = 'members';
+    const op = typeof options === 'function' ? options(alias) : options; */
+    return this.membersRespository.find(
+      options /* this.prepareQuery(alias, op) */
+    );
   }
 
   public async findOne(
-    options?: FindOneOptions<MemberEntity> | FindOneOptionsFunc<MemberEntity>
+    options?: FindOneOptions<MemberEntity> /*  | FindOneOptionsFunc<MemberEntity> */
   ): Promise<MemberEntity | undefined> {
-    const alias = 'members';
-    const op = typeof options === 'function' ? options(alias) : options;
-    return this.membersRespository.findOne(this.prepareQuery(alias, op));
+    /* const alias = 'members';
+    const op = typeof options === 'function' ? options(alias) : options; */
+    return this.membersRespository.findOne(
+      options /* this.prepareQuery(alias, op) */
+    );
   }
 
   public async createMemberRole(name: MemberRoleEnum, weight: number) {
