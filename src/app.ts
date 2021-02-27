@@ -6,6 +6,9 @@ import {
 } from '@nestjs/common';
 import { DataFormatInterceptor } from './tools/data.interceptor';
 import * as cookieParser from 'cookie-parser';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 export async function initApp(
   app: INestApplication,
@@ -13,7 +16,7 @@ export async function initApp(
 ): Promise<INestApplication> {
   app.enableCors({
     credentials: true,
-    origin: 'http://localhost',
+    origin: process.env.FRONTEND_URL,
   });
   app.use(cookieParser());
   app.useGlobalInterceptors(
