@@ -1,8 +1,8 @@
-import { Body, Controller, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Post, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignInDTO, SignUpDTO } from './auth.dto';
-import { Tokens, TokensService } from '../tokens/tokens.service';
-import { Request, Response } from 'express';
+import { Tokens, TokensService, MAX_AGE } from '../tokens/tokens.service';
+import { Request } from 'express';
 import { AuthGuard } from './auth.guard';
 
 @Controller('/auth')
@@ -26,7 +26,7 @@ export class AuthController {
 
     req.res.cookie('jwt-token', tokens.refreshToken, {
       httpOnly: true,
-      maxAge: this.tokensService.maxAge,
+      maxAge: MAX_AGE,
     });
 
     return tokens;
@@ -45,7 +45,7 @@ export class AuthController {
 
     req.res.cookie('jwt-token', tokens.refreshToken, {
       httpOnly: true,
-      maxAge: this.tokensService.maxAge,
+      maxAge: MAX_AGE,
     });
 
     return tokens;
@@ -60,7 +60,7 @@ export class AuthController {
 
     req.res.cookie('jwt-token', tokens.refreshToken, {
       httpOnly: true,
-      maxAge: this.tokensService.maxAge,
+      maxAge: MAX_AGE,
     });
 
     return tokens;

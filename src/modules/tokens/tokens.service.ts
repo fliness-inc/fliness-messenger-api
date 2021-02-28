@@ -3,17 +3,17 @@ import { JwtService } from '@nestjs/jwt';
 import { TokenEntity } from '~/db/entities/token.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as uuid from 'uuid';
-import { Repository } from 'typeorm';
+import { Repository, FindManyOptions, FindOneOptions } from 'typeorm';
 
 export class Tokens {
   public accessToken: string;
   public refreshToken: string;
 }
 
+export const MAX_AGE: number = 1000 * 60 * 60 * 24 * 60;
+
 @Injectable()
 export class TokensService {
-  private readonly numMaxAge: number = 1000 * 60 * 60 * 24 * 60;
-
   public constructor(
     @InjectRepository(TokenEntity)
     private readonly tokensRespository: Repository<TokenEntity>,
@@ -30,7 +30,7 @@ export class TokensService {
         userId,
         token: tokens.refreshToken,
         userAgent,
-        expiresAt: new Date(Date.now() + this.maxAge),
+        expiresAt: new Date(Date.now() + MAX_AGE),
       })
     );
 
@@ -79,7 +79,7 @@ export class TokensService {
     await this.tokensRespository.save({
       ...token,
       token: newTokens.refreshToken,
-      expiresAt: new Date(Date.now() + this.maxAge),
+      expiresAt: new Date(Date.now() + MAX_AGE),
     });
 
     return newTokens;
@@ -101,8 +101,16 @@ export class TokensService {
     await this.expireToken(token.userId, token.userAgent);
   }
 
-  get maxAge(): number {
-    return this.numMaxAge;
+  public async find(
+    options?: FindManyOptions<TokenEntity>
+  ): Promise<TokenEntity[]> {
+    return this.tokensRespository.find(options);
+  }
+
+  public async findOne(
+    options?: FindOneOptions<TokenEntity>
+  ): Promise<TokenEntity> {
+    return this.tokensRespository.findOne(options);
   }
 }
 

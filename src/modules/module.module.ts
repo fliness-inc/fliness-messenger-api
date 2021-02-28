@@ -3,7 +3,7 @@ import { AuthModule } from './auth/auth.module';
 import { ChatsModule } from './chats/chats.module';
 import { TokensModule } from './tokens/tokens.module';
 import { UsersModule } from './users/users.module';
-import { MessagesModule } from './messages/message.module';
+import { MessagesModule } from './messages/messages.module';
 
 @Module({
   imports: [AuthModule, TokensModule, UsersModule, ChatsModule, MessagesModule],

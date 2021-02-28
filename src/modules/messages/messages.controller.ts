@@ -5,6 +5,7 @@ import {
   NotFoundException,
   Param,
   Post,
+  Query,
 } from '@nestjs/common';
 import { MessageEntity } from '~/db/entities/message.entity';
 import { CurrentUser } from '~/modules/auth/current-user';
@@ -49,6 +50,7 @@ export class MessagesController {
   @Get('/chats/:chatId/messages')
   public async getMessages(
     @CurrentUser() user,
+    @Query('last') last: string,
     @Param('chatId') chatId: string
   ): Promise<MessageEntity[]> {
     const chat = await this.chatsService.findOne({
@@ -65,9 +67,15 @@ export class MessagesController {
 
     if (!member) throw new NotFoundException('The member was not found');
 
-    return this.messagesService.find({
-      where: { memberId: member.id, isDeleted: false },
-    });
+    const builder = this.messagesService.messageRepository
+      .createQueryBuilder('messages')
+      .leftJoin('messages.member', 'member')
+      .where('member.chatId = :chatId', { chatId: chat.id });
+
+    if (last)
+      builder.orderBy('messages.createAt', 'ASC').limit(Number.parseInt(last));
+
+    return builder.getMany();
   }
 }
 

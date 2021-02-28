@@ -8,6 +8,7 @@ import { MembersService } from '~/modules/members/members.service';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { MessageEntity } from '~/db/entities/message.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import MessagesGateway from './messages.gateway';
 
 export class MessageCreateOptions {
   public readonly text: string;
@@ -18,7 +19,8 @@ export class MessagesService {
   public constructor(
     @InjectRepository(MessageEntity)
     public readonly messageRepository: Repository<MessageEntity>,
-    private readonly membersService: MembersService
+    private readonly membersService: MembersService,
+    private readonly messagesGatway: MessagesGateway
   ) {}
 
   public async create(
@@ -28,7 +30,7 @@ export class MessagesService {
     const { text } = options;
 
     const member = await this.membersService.findOne({
-      select: ['id'],
+      select: ['id', 'chatId'],
       where: { id: memberId, isDeleted: false },
     });
 
@@ -43,6 +45,8 @@ export class MessagesService {
         text,
       })
     );
+
+    this.messagesGatway.messageCreatedEvent(member.chatId, message);
 
     return message;
   }

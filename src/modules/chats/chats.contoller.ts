@@ -1,4 +1,12 @@
-import { Body, Controller, Delete, Param, Post, Get } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Param,
+  Post,
+  Get,
+  NotFoundException,
+} from '@nestjs/common';
 import { ChatCreateDTO } from './chats.dto';
 import { CurrentUser } from '~/modules/auth/current-user';
 import { ChatsService } from './chats.service';
@@ -24,6 +32,24 @@ export class ChatsController {
       .leftJoin('chats.members', 'members')
       .where('members.userId = :userId', { userId: user.id })
       .getMany();
+  }
+
+  @AuthGuard()
+  @Get('/me/chats/:chatId')
+  public async getChat(
+    @CurrentUser() user,
+    @Param('chatId') chatId: string
+  ): Promise<ChatEntity> {
+    const chat = await this.chatsRepository
+      .createQueryBuilder('chats')
+      .leftJoin('chats.members', 'members')
+      .where('members.userId = :userId', { userId: user.id })
+      .andWhere('members.chatId = :chatId', { chatId })
+      .getOne();
+
+    if (!chat) throw new NotFoundException('The chat was not found');
+
+    return chat;
   }
 
   @Get('/chats/types')

@@ -250,15 +250,13 @@ describe('[IT] [MessagesModule] ...', () => {
         expect(res.status).toEqual(200);
         expect(res.body).toStrictEqual({
           statusCode: 200,
-          data: messages
-            .filter(m => m.memberId === firstMember.id)
-            .map(m => ({
-              id: m.id,
-              text: m.text,
-              memberId: m.memberId,
-              updatedAt: m.updatedAt.toISOString(),
-              createdAt: m.createdAt.toISOString(),
-            })),
+          data: messages.map(m => ({
+            id: m.id,
+            text: m.text,
+            memberId: m.memberId,
+            updatedAt: m.updatedAt.toISOString(),
+            createdAt: m.createdAt.toISOString(),
+          })),
         });
       });
 
@@ -275,15 +273,13 @@ describe('[IT] [MessagesModule] ...', () => {
         expect(res.status).toEqual(200);
         expect(res.body).toStrictEqual({
           statusCode: 200,
-          data: messages
-            .filter(m => m.memberId === secondMember.id)
-            .map(m => ({
-              id: m.id,
-              text: m.text,
-              memberId: m.memberId,
-              updatedAt: m.updatedAt.toISOString(),
-              createdAt: m.createdAt.toISOString(),
-            })),
+          data: messages.map(m => ({
+            id: m.id,
+            text: m.text,
+            memberId: m.memberId,
+            updatedAt: m.updatedAt.toISOString(),
+            createdAt: m.createdAt.toISOString(),
+          })),
         });
       });
     });
