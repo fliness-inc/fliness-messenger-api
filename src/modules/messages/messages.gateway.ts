@@ -62,6 +62,7 @@ export class MessagesGateway
     if (!tokenEntity) {
       client.error('unauthorized');
       client.disconnect();
+      return;
     }
 
     this.clientPool.set(client, { userId: tokenEntity.userId });

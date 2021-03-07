@@ -31,7 +31,21 @@ export class MembersController {
 
     if (!chat) throw new NotFoundException(`The chat was not found`);
 
-    return this.membersService.find({ where: { chatId: chat.id } });
+    return (
+      await this.membersService.find({
+        where: { chatId: chat.id },
+      })
+    ).map(
+      member =>
+        <any>{
+          id: member.id,
+          chatId: member.chatId,
+          roleId: member.roleId,
+          userId: member.userId,
+          updatedAt: member.updatedAt,
+          createdAt: member.createdAt,
+        }
+    );
   }
 
   @Get('/chats/members')
@@ -45,9 +59,21 @@ export class MembersController {
 
     const memberIds = chatIds.split(',');
 
-    return this.membersService.find({
-      where: { chatId: Array.isArray(memberIds) ? In(memberIds) : memberIds },
-    });
+    return (
+      await this.membersService.find({
+        where: { chatId: Array.isArray(memberIds) ? In(memberIds) : memberIds },
+      })
+    ).map(
+      member =>
+        <any>{
+          id: member.id,
+          chatId: member.chatId,
+          roleId: member.roleId,
+          userId: member.userId,
+          updatedAt: member.updatedAt,
+          createdAt: member.createdAt,
+        }
+    );
   }
 }
 

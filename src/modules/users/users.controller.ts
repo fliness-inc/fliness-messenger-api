@@ -17,37 +17,67 @@ export class UsersController {
 
   @AuthGuard()
   @Get('/me')
-  public async getMe(@CurrentUser() user) {
+  public async getMe(@CurrentUser() user): Promise<any> {
     const userFound = await this.usersService.findOne({
       where: { id: user.id },
     });
 
     if (!userFound) throw new NotFoundException('The user was not found');
 
-    return userFound;
+    return {
+      id: userFound.id,
+      name: userFound.name,
+      email: userFound.email,
+      avatarURL: userFound.avatarURL,
+      updatedAt: userFound.updatedAt,
+      createdAt: userFound.createdAt,
+    };
   }
 
   @Get('/users/:userId')
-  public async getUser(@Param('userId') userId: string): Promise<UserEntity> {
-    const user: UserEntity = await this.usersService.findOne({
+  public async getUser(@Param('userId') userId: string): Promise<any> {
+    const userFound: UserEntity = await this.usersService.findOne({
       where: { id: userId },
     });
 
-    if (!user) throw new NotFoundException('The user was not found');
+    if (!userFound) throw new NotFoundException('The user was not found');
 
-    return user;
+    return {
+      id: userFound.id,
+      name: userFound.name,
+      email: userFound.email,
+      avatarURL: userFound.avatarURL,
+      updatedAt: userFound.updatedAt,
+      createdAt: userFound.createdAt,
+    };
   }
 
   @Get('/users')
-  public async getUsers(@Query('ids') ids: string) {
+  public async getUsers(@Query('ids') ids: string): Promise<any> {
     if (ids) {
       const userIds = ids.split(',');
-      return this.usersService.find({
-        where: { id: Array.isArray(userIds) ? In(userIds) : userIds },
-      });
+      return (
+        await this.usersService.find({
+          where: { id: Array.isArray(userIds) ? In(userIds) : userIds },
+        })
+      ).map(user => ({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        avatarURL: user.avatarURL,
+        updatedAt: user.updatedAt,
+        createdAt: user.createdAt,
+      }));
     }
 
-    return this.usersService.find();
+    return (await this.usersService.find()).map(user => ({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      avatarURL: user.avatarURL,
+      updatedAt: user.updatedAt,
+      createdAt: user.createdAt,
+    }));
   }
 }
 

@@ -6,7 +6,6 @@ import {
   Post,
   Get,
   NotFoundException,
-  Query,
 } from '@nestjs/common';
 import { ChatCreateDTO, ChatTypeEnum } from './chats.dto';
 import { CurrentUser } from '~/modules/auth/current-user';
@@ -55,6 +54,18 @@ export class ChatsController {
         createdAt: currentChatType.createdAt,
       };
       chat.messages = await this.messagesService.getLastMessages(chat.id);
+
+      const member = await this.membersService.findOne({
+        select: ['id'],
+        where: {
+          chatId: chat.id,
+          userId: user.id,
+        },
+      });
+
+      chat.countMessageViews = await this.messagesService.getNumberMessageViews(
+        member.id
+      );
 
       if (chat.type.name !== ChatTypeEnum.DIALOG) continue;
 

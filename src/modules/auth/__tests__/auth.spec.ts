@@ -227,7 +227,8 @@ describe('[IT] [AuthModule] ...', () => {
           email: user.email,
           name: user.name,
           avatarURL: user.avatarURL,
-          createdAt: user.createdAt.toJSON(),
+          updatedAt: user.updatedAt.toISOString(),
+          createdAt: user.createdAt.toISOString(),
         },
       });
     });
@@ -267,6 +268,7 @@ describe('[IT] [AuthModule] ...', () => {
           email: payload.email,
           name: payload.name,
           avatarURL: meResponse.body.data.avatarURL,
+          updatedAt: meResponse.body.data.updatedAt,
           createdAt: meResponse.body.data.createdAt,
         },
       });
@@ -349,6 +351,7 @@ describe('[IT] [AuthModule] ...', () => {
           email: payload.email,
           name: meResponse.body.data.name,
           avatarURL: meResponse.body.data.avatarURL,
+          updatedAt: meResponse.body.data.updatedAt,
           createdAt: meResponse.body.data.createdAt,
         },
       });

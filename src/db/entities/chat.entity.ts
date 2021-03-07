@@ -26,6 +26,8 @@ export class ChatEntity extends IEntity {
   public members: MemberEntity[];
 
   public messages: MessageEntity[];
+
+  public countMessageViews: number;
 }
 
 export default ChatEntity;

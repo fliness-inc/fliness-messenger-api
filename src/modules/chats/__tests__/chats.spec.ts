@@ -475,6 +475,7 @@ describe('[IT] [ChatsModule] ...', () => {
               createdAt: companionMember.createdAt.toISOString(),
             },
           ],
+          countMessageViews: 0,
           messages: await messagesService.getLastMessages(chat.id),
           updatedAt: chat.updatedAt.toISOString(),
           createdAt: chat.createdAt.toISOString(),

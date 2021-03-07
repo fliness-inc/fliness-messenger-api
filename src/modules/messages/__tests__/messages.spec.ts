@@ -1,5 +1,5 @@
 import { Test } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, NotFoundException } from '@nestjs/common';
 import { Connection, getConnection } from 'typeorm';
 import * as request from 'supertest';
 import * as dotenv from 'dotenv';
@@ -22,6 +22,11 @@ import MemberEntity from '~/db/entities/member.entity';
 dotenv.config();
 
 jest.setTimeout(50000);
+
+export interface Account {
+  user: UserEntity;
+  tokens: Tokens;
+}
 
 describe('[IT] [MessagesModule] ...', () => {
   let app: INestApplication;
@@ -58,11 +63,11 @@ describe('[IT] [MessagesModule] ...', () => {
     await membersService.createMemberRole(MemberRoleEnum.CREATOR, 0.5);
     await membersService.createMemberRole(MemberRoleEnum.MEMBER, 0.1);
 
-    await connection.query('TRUNCATE messages CASCADE');
+    await connection.query('TRUNCATE messages, message_views CASCADE');
   });
 
   afterEach(async () => {
-    await connection.query('TRUNCATE messages CASCADE');
+    await connection.query('TRUNCATE messages, message_views CASCADE');
   });
 
   afterAll(async () => {
@@ -70,7 +75,8 @@ describe('[IT] [MessagesModule] ...', () => {
     await connection.close();
   });
 
-  const accounts: { user: UserEntity; tokens: Tokens }[] = [];
+  let chat: ChatEntity;
+  const accounts: Account[] = [];
 
   beforeAll(async () => {
     for (let i = 0; i < 4; ++i) {
@@ -92,24 +98,20 @@ describe('[IT] [MessagesModule] ...', () => {
         tokens,
       });
     }
+
+    const firstAccount = accounts[0];
+    const secondAccount = accounts[1];
+
+    chat = await chatsService.create(
+      firstAccount.user.id,
+      ChatTypeEnum.DIALOG,
+      {
+        userIds: [secondAccount.user.id],
+      }
+    );
   });
 
-  describe('', () => {
-    let chat: ChatEntity;
-
-    beforeAll(async () => {
-      const firstAccount = accounts[0];
-      const secondAccount = accounts[1];
-
-      chat = await chatsService.create(
-        firstAccount.user.id,
-        ChatTypeEnum.DIALOG,
-        {
-          userIds: [secondAccount.user.id],
-        }
-      );
-    });
-
+  describe('[Messages] ...', () => {
     describe('[/POST] ...', () => {
       it('should create a chat message', async () => {
         const firstAccount = accounts[0];
@@ -235,6 +237,10 @@ describe('[IT] [MessagesModule] ...', () => {
             })
           );
         }
+
+        messages = messages.sort((m, m2) =>
+          m.createdAt < m2.createdAt ? 1 : m.createdAt > m2.createdAt ? -1 : 0
+        );
       });
 
       it('should return chat messages', async () => {
@@ -281,6 +287,196 @@ describe('[IT] [MessagesModule] ...', () => {
             createdAt: m.createdAt.toISOString(),
           })),
         });
+      });
+    });
+  });
+
+  describe('[Messages Views] ...', () => {
+    let member1: MemberEntity;
+    let member2: MemberEntity;
+    let firstAccount: Account;
+    let secondAccount: Account;
+
+    beforeAll(async () => {
+      firstAccount = accounts[0];
+      secondAccount = accounts[1];
+
+      member1 = await membersService.findOne({
+        where: {
+          userId: firstAccount.user.id,
+          chatId: chat.id,
+        },
+      });
+
+      member2 = await membersService.findOne({
+        where: {
+          userId: secondAccount.user.id,
+          chatId: chat.id,
+        },
+      });
+    });
+
+    it('should return views number without viewing messages', async () => {
+      await messagesService.create(member1.id, {
+        text: faker.random.words(),
+      });
+
+      await messagesService.create(member2.id, {
+        text: faker.random.words(),
+      });
+      await messagesService.create(member2.id, {
+        text: faker.random.words(),
+      });
+      await messagesService.create(member2.id, {
+        text: faker.random.words(),
+      });
+
+      expect(await messagesService.getNumberMessageViews(member1.id)).toEqual(
+        3
+      );
+    });
+
+    it('should return views number with viewing messages', async () => {
+      await messagesService.create(member1.id, {
+        text: faker.random.words(),
+      });
+
+      await messagesService.create(member2.id, {
+        text: faker.random.words(),
+      });
+      await messagesService.create(member2.id, {
+        text: faker.random.words(),
+      });
+      await messagesService.create(member2.id, {
+        text: faker.random.words(),
+      });
+
+      expect(await messagesService.getNumberMessageViews(member1.id)).toEqual(
+        3
+      );
+
+      await messagesService.setAllMessageViews(member1.id);
+
+      expect(await messagesService.getNumberMessageViews(member1.id)).toEqual(
+        0
+      );
+    });
+
+    it('should return views with viewing some messages', async () => {
+      await messagesService.create(member1.id, {
+        text: faker.random.words(),
+      });
+
+      await messagesService.create(member2.id, {
+        text: faker.random.words(),
+      });
+      await messagesService.create(member2.id, {
+        text: faker.random.words(),
+      });
+      const message = await messagesService.create(member2.id, {
+        text: faker.random.words(),
+      });
+
+      await messagesService.setMessageView(message.id, member1.id);
+
+      expect(await messagesService.getNumberMessageViews(member1.id)).toEqual(
+        2
+      );
+    });
+
+    it('should return status "unreaded"', async () => {
+      await messagesService.create(member1.id, {
+        text: faker.random.words(),
+      });
+
+      const message = await messagesService.create(member2.id, {
+        text: faker.random.words(),
+      });
+
+      expect(
+        await messagesService.getMessageView(message.id, member2.id)
+      ).toBeDefined(); // creator
+
+      expect(
+        messagesService.getMessageView(message.id, member1.id)
+      ).rejects.toEqual(
+        new NotFoundException(`The message view was not found`)
+      ); // companion
+
+      await messagesService.setMessageView(message.id, member1.id);
+
+      expect(
+        await messagesService.getMessageView(message.id, member1.id)
+      ).toBeDefined(); // companion
+    });
+
+    describe('[/POST] ...', () => {
+      it('set all message views', async () => {
+        await messagesService.create(member1.id, {
+          text: faker.random.words(),
+        });
+        await messagesService.create(member1.id, {
+          text: faker.random.words(),
+        });
+        await messagesService.create(member1.id, {
+          text: faker.random.words(),
+        });
+
+        const res = await request(app.getHttpServer())
+          .post(`/chats/${chat.id}/messages/views`)
+          .set({
+            Authorization: `Bearer ${secondAccount.tokens.accessToken}`,
+          })
+          .send();
+
+        expect(res.status).toEqual(201);
+        expect(res.body).toStrictEqual({
+          statusCode: 201,
+        });
+
+        expect(await messagesService.getNumberMessageViews(member2.id)).toEqual(
+          0
+        );
+      });
+
+      it('set one message views', async () => {
+        await messagesService.create(member1.id, {
+          text: faker.random.words(),
+        });
+        await messagesService.create(member1.id, {
+          text: faker.random.words(),
+        });
+        const message = await messagesService.create(member1.id, {
+          text: faker.random.words(),
+        });
+
+        const res = await request(app.getHttpServer())
+          .post(`/chats/messages/${message.id}/views`)
+          .set({
+            Authorization: `Bearer ${secondAccount.tokens.accessToken}`,
+          })
+          .send();
+
+        const view = await messagesService.getMessageView(
+          message.id,
+          member2.id
+        );
+
+        expect(res.status).toEqual(201);
+        expect(res.body).toStrictEqual({
+          statusCode: 201,
+          data: {
+            id: view.id,
+            memberId: view.memberId,
+            messageId: view.messageId,
+            updatedAt: view.updatedAt.toISOString(),
+            createdAt: view.createdAt.toISOString(),
+          },
+        });
+
+        expect(await messagesService.getNumberMessageViews(member2.id)).toEqual(
+          2
+        );
       });
     });
   });

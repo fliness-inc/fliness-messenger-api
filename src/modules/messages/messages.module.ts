@@ -7,13 +7,14 @@ import { MembersModule } from '~/modules/members/members.module';
 import { ChatsModule } from '~/modules/chats/chats.module';
 import { MessagesGateway } from './messages.gateway';
 import { TokensModule } from '~/modules/tokens/tokens.module';
+import { MessageViewEntity } from '~/db/entities/message-view.entity';
 
 @Module({
   imports: [
     MembersModule,
     TokensModule,
     forwardRef(() => ChatsModule),
-    TypeOrmModule.forFeature([MessageEntity]),
+    TypeOrmModule.forFeature([MessageEntity, MessageViewEntity]),
   ],
   controllers: [MessagesController],
   providers: [MessagesService, MessagesGateway],
