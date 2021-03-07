@@ -20,8 +20,8 @@ export async function initApp(
   });
   app.use(cookieParser());
   app.useGlobalInterceptors(
-    new DataFormatInterceptor(),
-    new ClassSerializerInterceptor(app.get(Reflector))
+    new DataFormatInterceptor()
+    /* new ClassSerializerInterceptor(app.get(Reflector)) */
   );
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
 

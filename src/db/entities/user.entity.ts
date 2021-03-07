@@ -1,7 +1,6 @@
 import { Column, Entity, BeforeInsert, OneToMany, AfterLoad } from 'typeorm';
 import { IEntity } from './entity.interface';
 import { TokenEntity } from './token.entity';
-import { Exclude } from 'class-transformer';
 import * as bcrypt from 'bcryptjs';
 import * as dotenv from 'dotenv';
 
@@ -15,14 +14,12 @@ export class UserEntity extends IEntity {
   @Column({ unique: true })
   public email: string;
 
-  @Exclude()
   @Column({ length: 2048 })
   public password: string;
 
   @Column({ length: 2048, nullable: true })
   public avatarURL: string;
 
-  @Exclude()
   @OneToMany(type => TokenEntity, token => token.user)
   public tokens: TokenEntity[];
 

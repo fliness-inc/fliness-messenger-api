@@ -14,6 +14,7 @@ import { FindManyOptions, FindOneOptions } from 'typeorm';
 import { FindManyOptionsFunc, FindOneOptionsFunc } from '~/tools/options';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import MessageEntity from '~/db/entities/message.entity';
 
 @Injectable()
 export class MembersService {

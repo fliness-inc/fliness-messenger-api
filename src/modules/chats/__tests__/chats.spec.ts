@@ -1,9 +1,8 @@
 import { Test } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { Connection, getConnection, getRepository, Repository } from 'typeorm';
+import { Connection, getConnection, Not } from 'typeorm';
 import * as request from 'supertest';
 import * as uuid from 'uuid';
-import * as cookieParser from 'cookie-parser';
 import * as dotenv from 'dotenv';
 import * as faker from 'faker';
 import { ChatsService } from '../chats.service';
@@ -14,9 +13,10 @@ import { ChatCreateDTO, ChatTypeEnum } from '../chats.dto';
 import { AppModule } from '~/app.module';
 import MembersService from '~/modules/members/members.service';
 import { MemberRoleEnum } from '~/modules/members/members.dto';
-import { DataFormatInterceptor } from '~/tools/data.interceptor';
 import initApp from '~/app';
 import ChatEntity from '~/db/entities/chat.entity';
+import ChatTypeEntity from '~/db/entities/chat-type.entity';
+import MessagesService from '~/modules/messages/messages.service';
 
 dotenv.config();
 
@@ -30,6 +30,7 @@ describe('[IT] [ChatsModule] ...', () => {
   let tokensService: TokensService;
   let usersService: UsersService;
   let membersService: MembersService;
+  let messagesService: MessagesService;
 
   beforeAll(async () => {
     const moduleFixture = await Test.createTestingModule({
@@ -43,6 +44,7 @@ describe('[IT] [ChatsModule] ...', () => {
     tokensService = app.get<TokensService>(TokensService);
     usersService = app.get<UsersService>(UsersService);
     membersService = app.get<MembersService>(MembersService);
+    messagesService = app.get<MessagesService>(MessagesService);
 
     connection = getConnection();
     await connection.synchronize(true);
@@ -311,7 +313,6 @@ describe('[IT] [ChatsModule] ...', () => {
     });
 
     it('should return 401 when the unauthorized user trying to create new dialog', async () => {
-      const firstAccount = accounts[0];
       const secondAccount = accounts[1];
 
       const payload: ChatCreateDTO = {
@@ -395,6 +396,7 @@ describe('[IT] [ChatsModule] ...', () => {
 
   describe('[/GET] ...', () => {
     const chats: ChatEntity[] = [];
+    const chatTypes: ChatTypeEntity[] = [];
 
     beforeEach(async () => {
       for (let i = 0; i < accounts.length - 1; ++i) {
@@ -410,6 +412,8 @@ describe('[IT] [ChatsModule] ...', () => {
           );
         }
       }
+
+      chatTypes.push(...(await chatsService.getChatTypes()));
     });
 
     it('should return all chats', async () => {
@@ -430,21 +434,57 @@ describe('[IT] [ChatsModule] ...', () => {
         })
         .send();
 
+      const filteredChats = chats.filter(chat =>
+        currentMembersOfAccount.some(m => m.chatId === chat.id)
+      );
+
+      const serializedChats = [];
+
+      for (const chat of filteredChats) {
+        const currentChatType = chatTypes.find(t => t.id === chat.typeId);
+        const companionMember = await membersService.findOne({
+          select: [
+            'id',
+            'roleId',
+            'userId',
+            'chatId',
+            'updatedAt',
+            'createdAt',
+          ],
+          where: { chatId: chat.id, userId: Not(currentAccount.user.id) },
+        });
+
+        serializedChats.push({
+          id: chat.id,
+          title: chat.title,
+          description: chat.description,
+          typeId: chat.typeId,
+          type: {
+            id: currentChatType.id,
+            name: currentChatType.name,
+            updatedAt: currentChatType.updatedAt.toISOString(),
+            createdAt: currentChatType.createdAt.toISOString(),
+          },
+          members: [
+            {
+              id: companionMember.id,
+              roleId: companionMember.roleId,
+              userId: companionMember.userId,
+              chatId: companionMember.chatId,
+              updatedAt: companionMember.updatedAt.toISOString(),
+              createdAt: companionMember.createdAt.toISOString(),
+            },
+          ],
+          messages: await messagesService.getLastMessages(chat.id),
+          updatedAt: chat.updatedAt.toISOString(),
+          createdAt: chat.createdAt.toISOString(),
+        });
+      }
+
       expect(res.status).toEqual(200);
       expect(res.body).toStrictEqual({
         statusCode: 200,
-        data: chats
-          .filter(chat =>
-            currentMembersOfAccount.some(m => m.chatId === chat.id)
-          )
-          .map(chat => ({
-            id: chat.id,
-            title: chat.title,
-            description: chat.description,
-            typeId: chat.typeId,
-            updatedAt: chat.updatedAt.toISOString(),
-            createdAt: chat.createdAt.toISOString(),
-          })),
+        data: serializedChats,
       });
     });
   });

@@ -6,32 +6,74 @@ import {
   Post,
   Get,
   NotFoundException,
+  Query,
 } from '@nestjs/common';
-import { ChatCreateDTO } from './chats.dto';
+import { ChatCreateDTO, ChatTypeEnum } from './chats.dto';
 import { CurrentUser } from '~/modules/auth/current-user';
 import { ChatsService } from './chats.service';
 import { AuthGuard } from '~/modules/auth/auth.guard';
 import ChatEntity from '~/db/entities/chat.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import ChatTypeEntity from '~/db/entities/chat-type.entity';
-
+import MembersService from '../members/members.service';
+import MessagesService from '../messages/messages.service';
 @Controller()
 export class ChatsController {
   public constructor(
     @InjectRepository(ChatEntity)
     private readonly chatsRepository: Repository<ChatEntity>,
-    private readonly chatsService: ChatsService
+    private readonly chatsService: ChatsService,
+    private readonly membersService: MembersService,
+    private readonly messagesService: MessagesService
   ) {}
 
   @AuthGuard()
   @Get('/me/chats')
   public async getChats(@CurrentUser() user): Promise<ChatEntity[]> {
-    return this.chatsRepository
+    const chats = await this.chatsRepository
       .createQueryBuilder('chats')
+      .select('chats.id', 'id')
+      .addSelect('chats.title', 'title')
+      .addSelect('chats.description', 'description')
+      .addSelect('chats.typeId', 'typeId')
+      .addSelect('chats.updatedAt', 'updatedAt')
+      .addSelect('chats.createdAt', 'createdAt')
       .leftJoin('chats.members', 'members')
       .where('members.userId = :userId', { userId: user.id })
-      .getMany();
+      .getRawMany();
+
+    const chatTypes = await this.chatsService.getChatTypes();
+
+    for (const chat of chats) {
+      const currentChatType = chatTypes.find(type => type.id === chat.typeId);
+
+      chat.type = {
+        id: currentChatType.id,
+        name: currentChatType.name,
+        updatedAt: currentChatType.updatedAt,
+        createdAt: currentChatType.createdAt,
+      };
+      chat.messages = await this.messagesService.getLastMessages(chat.id);
+
+      if (chat.type.name !== ChatTypeEnum.DIALOG) continue;
+
+      chat.members = [
+        await this.membersService.findOne({
+          select: [
+            'id',
+            'roleId',
+            'userId',
+            'chatId',
+            'updatedAt',
+            'createdAt',
+          ],
+          where: { chatId: chat.id, userId: Not(user.id) },
+        }),
+      ];
+    }
+
+    return chats;
   }
 
   @AuthGuard()
@@ -59,12 +101,21 @@ export class ChatsController {
 
   @AuthGuard()
   @Post('/chats')
-  public createChat(@CurrentUser() user, @Body() payload: ChatCreateDTO) {
+  public async createChat(@CurrentUser() user, @Body() payload: ChatCreateDTO) {
     const { type, userIds } = payload;
 
-    return this.chatsService.create(user.id, type, {
+    const chat = await this.chatsService.create(user.id, type, {
       userIds,
     });
+
+    return {
+      id: chat.id,
+      title: chat.title,
+      description: chat.description,
+      typeId: chat.typeId,
+      updatedAt: chat.updatedAt,
+      createdAt: chat.createdAt,
+    };
   }
 
   @AuthGuard()

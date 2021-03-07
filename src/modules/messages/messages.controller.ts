@@ -14,6 +14,7 @@ import { MembersService } from '~/modules/members/members.service';
 import { MessageCreateDTO } from './messages.dto';
 import { MessagesService } from './messages.service';
 import { AuthGuard } from '~/modules/auth/auth.guard';
+import { TestingModuleBuilder } from '@nestjs/testing';
 
 @AuthGuard()
 @Controller()
@@ -48,9 +49,8 @@ export class MessagesController {
   }
 
   @Get('/chats/:chatId/messages')
-  public async getMessages(
+  public async getChatMessages(
     @CurrentUser() user,
-    @Query('last') last: string,
     @Param('chatId') chatId: string
   ): Promise<MessageEntity[]> {
     const chat = await this.chatsService.findOne({
@@ -67,15 +67,12 @@ export class MessagesController {
 
     if (!member) throw new NotFoundException('The member was not found');
 
-    const builder = this.messagesService.messageRepository
+    return this.messagesService.messageRepository
       .createQueryBuilder('messages')
       .leftJoin('messages.member', 'member')
-      .where('member.chatId = :chatId', { chatId: chat.id });
-
-    if (last)
-      builder.orderBy('messages.createAt', 'ASC').limit(Number.parseInt(last));
-
-    return builder.getMany();
+      .where('member.chatId = :chatId', { chatId: chat.id })
+      .orderBy('messages.createdAt', 'DESC')
+      .getMany();
   }
 }
 

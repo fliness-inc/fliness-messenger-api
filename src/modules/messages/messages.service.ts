@@ -114,6 +114,21 @@ export class MessagesService {
   ): Promise<MessageEntity | undefined> {
     return this.messageRepository.findOne(options);
   }
+
+  public getLastMessages(chatId: string, count = 1): Promise<MessageEntity[]> {
+    return this.messageRepository
+      .createQueryBuilder('messages')
+      .select('messages', 'messages.id')
+      .addSelect('messages', 'messages.text')
+      .addSelect('messages', 'messages.memberId')
+      .addSelect('messages', 'messages.updatedAt')
+      .addSelect('messages', 'messages.createdAt')
+      .leftJoin('messages.member', 'member')
+      .where('member.chat_id = :chatId', { chatId })
+      .orderBy('messages.createdAt', 'DESC')
+      .limit(count)
+      .getMany();
+  }
 }
 
 export default MessagesService;

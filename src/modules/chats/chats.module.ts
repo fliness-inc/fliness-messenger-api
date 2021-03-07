@@ -6,13 +6,13 @@ import { UsersModule } from '~/modules/users/users.module';
 import { MembersModule } from '~/modules/members/members.module';
 import { ChatsService } from './chats.service';
 import { ChatsController } from './chats.contoller';
-/* import { MessagesModule } from '~/modules/messages/messages.module'; */
+import { MessagesModule } from '~/modules/messages/messages.module';
 
 @Module({
   imports: [
     UsersModule,
     forwardRef(() => MembersModule),
-    /* forwardRef(() => MessagesModule), */
+    forwardRef(() => MessagesModule),
     TypeOrmModule.forFeature([ChatEntity, ChatTypeEntity]),
   ],
   controllers: [ChatsController],
