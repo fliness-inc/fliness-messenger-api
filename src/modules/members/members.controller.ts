@@ -12,6 +12,15 @@ import MembersService from './members.service';
 import { AuthGuard } from '~/modules/auth/auth.guard';
 import { In } from 'typeorm';
 
+export const makeFormated = (entity: MemberEntity) => ({
+  id: entity.id,
+  chatId: entity.chatId,
+  roleId: entity.roleId,
+  userId: entity.userId,
+  updatedAt: entity.updatedAt,
+  createdAt: entity.createdAt,
+});
+
 @AuthGuard()
 @Controller()
 export class MembersController {
@@ -35,17 +44,7 @@ export class MembersController {
       await this.membersService.find({
         where: { chatId: chat.id },
       })
-    ).map(
-      member =>
-        <any>{
-          id: member.id,
-          chatId: member.chatId,
-          roleId: member.roleId,
-          userId: member.userId,
-          updatedAt: member.updatedAt,
-          createdAt: member.createdAt,
-        }
-    );
+    ).map(member => <any>makeFormated(member));
   }
 
   @Get('/chats/members')
@@ -63,17 +62,20 @@ export class MembersController {
       await this.membersService.find({
         where: { chatId: Array.isArray(memberIds) ? In(memberIds) : memberIds },
       })
-    ).map(
-      member =>
-        <any>{
-          id: member.id,
-          chatId: member.chatId,
-          roleId: member.roleId,
-          userId: member.userId,
-          updatedAt: member.updatedAt,
-          createdAt: member.createdAt,
-        }
-    );
+    ).map(member => <any>makeFormated(member));
+  }
+
+  @Get('/chats/members/:memberId')
+  public async getChatMemeber(
+    @Param('memberId') memberId: string
+  ): Promise<MemberEntity> {
+    const member = await this.membersService.findOne({
+      where: { id: memberId },
+    });
+
+    if (!member) throw new NotFoundException(`The member was not found`);
+
+    return <any>makeFormated(member);
   }
 }
 

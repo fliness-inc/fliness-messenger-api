@@ -232,6 +232,7 @@ export class MessagesService {
 
         return `messages.id NOT IN (${query})`;
       })
+      .andWhere('messages.memberId = :memberId')
       .getRawMany();
 
     await this.messageViewsRepository
@@ -251,12 +252,6 @@ export class MessagesService {
     const member = await this.membersService.findOne({
       select: ['id', 'chatId'],
       where: { id: memberId },
-      join: {
-        alias: 'members',
-        leftJoin: {
-          chat: 'members.chat',
-        },
-      },
     });
 
     if (!member) throw new NotFoundException('The member was not found');
@@ -277,6 +272,7 @@ export class MessagesService {
 
         return `messages.id NOT IN (${query})`;
       })
+      .andWhere('messages.memberId = :memberId')
       .getCount();
   }
 }

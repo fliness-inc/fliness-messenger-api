@@ -13,7 +13,6 @@ import { EVENTS } from './messages.dto';
 export interface Pool<P = any> {
   [key: string]: P;
 }
-
 @WebSocketGateway({ path: '/messages' })
 export class MessagesGateway
   implements OnGatewayConnection, OnGatewayDisconnect {
@@ -43,7 +42,14 @@ export class MessagesGateway
   }
 
   async handleConnection(client: Socket) {
-    const cookies: string[] = client.handshake.headers.cookie.split('; ');
+    const cookies: string[] = client.handshake.headers.cookie?.split('; ');
+
+    if (!cookies?.length) {
+      client.error('unauthorized');
+      client.disconnect();
+      return;
+    }
+
     let token: string | null = null;
 
     cookies.forEach(cookie => {
